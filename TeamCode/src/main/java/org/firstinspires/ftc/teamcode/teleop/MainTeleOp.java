@@ -1,0 +1,111 @@
+package org.firstinspires.ftc.teamcode.teleop;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+
+import java.lang.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Config
+@TeleOp(name = "MainTeleOp")
+public class MainTeleOp extends LinearOpMode {
+
+    private Bot bot;
+    private double driveSpeed = 1, driveMultiplier = 1;
+    private GamepadEx gp1, gp2;
+    private boolean fieldCentric, intakeCancel, clipCancel;
+    private Thread thread;
+    private List<Action> runningActions = new ArrayList<>();
+
+    private int degTarget = 0;
+    private boolean runTurret = false;
+
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        Bot.instance = null;
+        bot = Bot.getInstance(this);
+
+        gp1 = new GamepadEx(gamepad1);
+        gp2 = new GamepadEx(gamepad2);
+
+        // Initialize bot
+//        bot.stopMotors();
+
+        //bot.storage();
+
+        waitForStart();
+
+        while (opModeIsActive() && !isStopRequested()) {
+            TelemetryPacket packet = new TelemetryPacket();
+
+            gp1.readButtons();
+            gp2.readButtons();
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
+                runTurret = false;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                runTurret = true;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                degTarget += 5;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                degTarget -= 5;
+            }
+
+
+            // DRIVE
+//            drive();
+
+            // TELEMETRY
+            telemetry.addData("On?", runTurret);
+            telemetry.addData("Temp Target (Degs)", degTarget);
+
+            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
+            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
+            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Power", bot.turret.getPower());
+            telemetry.update();
+            bot.turret.periodic();
+        }
+    }
+
+    // Driving
+//    private void drive() { // Robot centric, drive multiplier default 1
+//        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+//        driveSpeed = Math.max(0, driveSpeed);
+//        bot.fixMotors();
+//
+//        if (fieldCentric) {
+//            Vector2d driveVector = new Vector2d(-gp1.getLeftX(), -gp1.getLeftY()),
+//                    turnVector = new Vector2d(-gp1.getRightX(), 0);
+//            bot.driveFieldCentric(driveVector.getX() * driveSpeed,
+//                    driveVector.getY() * driveSpeed,
+//                    turnVector.getX() * driveSpeed
+//            );
+//        } else {
+//            Vector2d driveVector = new Vector2d(gp1.getLeftX(), -gp1.getLeftY()),
+//                    turnVector = new Vector2d(gp1.getRightX(), 0);
+//            bot.driveRobotCentric(driveVector.getX() * driveSpeed,
+//                    driveVector.getY() * driveSpeed,
+//                    turnVector.getX() * driveSpeed
+//            );
+//        }
+//    }
+
+}
