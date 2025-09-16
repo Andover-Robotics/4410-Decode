@@ -11,7 +11,7 @@ public class Turret {
     private final MotorEx motor;
     private PIDController controller;
 
-    public static double p = 0.00, i = 0, d = 0.000;
+    public static double p = 0.1, i = 0, d = 0.000;
     private double tolerance = 5, manualPower = 0, powerMin = 0.05;
     public static double degsPerTick = 360.0 / (145.1 * 144.0/14.0);
     public static int turretTarget = 0;

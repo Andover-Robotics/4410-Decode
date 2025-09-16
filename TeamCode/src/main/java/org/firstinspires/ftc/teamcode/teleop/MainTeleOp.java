@@ -56,15 +56,17 @@ public class MainTeleOp extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
                 runTurret = false;
+
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 runTurret = true;
+
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                degTarget += 5;
+                degTarget += 20;
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                degTarget -= 5;
+                degTarget -= 20;
             }
 
 
@@ -81,7 +83,11 @@ public class MainTeleOp extends LinearOpMode {
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.update();
-            bot.turret.periodic();
+
+            bot.turret.runToAngle(degTarget);
+            if (runTurret){
+                bot.turret.periodic();
+            }
         }
     }
 
