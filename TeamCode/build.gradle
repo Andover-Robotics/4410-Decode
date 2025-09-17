@@ -39,4 +39,6 @@ dependencies {
     implementation 'org.ftclib.ftclib:core:2.1.1'
     // the following is optional if you want vision
     implementation 'org.ftclib.ftclib:vision:2.1.0'
+
+    implementation "com.noahbres.jotai:jotai:1.0.2"
 }
