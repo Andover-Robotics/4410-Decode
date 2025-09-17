@@ -46,6 +46,7 @@ public class Bot {
     public OpMode opMode;
 
     public Turret turret;
+    public Shooter shooter;
 
     // get bot instance
     public static Bot getInstance() {
@@ -71,6 +72,7 @@ public class Bot {
 //        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_435);
 //        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_435);
         turret = new Turret(opMode);
+        shooter = new Shooter(opMode);
     }
 
 }

@@ -29,6 +29,8 @@ public class MainTeleOp extends LinearOpMode {
 
     private int degTarget = 0;
     private boolean runTurret = false;
+    public static double rpm = 0;
+    public static boolean shoot = false;
 
 
     @Override
@@ -60,7 +62,12 @@ public class MainTeleOp extends LinearOpMode {
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 runTurret = true;
-
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.shooter.setManualPower(rpm);
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
+                bot.shooter.setVelocity(rpm);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                 degTarget += 20;
@@ -73,20 +80,31 @@ public class MainTeleOp extends LinearOpMode {
             // DRIVE
 //            drive();
 
-            // TELEMETRY
-            telemetry.addData("On?", runTurret);
-            telemetry.addData("Temp Target (Degs)", degTarget);
+//            // TELEMETRY
+//            telemetry.addData("On?", runTurret);
+//            telemetry.addData("Temp Target (Degs)", degTarget);
+//
+//            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
+//            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
+//            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
+//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+//            telemetry.addData("Power", bot.turret.getPower());
 
-            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
-            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
-            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-            telemetry.addData("Power", bot.turret.getPower());
+            telemetry.addData("Power", bot.shooter.getPower());
+            telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
+            telemetry.addData("target rpm", bot.shooter.getTargetRPM());
+            telemetry.addData("On?", shoot);
+
             telemetry.update();
 
             bot.turret.runToAngle(degTarget);
             if (runTurret){
                 bot.turret.periodic();
+            }
+            if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER) || shoot) {
+                bot.shooter.periodic();
+            } else{
+                bot.shooter.setPower(0);
             }
         }
     }

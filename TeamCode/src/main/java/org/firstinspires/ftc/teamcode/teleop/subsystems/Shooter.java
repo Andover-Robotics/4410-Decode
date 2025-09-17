@@ -68,9 +68,9 @@ public class Shooter {
     }
 
     //open loop - disables pidf
-    public void setManualPower(double pwr) {
+    public void setManualPower(double rpm) {
         closedLoopEnabled = false;
-        power = clamp(pwr, -maxPower, maxPower);
+        power = clamp(rpm / 6000, -maxPower, maxPower);
     }
 
     //stop & reset
