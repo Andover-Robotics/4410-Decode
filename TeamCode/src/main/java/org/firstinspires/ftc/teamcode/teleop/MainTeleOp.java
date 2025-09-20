@@ -92,6 +92,7 @@ public class MainTeleOp extends LinearOpMode {
 
             telemetry.addData("Power", bot.shooter.getPower());
             telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
+            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
             telemetry.addData("target rpm", bot.shooter.getTargetRPM());
             telemetry.addData("On?", shoot);
 

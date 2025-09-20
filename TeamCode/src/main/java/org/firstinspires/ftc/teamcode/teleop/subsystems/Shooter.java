@@ -98,13 +98,14 @@ public class Shooter {
         measuredRPM = (ticksPerSec / ticksPerRev) * 60.0;
 
         // low-pass filter on RPM
-        if (firstLoop) {
-            filteredRPM = measuredRPM;
-            firstLoop = false;
-        } else {
-            double a = clamp(filterAlpha, 0.0, 1.0);
-            filteredRPM = filteredRPM + a * (measuredRPM - filteredRPM);
-        }
+//        if (firstLoop) {
+//            filteredRPM = measuredRPM;
+//            firstLoop = false;
+//        } else {
+//            double a = clamp(filterAlpha, 0.0, 1.0);
+//            filteredRPM = filteredRPM + a * (measuredRPM - filteredRPM);
+//        }
+        filteredRPM = motor1.getVelocity();
 
         lastPos = pos;
         lastTime = now;
@@ -112,7 +113,7 @@ public class Shooter {
         controller.setPID(p, i, d);
 
         if (closedLoopEnabled) {
-            double ff = f * targetRPM;                                   // feedforward
+            double ff = f * targetRPM;                                    // feedforward
             double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
             power = ff + pid;
 
