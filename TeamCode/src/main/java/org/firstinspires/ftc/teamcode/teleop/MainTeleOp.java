@@ -31,6 +31,7 @@ public class MainTeleOp extends LinearOpMode {
     private boolean runTurret = false;
     public static double rpm = 0;
     public static boolean shoot = false;
+    public static boolean noPid = false;
 
 
     @Override
@@ -63,10 +64,10 @@ public class MainTeleOp extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 runTurret = true;
             }
-            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.X) || noPid) {
                 bot.shooter.setManualPower(rpm);
             }
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y) || !noPid) {
                 bot.shooter.setVelocity(rpm);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
@@ -93,7 +94,8 @@ public class MainTeleOp extends LinearOpMode {
             telemetry.addData("Power", bot.shooter.getPower());
             telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
             telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
-            telemetry.addData("target rpm", bot.shooter.getTargetRPM());
+            telemetry.addData("target (power) rpm", rpm);
+            telemetry.addData("target (PIDF) rpm", bot.shooter.getTargetRPM());
             telemetry.addData("On?", shoot);
 
             telemetry.update();

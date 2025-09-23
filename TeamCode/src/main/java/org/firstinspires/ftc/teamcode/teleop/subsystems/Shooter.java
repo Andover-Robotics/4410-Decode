@@ -19,7 +19,7 @@ public class Shooter {
     private final ElapsedTime timer = new ElapsedTime();
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.0, i = 0.0, d = 0.0, f = 0.0;
+    public static double p = 0.0011, i = 0.0, d = 0.0, f = 0.000197;
 
     // mech conversion: motor ticks per rev and external gear ratio to flywheel
     // effective ticks per flywheel revolution = motorTicksPerRev * gearRatio
@@ -105,7 +105,7 @@ public class Shooter {
 //            double a = clamp(filterAlpha, 0.0, 1.0);
 //            filteredRPM = filteredRPM + a * (measuredRPM - filteredRPM);
 //        }
-        filteredRPM = motor1.getVelocity();
+        filteredRPM = motor1.getVelocity() * 60 / 28;
 
         lastPos = pos;
         lastTime = now;
