@@ -59,10 +59,18 @@ public class MainTeleOp extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
                 runTurret = false;
+                bot.turret.enableAutoAim(false); //disable auto aim
 
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 runTurret = true;
+            }
+            // enable/disable auto-aim with LEFT_BUMPER
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+                bot.turret.enableAutoAim(true);
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                bot.turret.enableAutoAim(false);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.X) || noPid) {
                 bot.shooter.setManualPower(rpm);
@@ -90,7 +98,7 @@ public class MainTeleOp extends LinearOpMode {
 //            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 //            telemetry.addData("Power", bot.turret.getPower());
-
+            telemetry.addData("Turret AutoAim", bot.turret.getTargetDegs());
             telemetry.addData("Power", bot.shooter.getPower());
             telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
             telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
