@@ -49,9 +49,9 @@ public class MainTeleOp extends LinearOpMode {
 //        bot.stopMotors();
 
         //bot.storage();
-
-        bot.initializeImus();
-        bot.resetIMU();
+//
+//        bot.initializeImus();
+//        bot.resetIMU();
 
         waitForStart();
 
@@ -82,12 +82,12 @@ public class MainTeleOp extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.Y) || !noPid) {
                 bot.shooter.setVelocity(rpm);
             }
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                degTarget += 20;
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                degTarget -= 20;
-            }
+//            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+//                degTarget += 20;
+//            }
+//            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+//                degTarget -= 20;
+//            }
 
 
             // DRIVE
