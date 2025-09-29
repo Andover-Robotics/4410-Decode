@@ -23,16 +23,19 @@ public class Turret {
 
     private double filteredTx = 0;
 
-    public static double p = 0.1, i = 0, d = 0.000, p2 = 0.025, i2 = 0, d2 = 0;
-    private double tolerance = 5, manualPower = 0, powerMin = 0.05;
+    public static double p = 0.1, i = 0, d = 0.000, p2 = 0.035, i2 = 0, d2 = 0, manualPower = 0;
+    private double tolerance = 5, powerMin = 0.05;
     public static double degsPerTick = 360.0 / (145.1 * 144.0/14.0);
     public static int turretTarget = 0;
 
+    public static double ty;
     public double power;
 
     private boolean isManual = false;
 
     public int limit = 360;
+
+    public double setPoint = 0, pos = 0;
 
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
@@ -74,30 +77,34 @@ public class Turret {
 
 
     public void periodic() {
-        int setPoint = turretTarget;
-        int pos = getPosition();
-
+        setPoint = 0;
+        pos = 0;
         if (autoAimEnabled) {
             LLResult llResult = limelight.getLatestResult();
             if (llResult != null && llResult.isValid()) {
-                double tx = Math.round(llResult.getTx() * 100.0) / 100.0; // horizontal offset from center
-                if (Math.abs(tx) > 0.5) {
-                    int txTicks = (int)(tx / degsPerTick);
-                    setPoint = pos - txTicks;
-                }
+//                ty = Math.round(llResult.getTy() * 100.0) / 100.0; // horizontal offset from center
+//                if (Math.abs(ty) > 0.5) {
+//                    int tyTicks = (int)(ty / degsPerTick);
+//                    setPoint = pos - tyTicks;
+//                }
+                ty = llResult.getTy();
+                setPoint = 0;
+                pos = -1 * ty;
             }
             controller.setPID(p2, i2, d2);
         } else {
+            setPoint = turretTarget;
+            pos = getPosition();
             controller.setPID(p, i, d);
         }
         controller.setSetPoint(setPoint);
 
-        if(isManual) {
+        if(isManual || manualPower != 0) {
             power = manualPower;
         } else {
             power = controller.calculate(pos);
         }
-        double maxPower = 0.3;
+        double maxPower = 0.85;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
         motor.set(power);

@@ -12,9 +12,12 @@ import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
@@ -44,6 +47,39 @@ import java.util.List;
 public class Bot {
     public static Bot instance;
     public OpMode opMode;
+
+    public BNO055IMU imu0;
+    private double imuOffset = 0;
+
+    public void initializeImus() {
+        imu0 = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+
+        final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = false;
+
+        imu0.initialize(parameters);
+        resetIMU();
+    }
+
+    public void setImuOffset(double offset) {
+        imuOffset += offset;
+    }
+
+    public void resetIMU() {
+        imuOffset += getIMU();
+    }
+
+    public double getIMU() {
+        double angle = (imu0.getAngularOrientation().toAngleUnit(AngleUnit.DEGREES).firstAngle - imuOffset) % 360;
+        if (angle > 180) {
+            angle = angle - 360;
+        }
+        return angle;
+    }
 
     public Turret turret;
     public Shooter shooter;

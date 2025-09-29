@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.arcrobotics.ftclib.controller.PController;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -48,6 +49,9 @@ public class MainTeleOp extends LinearOpMode {
 //        bot.stopMotors();
 
         //bot.storage();
+
+        bot.initializeImus();
+        bot.resetIMU();
 
         waitForStart();
 
@@ -99,12 +103,15 @@ public class MainTeleOp extends LinearOpMode {
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 //            telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Turret AutoAim", bot.turret.getTargetDegs());
-            telemetry.addData("Power", bot.shooter.getPower());
-            telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
-            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
-            telemetry.addData("target (power) rpm", rpm);
-            telemetry.addData("target (PIDF) rpm", bot.shooter.getTargetRPM());
-            telemetry.addData("On?", shoot);
+//            telemetry.addData("Power", bot.shooter.getPower());
+//            telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
+//            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
+//            telemetry.addData("target (power) rpm", rpm);
+//            telemetry.addData("target (PIDF) rpm", bot.shooter.getTargetRPM());
+//            telemetry.addData("On?", shoot);
+            telemetry.addData("ty", bot.turret.ty);
+            telemetry.addData("PID setPoint", bot.turret.setPoint);
+            telemetry.addData("PID pos", bot.turret.pos);
 
             telemetry.update();
 
