@@ -82,11 +82,6 @@ public class Turret {
         if (autoAimEnabled) {
             LLResult llResult = limelight.getLatestResult();
             if (llResult != null && llResult.isValid()) {
-//                ty = Math.round(llResult.getTy() * 100.0) / 100.0; // horizontal offset from center
-//                if (Math.abs(ty) > 0.5) {
-//                    int tyTicks = (int)(ty / degsPerTick);
-//                    setPoint = pos - tyTicks;
-//                }
                 ty = llResult.getTy();
                 setPoint = 0;
                 pos = -1 * ty;

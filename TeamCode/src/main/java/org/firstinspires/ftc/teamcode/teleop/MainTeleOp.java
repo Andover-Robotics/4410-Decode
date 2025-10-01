@@ -50,9 +50,6 @@ public class MainTeleOp extends LinearOpMode {
 
         //bot.storage();
 
-        bot.initializeImus();
-        bot.resetIMU();
-
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -60,6 +57,12 @@ public class MainTeleOp extends LinearOpMode {
 
             gp1.readButtons();
             gp2.readButtons();
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.START)) {
+                bot.resetHeading();
+            }
+
+            telemetry.addData("Heading (deg)", bot.getHeading());
 
             if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
                 runTurret = false;
@@ -88,6 +91,7 @@ public class MainTeleOp extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
                 degTarget -= 20;
             }
+
 
 
             // DRIVE
