@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.arcrobotics.ftclib.controller.PController;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "MainTeleOp")
-public class MainTeleOp extends LinearOpMode {
+@TeleOp(name = "Turret Shooter Tester")
+public class TurretShooterTester extends LinearOpMode {
 
     private Bot bot;
     private double driveSpeed = 1, driveMultiplier = 1;
@@ -29,7 +28,7 @@ public class MainTeleOp extends LinearOpMode {
     private List<Action> runningActions = new ArrayList<>();
 
     private int degTarget = 0;
-    private boolean runTurret = false;
+    public static boolean runTurret = false;
     public static double rpm = 0;
     public static boolean shoot = false;
     public static boolean noPid = false;
@@ -59,31 +58,18 @@ public class MainTeleOp extends LinearOpMode {
             gp2.readButtons();
 
             if (gp1.wasJustPressed(GamepadKeys.Button.START)) {
-                bot.resetHeading();
+                bot.turret.resetHeading();
             }
 
-            telemetry.addData("Heading (deg)", bot.getHeading());
+            telemetry.addData("Heading (deg)", bot.turret.getHeading());
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
-                runTurret = false;
-                bot.turret.enableAutoAim(false); //disable auto aim
-
+            // enable/disable auto-aim with DPAD
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+                bot.turret.autoAimEnabled = !bot.turret.autoAimEnabled;
             }
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                bot.turret.runToAngle(degTarget);
                 runTurret = true;
-            }
-            // enable/disable auto-aim with LEFT_BUMPER
-            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                bot.turret.enableAutoAim(true);
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                bot.turret.enableAutoAim(false);
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.X) || noPid) {
-                bot.shooter.setManualPower(rpm);
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y) || !noPid) {
-                bot.shooter.setVelocity(rpm);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                 degTarget += 20;
@@ -91,22 +77,47 @@ public class MainTeleOp extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
                 degTarget -= 20;
             }
+            if (gp1.wasJustPressed(GamepadKeys.Button.B)) { //imu follow only
+                runTurret = true;
+                bot.turret.autoAimEnabled = false;
+                bot.turret.imuFollow = true;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) { //everything!
+                runTurret = true;
+                bot.turret.autoAimEnabled = true;
+                bot.turret.imuFollow = true;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.X)) { //auto aim only
+                runTurret = true;
+                bot.turret.imuFollow = false;
+                bot.turret.autoAimEnabled = true;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) { //disable all
+                runTurret = false;
+                bot.turret.imuFollow = false;
+                bot.turret.autoAimEnabled = false;
+            }
 
-
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) || noPid) {
+                bot.shooter.setManualPower(rpm);
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || !noPid) {
+                bot.shooter.setVelocity(rpm);
+            }
 
             // DRIVE
 //            drive();
 
 //            // TELEMETRY
-//            telemetry.addData("On?", runTurret);
-//            telemetry.addData("Temp Target (Degs)", degTarget);
-//
-//            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
-//            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
-//            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
-//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-//            telemetry.addData("Power", bot.turret.getPower());
-            telemetry.addData("Turret AutoAim", bot.turret.getTargetDegs());
+            telemetry.addData("On?", runTurret);
+            telemetry.addData("Temp Target (Degs)", degTarget);
+
+            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
+            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
+            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Power", bot.turret.getPower());
+            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
 //            telemetry.addData("Power", bot.shooter.getPower());
 //            telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
 //            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
@@ -119,11 +130,10 @@ public class MainTeleOp extends LinearOpMode {
 
             telemetry.update();
 
-            bot.turret.runToAngle(degTarget);
             if (runTurret){
                 bot.turret.periodic();
             }
-            if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER) || shoot) {
+            if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shoot) {
                 bot.shooter.periodic();
             } else{
                 bot.shooter.setPower(0);

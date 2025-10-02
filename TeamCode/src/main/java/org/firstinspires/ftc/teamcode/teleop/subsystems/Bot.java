@@ -56,7 +56,6 @@ public class Bot {
     public Turret turret;
     public Shooter shooter;
 
-    private IMU imu;
 
     // get bot instance
     public static Bot getInstance() {
@@ -77,15 +76,6 @@ public class Bot {
     private Bot(OpMode opMode) {
         this.opMode = opMode;
 
-        imu = opMode.hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                )
-        );
-        imu.initialize(parameters);
-
 //        fl = new MotorEx(opMode.hardwareMap, "motorFL", Motor.GoBILDA.RPM_435);
 //        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_435);
 //        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_435);
@@ -94,13 +84,5 @@ public class Bot {
         shooter = new Shooter(opMode);
     }
 
-    public double getHeading() {
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-        return orientation.getYaw(AngleUnit.DEGREES);
-    }
-
-    public void resetHeading() {
-        imu.resetYaw();
-    }
 
 }
