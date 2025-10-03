@@ -99,16 +99,17 @@ public class Turret {
     }
 
     public void periodic() {
-        setPoint = 0;
-        pos = 0;
+        //setPoint = 0;
+        //pos = 0;
         LLResult llResult = limelight.getLatestResult();
         if (llResult != null && llResult.isValid() && autoAimEnabled) {
             ty = llResult.getTy();
 //            setPoint = 0;
 //            pos = -1 * ty;
 //            controller.setPID(p2, i2, d2);
-            runToAngle(getPositionDegs()-ty);
+            runToAngle(getPositionDegs()+ty);
             pos = getPosition();
+            controller.setPID(p, i, d);
         } else {
             if (imuFollow) {
                 runToAngle(getHeading());
