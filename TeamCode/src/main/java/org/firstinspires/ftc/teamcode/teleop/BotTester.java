@@ -138,6 +138,7 @@ public class BotTester extends LinearOpMode {
             drive();
 
 //            // TELEMETRY
+            telemetry.addData("tx", bot.turret.tx);
             telemetry.addData("ty", bot.turret.ty);
             telemetry.addData("tarea", bot.turret.tarea);
             telemetry.addData("dih stance", bot.turret.td);

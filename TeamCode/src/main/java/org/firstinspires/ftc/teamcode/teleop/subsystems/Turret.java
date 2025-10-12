@@ -28,10 +28,10 @@ public class Turret {
     public LLResult llResult;
     public boolean autoAimEnabled = false, imuFollow = false;
 
-    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 1, wraparoundTime = 0.35, timerTolerance = 0.15;
+    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
-    public double ty, tarea, td, power, lastTime;
+    public double tx, ty, tarea, td, power, lastTime;
 
     private boolean isManual = false, wraparound = false;
 
@@ -99,12 +99,11 @@ public class Turret {
     }
 
     public void periodic() {
-        //setPoint = 0;
-        //pos = 0;
         llResult = limelight.getLatestResult();
         controller.setPID(p, i, d);
         if ((llResult != null && llResult.isValid() && autoAimEnabled) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
             wraparound = false;
+            tx = llResult.getTx();
             ty = llResult.getTy();
             tarea = llResult.getTa();
             runToAngle(getPositionDegs()+ty);
@@ -127,7 +126,7 @@ public class Turret {
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
-        td = (dA / Math.sqrt(tarea)) * Math.cos(Math.toRadians(65));
+        td = (dA / Math.sqrt(tarea)) * Math.cos(Math.toRadians((90-65)-tx));
 
         motor.set(power);
     }
