@@ -11,6 +11,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -19,30 +20,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 public class Turret {
     private final MotorEx motor;
     private PIDController controller;
+    private final ElapsedTime timer = new ElapsedTime();
 
     private IMU imu;
 
     private Limelight3A limelight;
+    public LLResult llResult;
     public boolean autoAimEnabled = false, imuFollow = false;
-    public static double correctionMultiplier = 0.5;
 
-    public static double txAlpha = 0.2;
+    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 1, wraparoundTime = 0.35, timerTolerance = 0.15;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
-    private double filteredTx = 0;
+    public double ty, tarea, td, power, lastTime;
 
-    public static double p = 0.008, i = 0, d = 0.0003, p2 = 0.035, i2 = 0, d2 = 0, manualPower = 0;
-    private double tolerance = 5, powerMin = 0.05;
-    public static double degsPerTick = 360.0 / (145.1 * 104.0/10.0);
-    public final double ticksPerRev = 360 / degsPerTick;
+    private boolean isManual = false, wraparound = false;
 
-    public static double ty;
-    public double power;
-
-    private boolean isManual = false;
-
-    public double highLimit = 180, lowLimit = -180, highLimitTicks = 180 / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
-
-    public double setPoint = 0, pos = 0;
+    public double setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
@@ -62,10 +55,13 @@ public class Turret {
         );
         imu.initialize(parameters);
         imu.resetYaw();
-        
+
         // initialize limelight
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.start();
+
+        timer.reset();
+        lastTime = timer.seconds();
     }
 
     public void enableAutoAim(boolean enable) {
@@ -75,8 +71,12 @@ public class Turret {
     public void runToAngle(double angle) {
         if (angle > highLimit) {
             angle = angle - 360;
+            wraparound = true;
         } else if (angle < lowLimit) {
             angle = angle + 360;
+            wraparound = true;
+        } else {
+            wraparound = false;
         }
         angle = Math.min(Math.max(lowLimit, angle), highLimit);
         int t = (int) ((angle) / degsPerTick);
@@ -99,23 +99,24 @@ public class Turret {
     }
 
     public void periodic() {
-        setPoint = 0;
-        pos = 0;
-        LLResult llResult = limelight.getLatestResult();
-        if (llResult != null && llResult.isValid() && autoAimEnabled) {
+        //setPoint = 0;
+        //pos = 0;
+        llResult = limelight.getLatestResult();
+        controller.setPID(p, i, d);
+        if ((llResult != null && llResult.isValid() && autoAimEnabled) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
+            wraparound = false;
             ty = llResult.getTy();
-//            setPoint = 0;
-//            pos = -1 * ty;
-//            controller.setPID(p2, i2, d2);
-            runToAngle(getPositionDegs()-ty);
-            pos = getPosition();
-        } else {
-            if (imuFollow) {
-                runToAngle(getHeading());
-            }
-            pos = getPosition();
+            tarea = llResult.getTa();
+            runToAngle(getPositionDegs()+ty);
             controller.setPID(p, i, d);
+            lastTime = timer.seconds();
+        } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !autoAimEnabled){
+            if (imuFollow) {
+                runToAngle(getHeading() + (45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1)));
+                controller.setPID(p2, i2, d2);
+            }
         }
+        pos = getPosition();
         controller.setSetPoint(setPoint);
 
         if(isManual || manualPower != 0) {
@@ -125,6 +126,8 @@ public class Turret {
         }
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
+
+        td = (dA / Math.sqrt(tarea)) * Math.cos(Math.toRadians(65));
 
         motor.set(power);
     }
@@ -136,7 +139,7 @@ public class Turret {
     public int getPosition() {
         return motor.getCurrentPosition();
     }
-    
+
     public double getPositionDegs() {
         return getPosition() * degsPerTick;
     }
@@ -166,4 +169,3 @@ public class Turret {
     }
 
 }
-

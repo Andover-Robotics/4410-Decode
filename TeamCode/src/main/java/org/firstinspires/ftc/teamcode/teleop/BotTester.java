@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -17,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "Turret Shooter Tester")
-public class TurretShooterTester extends LinearOpMode {
+@TeleOp(name = "Bot Tester")
+public class BotTester extends LinearOpMode {
 
     private Bot bot;
     private double driveSpeed = 1, driveMultiplier = 1;
@@ -29,7 +30,7 @@ public class TurretShooterTester extends LinearOpMode {
 
     private int degTarget = 0;
     public static boolean runTurret = false;
-    public static double rpm = 0;
+    public static double rpm = 4800;
     public static boolean shoot = false;
     public static boolean noPid = false;
 
@@ -63,10 +64,6 @@ public class TurretShooterTester extends LinearOpMode {
 
             telemetry.addData("Heading (deg)", bot.turret.getHeading());
 
-            // enable/disable auto-aim with DPAD
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-                bot.turret.autoAimEnabled = !bot.turret.autoAimEnabled;
-            }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
                 bot.turret.runToAngle(degTarget);
                 runTurret = true;
@@ -105,30 +102,11 @@ public class TurretShooterTester extends LinearOpMode {
                 bot.shooter.setVelocity(rpm);
             }
 
-            // DRIVE
-//            drive();
-
-//            // TELEMETRY
-            telemetry.addData("On?", runTurret);
-            telemetry.addData("Temp Target (Degs)", degTarget);
-
-            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
-            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
-            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-            telemetry.addData("Power", bot.turret.getPower());
-            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
-//            telemetry.addData("Power", bot.shooter.getPower());
-//            telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
-//            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
-//            telemetry.addData("target (power) rpm", rpm);
-//            telemetry.addData("target (PIDF) rpm", bot.shooter.getTargetRPM());
-//            telemetry.addData("On?", shoot);
-            telemetry.addData("ty", bot.turret.ty);
-            telemetry.addData("PID setPoint", bot.turret.setPoint);
-            telemetry.addData("PID pos", bot.turret.pos);
-
-            telemetry.update();
+            if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                bot.intake.intake();
+            } else {
+                bot.intake.stop();
+            }
 
             if (runTurret){
                 bot.turret.periodic();
@@ -138,30 +116,71 @@ public class TurretShooterTester extends LinearOpMode {
             } else{
                 bot.shooter.setPower(0);
             }
+
+            if (gp1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.intake.openGate();
+            }
+
+            if (gp1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.intake.closeGate();
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
+                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.lift.liftUp();
+            }
+
+            bot.lift.periodic();
+            // DRIVE
+            drive();
+
+//            // TELEMETRY
+            telemetry.addData("ty", bot.turret.ty);
+            telemetry.addData("tarea", bot.turret.tarea);
+            telemetry.addData("dih stance", bot.turret.td);
+            telemetry.addData("PID setPoint", bot.turret.setPoint);
+            telemetry.addData("PID pos", bot.turret.pos);
+            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
+            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
+            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Power", bot.turret.getPower());
+            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
+            telemetry.addData("\nPower", bot.shooter.getPower());
+            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
+            telemetry.addData("target rpm", rpm);
+
+            telemetry.addData("\nLeft Climb Encoder", bot.lift.getLeftEncAbsDeg());
+            telemetry.addData("Right Climb Encoder", bot.lift.getRightEncAbsDeg());
+            telemetry.addData("Left Climb Pos", bot.lift.getLeftEncContinuousDeg());
+            telemetry.addData("Right Climb Pos", bot.lift.getRightEncContinuousDeg());
+            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
+            telemetry.addData("Left Power", bot.lift.leftPower);
+            telemetry.addData("Right Power", bot.lift.rightPower);
+
+//            if (bot.turret.llResult != null)
+//                telemetry.addData("Limelight Result", bot.turret.llResult);
+
+//            telemetry.addData("On?", shoot);
+
+            telemetry.update();
+
         }
     }
 
     // Driving
-//    private void drive() { // Robot centric, drive multiplier default 1
-//        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-//        driveSpeed = Math.max(0, driveSpeed);
-//        bot.fixMotors();
-//
-//        if (fieldCentric) {
-//            Vector2d driveVector = new Vector2d(-gp1.getLeftX(), -gp1.getLeftY()),
-//                    turnVector = new Vector2d(-gp1.getRightX(), 0);
-//            bot.driveFieldCentric(driveVector.getX() * driveSpeed,
-//                    driveVector.getY() * driveSpeed,
-//                    turnVector.getX() * driveSpeed
-//            );
-//        } else {
-//            Vector2d driveVector = new Vector2d(gp1.getLeftX(), -gp1.getLeftY()),
-//                    turnVector = new Vector2d(gp1.getRightX(), 0);
-//            bot.driveRobotCentric(driveVector.getX() * driveSpeed,
-//                    driveVector.getY() * driveSpeed,
-//                    turnVector.getX() * driveSpeed
-//            );
-//        }
-//    }
-
+    private void drive() { // Robot centric, drive multiplier default 1
+        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        driveSpeed = Math.max(0, driveSpeed);
+        bot.fixMotors();
+        Vector2d driveVector = new Vector2d(gp1.getLeftX(), gp1.getLeftY()),
+                turnVector = new Vector2d(gp1.getRightX(), 0);
+        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
+                driveVector.getY() * driveSpeed,
+                turnVector.getX() * driveSpeed
+        );
+    }
 }
