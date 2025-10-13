@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.lang.*;
 import java.util.ArrayList;
@@ -138,18 +139,15 @@ public class BotTester extends LinearOpMode {
             drive();
 
 //            // TELEMETRY
-            telemetry.addData("tx", bot.turret.tx);
-            telemetry.addData("ty", bot.turret.ty);
-            telemetry.addData("tarea", bot.turret.tarea);
-            telemetry.addData("dih stance", bot.turret.td);
-            telemetry.addData("PID setPoint", bot.turret.setPoint);
-            telemetry.addData("PID pos", bot.turret.pos);
-            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
-            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
-            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-            telemetry.addData("Power", bot.turret.getPower());
-            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
+            telemetry.addData("tx", Turret.tx);
+            telemetry.addData("ty", Turret.ty);
+            telemetry.addData("correct distance", Turret.distance);
+//            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
+//            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
+//            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
+//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+//            telemetry.addData("Power", bot.turret.getPower());
+//            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
             telemetry.addData("\nPower", bot.shooter.getPower());
             telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
             telemetry.addData("target rpm", rpm);
