@@ -98,6 +98,7 @@ public class Bot {
         lift = new Lift(opMode);
     }
 
+
     public void driveRobotCentric(double strafeSpeed, double forwardBackSpeed, double turnSpeed) {
         double frontWheelModifier = 1;
         double rearWheelModifier = 1;
@@ -149,6 +150,15 @@ public class Bot {
 
     public double getMotorCurrent() {
         return fl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + fr.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + bl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + br.motorEx.getCurrent(CurrentUnit.MILLIAMPS);
+    }
+    public Action shootOne() {
+        return new SequentialAction(
+                new InstantAction(() -> intake.intake()),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(0.3),
+                new InstantAction(() -> intake.closeGate()),
+                new InstantAction(() -> intake.storage())
+        );
     }
 
 

@@ -28,7 +28,7 @@ public class Shooter {
     public static boolean inverted = false;
 
     // targeting and behavior
-    public static double toleranceRPM = 40.0;   // speed window for "at speed"
+    public static double toleranceRPM = 50.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
 
@@ -70,6 +70,9 @@ public class Shooter {
     public void setManualPower(double rpm) {
         closedLoopEnabled = false;
         power = clamp(rpm / 6000, -maxPower, maxPower);
+    }
+    public boolean inRange() {
+        return (filteredRPM > targetRPM - toleranceRPM && filteredRPM < targetRPM + toleranceRPM);
     }
 
     //stop & reset

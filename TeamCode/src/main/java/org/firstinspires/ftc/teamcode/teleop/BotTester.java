@@ -142,10 +142,12 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("tx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
             telemetry.addData("correct distance", Turret.distance);
+            telemetry.addData( "tag angle", Turret.tAngle);
+            telemetry.addData("tOffset", Turret.tOffset);
 //            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
 //            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
 //            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
-//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 //            telemetry.addData("Power", bot.turret.getPower());
 //            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
             telemetry.addData("\nPower", bot.shooter.getPower());

@@ -48,9 +48,9 @@ public class Lift {
 
 
     public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.002, kI = 0.0, kD = 0.0, kF = 0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 0.95;
-    public static int up = 1575, down = 0;
+    public static int up = 2150, down = 0;
 
-    public static boolean LEFT_INVERTED = true, RIGHT_INVERTED = false, APPLY_F_ALWAYS = true;
+    public static boolean LEFT_INVERTED = true, RIGHT_INVERTED = false;
 
     public double leftPower, rightPower;
 
@@ -114,10 +114,8 @@ public class Lift {
         double rightPidOut = rightPID.calculate(rightPos) * (RIGHT_INVERTED? -1 : 1);
 
         // Feedforward
-        double leftDir  = Math.signum((leftTargetDeg - leftZeroDeg) - leftPos);
-        double rightDir = Math.signum((rightTargetDeg - rightZeroDeg) - rightPos);
-        double leftF  = APPLY_F_ALWAYS ? kF : (leftDir > 0 ? kF : 0.0);
-        double rightF = APPLY_F_ALWAYS ? kF : (rightDir > 0 ? kF : 0.0);
+        double leftF  = -kF;
+        double rightF = kF;
 
         // Final power (clamped to [-1, 1]; optional inversion)
         leftPower  = clamp(leftPidOut + leftF, -maxPower, maxPower);
@@ -140,8 +138,6 @@ public class Lift {
     public void setBothTargetDeg(double degTarget) { leftTargetDeg = -degTarget; rightTargetDeg = degTarget; }
     public void setLeftTargetDeg(double deg)  { leftTargetDeg = deg; }
     public void setRightTargetDeg(double deg) { rightTargetDeg = deg; }
-    public void nudgeLeft(double deltaDeg)    { leftTargetDeg  += deltaDeg; }
-    public void nudgeRight(double deltaDeg)   { rightTargetDeg += deltaDeg; }
 
 
     public double getLeftEncAbsDeg()  { return readAbsDeg(leftEnc); }
