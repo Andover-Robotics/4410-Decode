@@ -28,7 +28,7 @@ public class Turret {
     public LLResult llResult;
     public boolean autoAimEnabled = false, imuFollow = false;
 
-    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15;
+    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = -5;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 186612.646, shooterC = 4488695.3;
 
     public double power, lastTime;
@@ -127,7 +127,8 @@ public class Turret {
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
-        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - tx));
+        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - tx)) - distanceOffset;
+        shooterRpm = Math.sqrt(shooterA * (distance) + shooterC);
 
         motor.set(power);
     }

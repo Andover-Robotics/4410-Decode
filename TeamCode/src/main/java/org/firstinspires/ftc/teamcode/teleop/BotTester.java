@@ -33,7 +33,7 @@ public class BotTester extends LinearOpMode {
     public static boolean runTurret = false;
     public static double rpm = 4800;
     public static boolean shoot = false;
-    public static boolean noPid = false;
+    public static boolean manualRPM = false;
 
 
     @Override
@@ -96,10 +96,10 @@ public class BotTester extends LinearOpMode {
                 bot.turret.autoAimEnabled = false;
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) || noPid) {
-                bot.shooter.setManualPower(rpm);
+            if (!manualRPM) {
+                bot.shooter.setVelocity(Turret.shooterRpm);
             }
-            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || !noPid) {
+            if (manualRPM) {
                 bot.shooter.setVelocity(rpm);
             }
 
@@ -149,8 +149,9 @@ public class BotTester extends LinearOpMode {
 //            telemetry.addData("Power", bot.turret.getPower());
 //            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
             telemetry.addData("\nPower", bot.shooter.getPower());
+            telemetry.addData("manual target rpm", rpm);
+            telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
-            telemetry.addData("target rpm", rpm);
 
             telemetry.addData("\nLeft Climb Encoder", bot.lift.getLeftEncAbsDeg());
             telemetry.addData("Right Climb Encoder", bot.lift.getRightEncAbsDeg());
