@@ -48,7 +48,7 @@ public class Lift {
 
 
     public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.002, kI = 0.0, kD = 0.0, kF = 0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 0.95;
-    public static int up = 2150, down = 0;
+    public static int up = 2125, down = 0;
 
     public static boolean LEFT_INVERTED = true, RIGHT_INVERTED = false;
 
