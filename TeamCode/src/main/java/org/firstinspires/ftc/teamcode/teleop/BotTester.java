@@ -32,7 +32,7 @@ public class BotTester extends LinearOpMode {
     private int degTarget = 0;
     public static boolean runTurret = false;
     public static double rpm = 4800;
-    public static boolean shoot = false;
+    public static boolean shoot = false, stallIntake = true;
     public static boolean manualRPM = false;
 
 
@@ -59,63 +59,53 @@ public class BotTester extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.START)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetHeading();
             }
 
             telemetry.addData("Heading (deg)", bot.turret.getHeading());
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                bot.turret.runToAngle(degTarget);
-                runTurret = true;
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                degTarget += 20;
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                degTarget -= 20;
-            }
             if (gp1.wasJustPressed(GamepadKeys.Button.B)) { //imu follow only
                 runTurret = true;
-                bot.turret.autoAimEnabled = false;
-                bot.turret.imuFollow = true;
+                bot.enableFullAuto(false);
+                bot.turret.enableImuFollow(true);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) { //everything!
                 runTurret = true;
-                bot.turret.autoAimEnabled = true;
-                bot.turret.imuFollow = true;
+                bot.enableFullAuto(true);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.X)) { //auto aim only
                 runTurret = true;
-                bot.turret.imuFollow = false;
-                bot.turret.autoAimEnabled = true;
+                bot.enableFullAuto(false);
+                bot.turret.enableAprilTracking(true);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) { //disable all
                 runTurret = false;
-                bot.turret.imuFollow = false;
-                bot.turret.autoAimEnabled = false;
-            }
-
-            if (!manualRPM) {
-                bot.shooter.setVelocity(Turret.shooterRpm);
-            }
-            if (manualRPM) {
-                bot.shooter.setVelocity(rpm);
+                bot.enableFullAuto(false);
             }
 
             if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                 bot.intake.intake();
             } else {
-                bot.intake.stop();
+                if (stallIntake) {
+                    bot.intake.storage();
+                } else {
+                    bot.intake.stop();
+                }
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                stallIntake = !stallIntake;
             }
 
             if (runTurret){
                 bot.turret.periodic();
             }
+
             if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shoot) {
-                bot.shooter.periodic();
-            } else{
-                bot.shooter.setPower(0);
+                bot.turret.enableShooter(true);
+            } else {
+                bot.turret.enableShooter(false);
             }
 
             if (gp1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -150,10 +140,10 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 //            telemetry.addData("Power", bot.turret.getPower());
 //            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
-            telemetry.addData("\nPower", bot.shooter.getPower());
+            telemetry.addData("\nPower", bot.turret.shooter.getPower());
             telemetry.addData("manual target rpm", rpm);
             telemetry.addData("auto target rpm", Turret.shooterRpm);
-            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
+            telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 
             telemetry.addData("\nLeft Climb Encoder", bot.lift.getLeftEncAbsDeg());
             telemetry.addData("Right Climb Encoder", bot.lift.getRightEncAbsDeg());

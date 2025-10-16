@@ -54,7 +54,6 @@ public class Bot {
     public OpMode opMode;
 
     public Turret turret;
-    public Shooter shooter;
     public Intake intake;
     public Lift lift;
     private final MotorEx fl;
@@ -68,6 +67,20 @@ public class Bot {
     }
 
     public static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
+
+    public void enableFullAuto(boolean on) {
+        turret.enableFullAuto(on);
+    }
+
+    public Action shootOne() {
+        return new SequentialAction(
+                new InstantAction(() -> intake.intake()),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(0.3),
+                new InstantAction(() -> intake.closeGate()),
+                new InstantAction(() -> intake.storage())
+        );
+    }
 
     // get bot instance
     public static Bot getInstance() {
@@ -88,16 +101,14 @@ public class Bot {
     private Bot(OpMode opMode) {
         this.opMode = opMode;
 
-        fl = new MotorEx(opMode.hardwareMap, "motorFL", Motor.GoBILDA.RPM_435);
-        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_435);
-        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_435);
-        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_435);
+        fl = new MotorEx(opMode.hardwareMap, "motorFL", Motor.GoBILDA.RPM_312);
+        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_312);
+        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_312);
+        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_312);
         turret = new Turret(opMode);
-        shooter = new Shooter(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
     }
-
 
     public void driveRobotCentric(double strafeSpeed, double forwardBackSpeed, double turnSpeed) {
         double frontWheelModifier = 1;
@@ -151,15 +162,7 @@ public class Bot {
     public double getMotorCurrent() {
         return fl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + fr.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + bl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + br.motorEx.getCurrent(CurrentUnit.MILLIAMPS);
     }
-    public Action shootOne() {
-        return new SequentialAction(
-                new InstantAction(() -> intake.intake()),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(0.3),
-                new InstantAction(() -> intake.closeGate()),
-                new InstantAction(() -> intake.storage())
-        );
-    }
+
 
 
 }

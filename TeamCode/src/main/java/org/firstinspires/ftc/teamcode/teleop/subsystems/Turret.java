@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -26,18 +27,19 @@ public class Turret {
 
     private Limelight3A limelight;
     public LLResult llResult;
-    public boolean autoAimEnabled = false, imuFollow = false;
+
+    public Shooter shooter;
+
+    public boolean aprilTracking = true, imuFollow = true, shooterActive = true;
 
     public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = -3, llRearOffsetMeters = -0.27, llRearOffsetInches = llRearOffsetMeters * 39.37;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 186612.646, shooterC = 4488695.3;
 
-    public double power, lastTime;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
     public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0;
 
     private boolean isManual = false, wraparound = false;
-
-    public double setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
@@ -62,12 +64,32 @@ public class Turret {
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.start();
 
+        shooter = new Shooter(opMode);
+
         timer.reset();
         lastTime = timer.seconds();
     }
 
-    public void enableAutoAim(boolean enable) {
-        autoAimEnabled = enable;
+    public void enableFullAuto(boolean on) {
+        enableAutoAim(on);
+        enableShooter(on);
+    }
+    
+    public void enableAutoAim(boolean on) {
+        enableAprilTracking(on);
+        enableImuFollow(on);
+    }
+
+    public void enableAprilTracking(boolean enable) {
+        aprilTracking = enable;
+    }
+
+    public void enableShooter(boolean enable) {
+        shooterActive = enable;
+    }
+
+    public void enableImuFollow(boolean enable) {
+        imuFollow = enable;
     }
 
     public void runToAngle(double angle) {
@@ -103,19 +125,20 @@ public class Turret {
     public void periodic() {
         llResult = limelight.getLatestResult();
         controller.setPID(p, i, d);
-        if ((llResult != null && llResult.isValid() && autoAimEnabled) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
+        if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
             wraparound = false;
             tx = llResult.getTx();
             ty = llResult.getTy();
             runToAngle(getPositionDegs()+ty);
             controller.setPID(p, i, d);
             lastTime = timer.seconds();
-        } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !autoAimEnabled){
+        } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking){
             if (imuFollow) {
                 runToAngle(getHeading() + (45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1)));
                 controller.setPID(p2, i2, d2);
             }
         }
+
         pos = getPosition();
         controller.setSetPoint(setPoint);
 
@@ -132,6 +155,13 @@ public class Turret {
         tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
         distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - tx)) - distanceOffset + tOffset;
         shooterRpm = Math.sqrt(shooterA * (distance) + shooterC);
+
+        if (shooterActive) {
+            shooter.periodic();
+            shooter.setVelocity(shooterRpm);
+        } else {
+            shooter.setPower(0);
+        }
 
         motor.set(power);
     }

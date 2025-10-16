@@ -95,8 +95,8 @@ public class Shooter {
         if (dt <= 0) dt = 1e-3;
 
         double pos = motor1.getCurrentPosition();
-        double ticksPerRev = motorTicksPerRev * gearRatio;
-        double ticksPerSec = (pos - lastPos) / dt;
+//        double ticksPerRev = motorTicksPerRev * gearRatio;
+//        double ticksPerSec = (pos - lastPos) / dt;
 //        measuredRPM = (ticksPerSec / ticksPerRev) * 60.0;
 
         // low-pass filter on RPM
@@ -133,7 +133,6 @@ public class Shooter {
 
     // telemetry
     public double getTargetRPM() { return targetRPM; }
-//    public double getMeasuredRPM() { return measuredRPM; } //INACCURATE
     public double getFilteredRPM() { return filteredRPM; }
     public double getPower() { return power; }
     public boolean atSpeed() { return Math.abs(targetRPM - filteredRPM) <= toleranceRPM; }
