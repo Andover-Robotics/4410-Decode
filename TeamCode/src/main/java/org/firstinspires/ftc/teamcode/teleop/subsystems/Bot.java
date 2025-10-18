@@ -77,6 +77,22 @@ public class Bot {
     public static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     public static startingPosition startingPos = startingPosition.FAR;
 
+    public void switchAlliance() {
+        if (alliance == allianceOptions.RED_ALLIANCE) {
+            alliance = allianceOptions.BLUE_ALLIANCE;
+        } else {
+            alliance = allianceOptions.RED_ALLIANCE;
+        }
+    }
+
+    public void switchStartingPos() {
+        if (startingPos == startingPosition.FAR) {
+            startingPos = startingPosition.CLOSE;
+        } else {
+            startingPos = startingPosition.FAR;
+        }
+    }
+
     public void enableFullAuto(boolean on) {
         turret.enableFullAuto(on);
     }
@@ -113,6 +129,11 @@ public class Bot {
                 new InstantAction(() -> intake.storage()),
                 new InstantAction(() -> shooting = false)
         );
+    }
+
+    public void periodic() {
+        turret.periodic();
+        lift.periodic();
     }
 
     // get bot instance
