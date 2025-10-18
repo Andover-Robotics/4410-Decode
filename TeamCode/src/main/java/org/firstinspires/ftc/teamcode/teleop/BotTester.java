@@ -49,8 +49,6 @@ public class BotTester extends LinearOpMode {
         // Initialize bot
 //        bot.stopMotors();
 
-        //bot.storage();
-
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -84,13 +82,15 @@ public class BotTester extends LinearOpMode {
                 bot.enableFullAuto(false);
             }
 
-            if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                bot.intake.intake();
-            } else {
-                if (stallIntake) {
-                    bot.intake.storage();
+            if (!bot.shooting) {
+                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                    bot.intake.intake();
                 } else {
-                    bot.intake.stop();
+                    if (stallIntake) {
+                        bot.intake.storage();
+                    } else {
+                        bot.intake.stop();
+                    }
                 }
             }
 
@@ -116,6 +116,14 @@ public class BotTester extends LinearOpMode {
                 bot.intake.closeGate();
             }
 
+            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                runningActions.add(bot.shootOne());
+            }
+
+            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                runningActions.add(bot.shootThree());
+            }
+
             if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
             }
@@ -128,18 +136,22 @@ public class BotTester extends LinearOpMode {
             // DRIVE
             drive();
 
+            List<Action> newActions = new ArrayList<>();
+            for (Action action : runningActions) {
+                action.preview(packet.fieldOverlay());
+                if (action.run(packet)) {
+                    newActions.add(action);
+                }
+            }
+            runningActions = newActions;
+
 //            // TELEMETRY
             telemetry.addData("tx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
             telemetry.addData("correct distance", Turret.distance);
             telemetry.addData( "tag angle", Turret.tAngle);
             telemetry.addData("tOffset", Turret.tOffset);
-//            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
-//            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
-//            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-//            telemetry.addData("Power", bot.turret.getPower());
-//            telemetry.addData("Turret AutoAim", bot.turret.autoAimEnabled);
             telemetry.addData("\nPower", bot.turret.shooter.getPower());
             telemetry.addData("manual target rpm", rpm);
             telemetry.addData("auto target rpm", Turret.shooterRpm);

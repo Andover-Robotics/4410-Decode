@@ -39,6 +39,8 @@ public class Turret {
 
     public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0;
 
+    public int startingOffset = 0;
+
     private boolean isManual = false, wraparound = false;
 
     public Turret(OpMode opMode) {
@@ -68,6 +70,7 @@ public class Turret {
 
         timer.reset();
         lastTime = timer.seconds();
+        startingOffset = 45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1);
     }
 
     public void enableFullAuto(boolean on) {
@@ -123,6 +126,19 @@ public class Turret {
     }
 
     public void periodic() {
+        if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+            if (Bot.startingPos == Bot.startingPosition.FAR) {
+                startingOffset = -45;
+            } else {
+                startingOffset = 0;
+            }
+        } else {
+            if (Bot.startingPos == Bot.startingPosition.FAR) {
+                startingOffset = 45;
+            } else {
+                startingOffset = 0;
+            }
+        }
         llResult = limelight.getLatestResult();
         controller.setPID(p, i, d);
         if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
@@ -134,7 +150,7 @@ public class Turret {
             lastTime = timer.seconds();
         } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking){
             if (imuFollow) {
-                runToAngle(getHeading() + (45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1)));
+                runToAngle(getHeading() + startingOffset) ;
                 controller.setPID(p2, i2, d2);
             }
         }
@@ -151,7 +167,7 @@ public class Turret {
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
-        tAngle = (getPositionDegs()-getHeading() + (45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? 1 : -1)));
+        tAngle = getPositionDegs()-getHeading() - startingOffset;
         tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
         distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - tx)) - distanceOffset + tOffset;
         shooterRpm = Math.sqrt(shooterA * (distance) + shooterC);

@@ -61,12 +61,21 @@ public class Bot {
     private final MotorEx bl;
     private final MotorEx br;
 
+    public static double shootTime = 0.3, shootDelay = 0.3;
+    public boolean shooting = false;
+
     public static enum allianceOptions {
         RED_ALLIANCE,
         BLUE_ALLIANCE
     }
 
+    public static enum startingPosition {
+        CLOSE,
+        FAR
+    }
+
     public static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
+    public static startingPosition startingPos = startingPosition.FAR;
 
     public void enableFullAuto(boolean on) {
         turret.enableFullAuto(on);
@@ -74,11 +83,35 @@ public class Bot {
 
     public Action shootOne() {
         return new SequentialAction(
+                new InstantAction(() -> shooting = true),
                 new InstantAction(() -> intake.intake()),
+                new SleepAction(0.2),
                 new InstantAction(() -> intake.openGate()),
-                new SleepAction(0.3),
+                new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
-                new InstantAction(() -> intake.storage())
+                new InstantAction(() -> intake.storage()),
+                new InstantAction(() -> shooting = false)
+        );
+    }
+
+    public Action shootThree() {
+        return new SequentialAction(
+                new InstantAction(() -> shooting = true),
+                new InstantAction(() -> intake.intake()),
+                new SleepAction(0.2),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new SleepAction(shootDelay),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new SleepAction(shootDelay),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new InstantAction(() -> intake.storage()),
+                new InstantAction(() -> shooting = false)
         );
     }
 
