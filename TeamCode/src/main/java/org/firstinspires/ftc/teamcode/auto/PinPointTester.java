@@ -20,7 +20,7 @@
  *   SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode.teleop.subsystems;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -62,7 +62,7 @@ For support, contact tech@gobilda.com
 @TeleOp(name="pinpoint test code", group="Linear OpMode")
 //@Disabled
 
-public class PinPoint extends LinearOpMode {
+public class PinPointTester extends LinearOpMode {
 
     GoBildaPinpointDriver odo; // Declare OpMode member for the Odometry Computer
 
@@ -85,7 +85,7 @@ public class PinPoint extends LinearOpMode {
         the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
         backwards is a negative number.
          */
-        odo.setOffsets(-84.0, -168.0, DistanceUnit.MM); //these are tuned for 3110-0002-0001 Product Insight #1
+        odo.setOffsets(-1, -7.6, DistanceUnit.INCH); //these are tuned for 3110-0002-0001 Product Insight #1
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either
@@ -102,7 +102,7 @@ public class PinPoint extends LinearOpMode {
         increase when you move the robot forward. And the Y (strafe) pod should increase when
         you move the robot to the left.
          */
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
 
         /*
@@ -117,8 +117,8 @@ public class PinPoint extends LinearOpMode {
         odo.resetPosAndIMU();
 
         telemetry.addData("Status", "Initialized");
-        telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
-        telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
+        telemetry.addData("X offset", odo.getXOffset(DistanceUnit.INCH));
+        telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.INCH));
         telemetry.addData("Device Version Number:", odo.getDeviceVersion());
         telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.update();
