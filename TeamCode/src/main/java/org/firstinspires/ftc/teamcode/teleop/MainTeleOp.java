@@ -7,31 +7,27 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
-import java.lang.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "MainTeleOp")
-public class MainTeleOp extends LinearOpMode {
+@TeleOp(name = "MainTeleop")
+public class MainTeleop extends LinearOpMode {
 
     private Bot bot;
     private double driveSpeed = 1, driveMultiplier = 1;
     private GamepadEx gp1, gp2;
-    private boolean fieldCentric, intakeCancel, clipCancel;
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
 
-    private int degTarget = 0;
-    private boolean runTurret = false;
-    public static double rpm = 0;
-    public static boolean shoot = false;
-    public static boolean noPid = false;
+    public static boolean stallIntake = true, manualTurret = false;
 
 
     @Override
@@ -43,11 +39,10 @@ public class MainTeleOp extends LinearOpMode {
 
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
+        bot.enableFullAuto(true);
 
         // Initialize bot
 //        bot.stopMotors();
-
-        //bot.storage();
 
         waitForStart();
 
@@ -57,82 +52,134 @@ public class MainTeleOp extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
-                runTurret = false;
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetHeading();
+            }
 
+            if (!bot.shooting) {
+                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                    bot.intake.intake();
+                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    bot.intake.reverse();
+                } else {
+                    if (stallIntake) {
+                        bot.intake.storage();
+                    } else {
+                        bot.intake.stop();
+                    }
+                }
             }
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                runTurret = true;
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.X) || noPid) {
-                bot.shooter.setManualPower(rpm);
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y) || !noPid) {
-                bot.shooter.setVelocity(rpm);
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                degTarget += 20;
-            }
+
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                degTarget -= 20;
+                stallIntake = !stallIntake;
             }
 
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //imu follow only
+                bot.enableFullAuto(false);
+                bot.turret.enableImuFollow(true);
+                manualTurret = false;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
+                bot.enableFullAuto(true);
+                manualTurret = false;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) { //auto aim only
+                bot.enableFullAuto(false);
+                bot.turret.enableAprilTracking(true);
+                manualTurret = false;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //disable all
+                bot.enableFullAuto(false);
+                manualTurret = true;
+            }
 
+            if (manualTurret) {
+                bot.turret.runManual(gp2.getLeftX());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetEncoder();
+            }
+
+            if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+                bot.turret.enableShooter(true);
+            } else {
+                bot.turret.enableShooter(false);
+            }
+
+            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.intake.openGate();
+            }
+
+            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.intake.closeGate();
+            }
+
+            if (gp2.getButton(GamepadKeys.Button.A) && !bot.shooting) {
+                runningActions.add(bot.shootOne());
+            }
+
+            if (gp2.getButton(GamepadKeys.Button.B) && !bot.shooting) {
+                runningActions.add(bot.shootThree());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
+                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.lift.liftUp();
+            }
+
+            bot.periodic();
             // DRIVE
-//            drive();
+            drive();
+
+            List<Action> newActions = new ArrayList<>();
+            for (Action action : runningActions) {
+                action.preview(packet.fieldOverlay());
+                if (action.run(packet)) {
+                    newActions.add(action);
+                }
+            }
+            runningActions = newActions;
 
 //            // TELEMETRY
-//            telemetry.addData("On?", runTurret);
-//            telemetry.addData("Temp Target (Degs)", degTarget);
-//
-//            telemetry.addData("\nTarget (Ticks)", bot.turret.getTargetTicks());
-//            telemetry.addData("Target (Degs)", bot.turret.getTargetDegs());
-//            telemetry.addData("Pos (Ticks)", bot.turret.getPositionTicks());
-//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-//            telemetry.addData("Power", bot.turret.getPower());
+            telemetry.addData("alliance", Bot.alliance);
+            telemetry.addData("starting pos", Bot.startingPos);
 
-            telemetry.addData("Power", bot.shooter.getPower());
-            telemetry.addData("measured rpm", bot.shooter.getMeasuredRPM());
-            telemetry.addData("filtered rpm", bot.shooter.getFilteredRPM());
-            telemetry.addData("target (power) rpm", rpm);
-            telemetry.addData("target (PIDF) rpm", bot.shooter.getTargetRPM());
-            telemetry.addData("On?", shoot);
+            telemetry.addData("\ntx", Turret.tx);
+            telemetry.addData("ty", Turret.ty);
+            telemetry.addData("correct distance", Turret.distance);
+            telemetry.addData( "tag angle", Turret.tAngle);
+            telemetry.addData("tOffset", Turret.tOffset);
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("\nPower", bot.turret.shooter.getPower());
+            telemetry.addData("auto target rpm", Turret.shooterRpm);
+            telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 
+            telemetry.addData("\nLeft Climb Encoder", bot.lift.getLeftEncAbsDeg());
+            telemetry.addData("Right Climb Encoder", bot.lift.getRightEncAbsDeg());
+            telemetry.addData("Left Climb Pos", bot.lift.getLeftEncContinuousDeg());
+            telemetry.addData("Right Climb Pos", bot.lift.getRightEncContinuousDeg());
+            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
+            telemetry.addData("Left Power", bot.lift.leftPower);
+            telemetry.addData("Right Power", bot.lift.rightPower);
             telemetry.update();
 
-            bot.turret.runToAngle(degTarget);
-            if (runTurret){
-                bot.turret.periodic();
-            }
-            if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER) || shoot) {
-                bot.shooter.periodic();
-            } else{
-                bot.shooter.setPower(0);
-            }
         }
     }
 
     // Driving
-//    private void drive() { // Robot centric, drive multiplier default 1
-//        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-//        driveSpeed = Math.max(0, driveSpeed);
-//        bot.fixMotors();
-//
-//        if (fieldCentric) {
-//            Vector2d driveVector = new Vector2d(-gp1.getLeftX(), -gp1.getLeftY()),
-//                    turnVector = new Vector2d(-gp1.getRightX(), 0);
-//            bot.driveFieldCentric(driveVector.getX() * driveSpeed,
-//                    driveVector.getY() * driveSpeed,
-//                    turnVector.getX() * driveSpeed
-//            );
-//        } else {
-//            Vector2d driveVector = new Vector2d(gp1.getLeftX(), -gp1.getLeftY()),
-//                    turnVector = new Vector2d(gp1.getRightX(), 0);
-//            bot.driveRobotCentric(driveVector.getX() * driveSpeed,
-//                    driveVector.getY() * driveSpeed,
-//                    turnVector.getX() * driveSpeed
-//            );
-//        }
-//    }
-
+    private void drive() { // Robot centric, drive multiplier default 1
+        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        driveSpeed = Math.max(0, driveSpeed);
+        bot.fixMotors();
+        Vector2d driveVector = new Vector2d(gp1.getLeftX(), gp1.getLeftY()),
+                turnVector = new Vector2d(gp1.getRightX(), 0);
+        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
+                driveVector.getY() * driveSpeed,
+                turnVector.getX() * driveSpeed
+        );
+    }
 }

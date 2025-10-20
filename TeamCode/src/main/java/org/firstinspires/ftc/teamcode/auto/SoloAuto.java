@@ -50,6 +50,39 @@ public class SoloAuto extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         // TODO: replace all actions with real names
+        Action shootPreload = drive.actionBuilder(drive.localizer.getPose())
+                .afterTime(0.1, bot.shootThree())
+                .build();
+
+        Action cycleHP = drive.actionBuilder(initialPose)
+                .splineToLinearHeading(hpIntake, Math.toRadians(0), drive.defaultVelConstraint, drive.defaultAccelConstraint)
+                .stopAndAdd(new SequentialAction(
+                        bot.intake.intake(),
+                        new SleepAction(3.0),
+                        bot.intake.storage()
+                ))
+                .strafeToConstantHeading(new Vector2d(hpIntake.component1().x, hpIntake.component1().y -6), drive.defaultVelConstraint, drive.defaultAccelConstraint)
+                .afterTime(2.0, bot.shootThree())
+                .splineTolinearheading(farShoot, Math.toRadians(30), drive.defaultVelConstraint, drive.defaultAccelConstraint)
+                .build();
+
+        Action intakeFar = drive.actionBuilder(farShoot)
+                .splineToLinearHeading(farIntake, Math.toRadians(0), drive.defaultVelConstraint, drive.defaultAccelConstraint)
+                .stopAndAdd(new SequentialAction(
+                        bot.intake.intake(),
+                        new SleepAction(2.0),
+                        bot.intake.storage()
+                ))
+                .strafeToConstantHeading(new Vector2d(farIntake.component1().x + 15, farIntake.component1().y), drive.defaultVelConstraint, drive.defaultAccelConstraint)
+                .build();
+
+        Action openGate = drive.actionBuilder(new Pose2d(farIntake.component1().x + 15, farIntake.component1().y, Math.toRadians(0)))
+                .splineToLinearHeading(new Pose2d(24, 0, Math.toRadians(90)), Math.toRadians(90))
+                .waitSeconds(0.1)
+                .splineToConstantHeading(gate.component1(), Math.toRadians(0))
+                .waitSeconds(2)
+                .build();
+
     }
 
 }

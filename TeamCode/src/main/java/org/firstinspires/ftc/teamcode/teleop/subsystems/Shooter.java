@@ -28,10 +28,9 @@ public class Shooter {
     public static boolean inverted = false;
 
     // targeting and behavior
-    public static double toleranceRPM = 40.0;   // speed window for "at speed"
+    public static double toleranceRPM = 50.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
-    public static double filterAlpha = 1.0;     // 1.0 no filter, 0.1 strong smoothing
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -72,6 +71,9 @@ public class Shooter {
         closedLoopEnabled = false;
         power = clamp(rpm / 6000, -maxPower, maxPower);
     }
+    public boolean inRange() {
+        return (filteredRPM > targetRPM - toleranceRPM && filteredRPM < targetRPM + toleranceRPM);
+    }
 
     //stop & reset
     public void stop() {
@@ -93,9 +95,9 @@ public class Shooter {
         if (dt <= 0) dt = 1e-3;
 
         double pos = motor1.getCurrentPosition();
-        double ticksPerRev = motorTicksPerRev * gearRatio;
-        double ticksPerSec = (pos - lastPos) / dt;
-        measuredRPM = (ticksPerSec / ticksPerRev) * 60.0;
+//        double ticksPerRev = motorTicksPerRev * gearRatio;
+//        double ticksPerSec = (pos - lastPos) / dt;
+//        measuredRPM = (ticksPerSec / ticksPerRev) * 60.0;
 
         // low-pass filter on RPM
 //        if (firstLoop) {
@@ -131,7 +133,6 @@ public class Shooter {
 
     // telemetry
     public double getTargetRPM() { return targetRPM; }
-    public double getMeasuredRPM() { return measuredRPM; }
     public double getFilteredRPM() { return filteredRPM; }
     public double getPower() { return power; }
     public boolean atSpeed() { return Math.abs(targetRPM - filteredRPM) <= toleranceRPM; }
