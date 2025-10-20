@@ -136,6 +136,18 @@ public class Bot {
         lift.periodic();
     }
 
+    public Action actionPeriodic() {
+        return new actionPeriodic();
+    }
+    public class actionPeriodic implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            turret.periodic();
+            lift.periodic();
+            return true;
+        }
+    }
+
     // get bot instance
     public static Bot getInstance() {
         if (instance == null) {
