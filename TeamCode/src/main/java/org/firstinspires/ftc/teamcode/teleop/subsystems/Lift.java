@@ -43,16 +43,18 @@ import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 @Config
 public class Lift {
 
 
-    public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.002, kI = 0.0, kD = 0.0, kF = 0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 0.95;
-    public static int up = 2125, down = 0;
+    public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.002, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 0.95, spoolRad = 14, liftWidth = 178;
+    public static int up = 1950, down = 0, balancing = 500;
 
-    public static boolean LEFT_INVERTED = true, RIGHT_INVERTED = false;
+    public static boolean LEFT_INVERTED = false, RIGHT_INVERTED = false, offsetLeftSide = false;
 
-    public double leftPower, rightPower;
+    public double leftPower, rightPower, offset;
 
     private final CRServo climbLeft, climbRight;
     private final AnalogInput leftEnc, rightEnc;
@@ -61,10 +63,18 @@ public class Lift {
     private final PIDController leftPID = new PIDController(kP, kI, kD);
     private final PIDController rightPID = new PIDController(kP, kI, kD);
 
-    private double leftTargetDeg, rightTargetDeg;     // continuous degrees
+    public double leftTargetDeg, rightTargetDeg, leftOffsetDeg, rightOffsetDeg;     // continuous degrees
     private double leftZeroDeg = 0.0, rightZeroDeg = 0.0;
 
     private boolean closedLoopEnabled = false;         // toggle
+
+    public static enum liftStates {
+        LIFTING,
+        BALANCING,
+        IDLE
+    }
+
+    public liftStates liftState = liftStates.IDLE;
 
     public Lift(OpMode opMode) {
         climbLeft  = new CRServo(opMode.hardwareMap, "climbLeft");
@@ -75,9 +85,6 @@ public class Lift {
         leftTracker  = new ContinuousAngleTracker(readAbsDeg(leftEnc), WRAP_TOLERANCE_DEG);
         rightTracker = new ContinuousAngleTracker(readAbsDeg(rightEnc), WRAP_TOLERANCE_DEG);
 
-        leftTargetDeg  = getLeftEncContinuousDegInternal();
-        rightTargetDeg = getRightEncContinuousDegInternal();
-
         leftPID.setTolerance(POSITION_TOLERANCE_DEG);
         rightPID.setTolerance(POSITION_TOLERANCE_DEG);
         zeroBoth();
@@ -85,6 +92,23 @@ public class Lift {
 
     public void liftUp() {
         setBothTargetDeg(up);
+    }
+
+    public void balance() {
+        offset = 360 * liftWidth * Math.toRadians(Turret.orientation.getRoll(AngleUnit.DEGREES)) / (2 * Math.PI * spoolRad);
+        if (offset > 0) {
+            if (offsetLeftSide) {
+                setLeftTargetDeg(leftTargetDeg + offset);
+            } else {
+                setRightTargetDeg(rightTargetDeg + offset);
+            }
+        } else {
+            if (offsetLeftSide) {
+                setRightTargetDeg(rightTargetDeg + offset);
+            } else {
+                setLeftTargetDeg(leftTargetDeg + offset);
+            }
+        }
     }
 
     /** Call this from your parent loop. Runs PIDF only when enabled. */
@@ -101,21 +125,21 @@ public class Lift {
         leftTracker.update(readAbsDeg(leftEnc));
         rightTracker.update(readAbsDeg(rightEnc));
 
-        if (!closedLoopEnabled) return; // allow parent to drive servos manually when disabled
+        if (!closedLoopEnabled) return; // allow driving servos manually when disabled
 
         // Positions in same frame as targets (continuous, zeroed)
         double leftPos  = getLeftEncContinuousDeg();
         double rightPos = getRightEncContinuousDeg();
 
         // PID
-        leftPID.setSetPoint(leftTargetDeg - leftZeroDeg);
-        rightPID.setSetPoint(rightTargetDeg - rightZeroDeg);
-        double leftPidOut  = leftPID.calculate(leftPos) * (LEFT_INVERTED? -1 : 1);
-        double rightPidOut = rightPID.calculate(rightPos) * (RIGHT_INVERTED? -1 : 1);
+        leftPID.setSetPoint(leftTargetDeg);
+        rightPID.setSetPoint(rightTargetDeg);
+        double leftPidOut  = leftPID.calculate(leftPos);
+        double rightPidOut = rightPID.calculate(rightPos);
 
         // Feedforward
-        double leftF  = -kF;
-        double rightF = kF;
+        double leftF  = kF;
+        double rightF = -kF;
 
         // Final power (clamped to [-1, 1]; optional inversion)
         leftPower  = clamp(leftPidOut + leftF, -maxPower, maxPower);
@@ -138,8 +162,7 @@ public class Lift {
     public void setBothTargetDeg(double degTarget) { leftTargetDeg = -degTarget; rightTargetDeg = degTarget; }
     public void setLeftTargetDeg(double deg)  { leftTargetDeg = deg; }
     public void setRightTargetDeg(double deg) { rightTargetDeg = deg; }
-
-
+    
     public double getLeftEncAbsDeg()  { return readAbsDeg(leftEnc); }
     public double getRightEncAbsDeg() { return readAbsDeg(rightEnc); }
     public double getLeftEncContinuousDeg()  { return getLeftEncContinuousDegInternal() - leftZeroDeg; }
@@ -149,8 +172,7 @@ public class Lift {
 
     public boolean leftAtTarget()  { return leftPID.atSetPoint(); }
     public boolean rightAtTarget() { return rightPID.atSetPoint(); }
-
-
+    
     private double getLeftEncContinuousDegInternal()  { return leftTracker.getContinuousDeg(); }
     private double getRightEncContinuousDegInternal() { return rightTracker.getContinuousDeg(); }
 

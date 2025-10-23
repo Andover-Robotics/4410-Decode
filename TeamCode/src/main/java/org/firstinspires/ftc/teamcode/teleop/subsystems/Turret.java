@@ -38,6 +38,7 @@ public class Turret {
     public double power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
     public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0;
+    public static YawPitchRollAngles orientation;
 
     public int startingOffset = 0;
 
@@ -139,6 +140,7 @@ public class Turret {
                 startingOffset = 0;
             }
         }
+        orientation = imu.getRobotYawPitchRollAngles();
         llResult = limelight.getLatestResult();
         controller.setPID(p, i, d);
         if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
@@ -210,8 +212,13 @@ public class Turret {
     }
 
     public double getHeading() {
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        orientation = imu.getRobotYawPitchRollAngles();
         return orientation.getYaw(AngleUnit.DEGREES);
+    }
+
+    public double getRoll() {
+        orientation = imu.getRobotYawPitchRollAngles();
+        return orientation.getRoll(AngleUnit.DEGREES);
     }
 
     public void resetHeading() {

@@ -93,6 +93,8 @@ public class Bot {
         }
     }
 
+
+
     public void enableFullAuto(boolean on) {
         turret.enableFullAuto(on);
     }

@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
@@ -123,12 +124,18 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.shootThree());
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
                 bot.lift.liftUp();
+            }
+
+
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.lift.balance();
             }
 
             bot.periodic();
@@ -158,13 +165,15 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 
-            telemetry.addData("\nLeft Climb Encoder", bot.lift.getLeftEncAbsDeg());
-            telemetry.addData("Right Climb Encoder", bot.lift.getRightEncAbsDeg());
-            telemetry.addData("Left Climb Pos", bot.lift.getLeftEncContinuousDeg());
-            telemetry.addData("Right Climb Pos", bot.lift.getRightEncContinuousDeg());
+            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
+            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
             telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
             telemetry.addData("Left Power", bot.lift.leftPower);
             telemetry.addData("Right Power", bot.lift.rightPower);
+            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
+            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
+            telemetry.addData("Offset", bot.lift.offset);
+            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.update();
 
         }

@@ -95,18 +95,6 @@ public class Shooter {
         if (dt <= 0) dt = 1e-3;
 
         double pos = motor1.getCurrentPosition();
-//        double ticksPerRev = motorTicksPerRev * gearRatio;
-//        double ticksPerSec = (pos - lastPos) / dt;
-//        measuredRPM = (ticksPerSec / ticksPerRev) * 60.0;
-
-        // low-pass filter on RPM
-//        if (firstLoop) {
-//            filteredRPM = measuredRPM;
-//            firstLoop = false;
-//        } else {
-//            double a = clamp(filterAlpha, 0.0, 1.0);
-//            filteredRPM = filteredRPM + a * (measuredRPM - filteredRPM);
-//        }
         filteredRPM = motor1.getVelocity() * 60 / 28;
 
         lastPos = pos;
