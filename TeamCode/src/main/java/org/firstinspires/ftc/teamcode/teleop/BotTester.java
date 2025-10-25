@@ -104,6 +104,7 @@ public class BotTester extends LinearOpMode {
 
             if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shoot) {
                 bot.turret.enableShooter(true);
+                bot.turret.shooter.setVelocity(rpm);
             } else {
                 bot.turret.enableShooter(false);
             }
@@ -148,11 +149,11 @@ public class BotTester extends LinearOpMode {
 //            // TELEMETRY
             telemetry.addData("tx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
-            telemetry.addData("correct distance", Turret.distance);
             telemetry.addData( "tag angle", Turret.tAngle);
             telemetry.addData("tOffset", Turret.tOffset);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("\nPower", bot.turret.shooter.getPower());
+            telemetry.addData("correct distance", Turret.distance);
             telemetry.addData("manual target rpm", rpm);
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());

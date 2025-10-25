@@ -170,6 +170,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
             telemetry.addData("Left Power", bot.lift.leftPower);
             telemetry.addData("Right Power", bot.lift.rightPower);
+            telemetry.addData("Left PID out", bot.lift.leftPidOut);
+            telemetry.addData("Right PID out", bot.lift.rightPidOut);
             telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
             telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
             telemetry.addData("Offset", bot.lift.offset);

@@ -63,7 +63,7 @@ public class Lift {
     private final PIDController leftPID = new PIDController(kP, kI, kD);
     private final PIDController rightPID = new PIDController(kP, kI, kD);
 
-    public double leftTargetDeg, rightTargetDeg, leftOffsetDeg, rightOffsetDeg;     // continuous degrees
+    public double leftTargetDeg, rightTargetDeg, leftPidOut, rightPidOut;     // continuous degrees
     private double leftZeroDeg = 0.0, rightZeroDeg = 0.0;
 
     private boolean closedLoopEnabled = false;         // toggle
@@ -134,8 +134,8 @@ public class Lift {
         // PID
         leftPID.setSetPoint(leftTargetDeg);
         rightPID.setSetPoint(rightTargetDeg);
-        double leftPidOut  = leftPID.calculate(leftPos);
-        double rightPidOut = rightPID.calculate(rightPos);
+        leftPidOut  = leftPID.calculate(leftPos);
+        rightPidOut = rightPID.calculate(rightPos);
 
         // Feedforward
         double leftF  = kF;
