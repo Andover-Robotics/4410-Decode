@@ -82,7 +82,7 @@ public class SoloAuto extends LinearOpMode {
                 .build();
 
         Action shootFirstThree = drive.actionBuilder(gate)
-                .splineToLinearHeading(closeShoot, Math.toRadians(90))
+                .splineToLinearHeading(closeShoot, Math.toRadians(0))
                 .afterTime(0.1, bot.shootThree())
                 .build();
 
@@ -92,6 +92,10 @@ public class SoloAuto extends LinearOpMode {
                 .strafeToConstantHeading(new Vector2d(midIntake.component1().x + 15, farIntake.component1().y), drive.defaultVelConstraint, drive.defaultAccelConstraint)
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .build();
+        Action shootMidThree = drive.actionBuilder(new Pose2d(midIntake.component1().x + 15, farIntake.component1().y, Math.toRadians(0)))
+                .splineToLinearHeading(closeShoot, Math.toRadians(0))
+                .afterTime(0.1, bot.shootThree())
+                .build();
 
         Action intakeClose = drive.actionBuilder(closeShoot)
                 .splineToLinearHeading(closeIntake, Math.toRadians(0), drive.defaultVelConstraint, drive.defaultAccelConstraint)
@@ -99,10 +103,15 @@ public class SoloAuto extends LinearOpMode {
                 .strafeToConstantHeading(new Vector2d(closeIntake.component1().x + 15, farIntake.component1().y), drive.defaultVelConstraint, drive.defaultAccelConstraint)
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .build();
+        Action shootCloseThree = drive.actionBuilder(new Pose2d(closeIntake.component1().x + 15, closeIntake.component1().y, Math.toRadians(0)))
+                .splineToLinearHeading(closeShoot, Math.toRadians(0))
+                .afterTime(0.1, bot.shootThree())
+                .build();
 
         Action leaveZone = drive.actionBuilder(closeShoot)
                 .strafeToConstantHeading(new Vector2d(leave.component1().x, leave.component1().y))
                 .build();
+
 
         Actions.runBlocking(
                 new ActionHelper.RaceParallelCommand(
@@ -114,7 +123,11 @@ public class SoloAuto extends LinearOpMode {
                                 intakeFar,
                                 openGate,
                                 shootFirstThree,
-                                intakeMid
+                                intakeMid,
+                                shootMidThree,
+                                intakeClose,
+                                shootCloseThree,
+                                leaveZone
                         )
                 )
         );
