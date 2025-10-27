@@ -17,6 +17,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+import java.util.ArrayList;
+
 @Config
 public class Turret {
     private final MotorEx motor;
@@ -35,12 +37,14 @@ public class Turret {
     public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = -3, llRearOffsetMeters = -0.27, llRearOffsetInches = llRearOffsetMeters * 39.37;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 186612.646, shooterC = 4488695.3;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
+    public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
-    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0;
+    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 4;
     public static YawPitchRollAngles orientation;
 
     public int startingOffset = 0;
+
+    public ArrayList<Double> txArr, tyArr;
 
     private boolean isManual = false, wraparound = false;
 
@@ -72,6 +76,8 @@ public class Turret {
         timer.reset();
         lastTime = timer.seconds();
         startingOffset = 45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1);
+        txArr = new ArrayList<>(0);
+        tyArr = new ArrayList<>(0);
     }
 
     public void enableFullAuto(boolean on) {
@@ -126,6 +132,27 @@ public class Turret {
         }
     }
 
+    public void filtertxty() {
+        txArr.add(tx);
+        if (txArr.size() > avgCount) {
+            txArr.remove(0);
+        }
+        double tempTxAvg = 0;
+        for (double i : txArr) {
+            tempTxAvg += i;
+        }
+        txAvg = tempTxAvg / txArr.size();
+        tyArr.add(ty);
+        if (tyArr.size() > avgCount) {
+            tyArr.remove(0);
+        }
+        double tempTyAvg = 0;
+        for (double i : tyArr) {
+            tempTyAvg += i;
+        }
+        tyAvg = tempTyAvg / txArr.size();
+    }
+
     public void periodic() {
         if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
             if (Bot.startingPos == Bot.startingPosition.FAR) {
@@ -147,7 +174,8 @@ public class Turret {
             wraparound = false;
             tx = llResult.getTx();
             ty = llResult.getTy();
-            runToAngle(getPositionDegs()+ty);
+            filtertxty();
+            runToAngle(getPositionDegs()+ty);//not using avg here
             controller.setPID(p, i, d);
             lastTime = timer.seconds();
         } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking){
@@ -171,7 +199,7 @@ public class Turret {
 
         tAngle = getPositionDegs()-getHeading() - startingOffset;
         tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
-        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - tx)) - distanceOffset + tOffset;
+        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
         shooterRpm = Math.sqrt(shooterA * (distance) + shooterC);
 
         if (shooterActive) {

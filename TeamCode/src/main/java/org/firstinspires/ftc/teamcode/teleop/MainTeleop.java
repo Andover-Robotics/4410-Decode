@@ -157,7 +157,11 @@ public class MainTeleop extends LinearOpMode {
 
             telemetry.addData("\ntx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
-            telemetry.addData("correct distance", Turret.distance);
+
+            telemetry.addData("\ntxAvg", bot.turret.txAvg);
+            telemetry.addData("tyAvg", bot.turret.tyAvg);
+
+            telemetry.addData("\ncorrect distance", Turret.distance);
             telemetry.addData( "tag angle", Turret.tAngle);
             telemetry.addData("tOffset", Turret.tOffset);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
@@ -170,12 +174,12 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
             telemetry.addData("Left Power", bot.lift.leftPower);
             telemetry.addData("Right Power", bot.lift.rightPower);
-            telemetry.addData("Left PID out", bot.lift.leftPidOut);
-            telemetry.addData("Right PID out", bot.lift.rightPidOut);
+//            telemetry.addData("Left PID out", bot.lift.leftPidOut);
+//            telemetry.addData("Right PID out", bot.lift.rightPidOut);
             telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
             telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
-            telemetry.addData("Offset", bot.lift.offset);
-            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
+//            telemetry.addData("Offset", bot.lift.offset);
+//            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.update();
 
         }
