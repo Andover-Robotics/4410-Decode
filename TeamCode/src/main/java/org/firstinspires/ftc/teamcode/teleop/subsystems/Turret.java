@@ -34,12 +34,12 @@ public class Turret {
 
     public boolean aprilTracking = true, imuFollow = true, shooterActive = true;
 
-    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = -3, llRearOffsetMeters = -0.27, llRearOffsetInches = llRearOffsetMeters * 39.37;
-    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 186612.646, shooterC = 4488695.3;
+    public static double p = 0.012, i = 0, d = 0.00055, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = -3, llRearOffsetMeters = -0.27, llRearOffsetInches = llRearOffsetMeters * 39.37;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 153821.985, shooterC = 2103235.28;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
-    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 4;
+    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 8;
     public static YawPitchRollAngles orientation;
 
     public int startingOffset = 0;
@@ -132,7 +132,7 @@ public class Turret {
         }
     }
 
-    public void filtertxty() {
+    public void filtertx() {
         txArr.add(tx);
         if (txArr.size() > avgCount) {
             txArr.remove(0);
@@ -142,15 +142,6 @@ public class Turret {
             tempTxAvg += i;
         }
         txAvg = tempTxAvg / txArr.size();
-        tyArr.add(ty);
-        if (tyArr.size() > avgCount) {
-            tyArr.remove(0);
-        }
-        double tempTyAvg = 0;
-        for (double i : tyArr) {
-            tempTyAvg += i;
-        }
-        tyAvg = tempTyAvg / txArr.size();
     }
 
     public void periodic() {
@@ -169,13 +160,17 @@ public class Turret {
         }
         orientation = imu.getRobotYawPitchRollAngles();
         llResult = limelight.getLatestResult();
+        pos = getPosition();
         controller.setPID(p, i, d);
-        if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
+        if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
             wraparound = false;
             tx = llResult.getTx();
             ty = llResult.getTy();
-            filtertxty();
+            filtertx();
             runToAngle(getPositionDegs()+ty);//not using avg here
+//            ty = llResult.getTy();
+//            setPoint = 0;
+//            pos = -1 * ty;
             controller.setPID(p, i, d);
             lastTime = timer.seconds();
         } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking){
@@ -184,8 +179,6 @@ public class Turret {
                 controller.setPID(p2, i2, d2);
             }
         }
-
-        pos = getPosition();
         controller.setSetPoint(setPoint);
 
         if(isManual || manualPower != 0) {
@@ -198,7 +191,7 @@ public class Turret {
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
         tAngle = getPositionDegs()-getHeading() - startingOffset;
-        tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
+        tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle)) * 0;
         distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
         shooterRpm = Math.sqrt(shooterA * (distance) + shooterC);
 
@@ -223,6 +216,7 @@ public class Turret {
     public double getPositionDegs() {
         return getPosition() * degsPerTick;
     }
+
     public double getPositionTicks() {
         return getPosition();
     }
