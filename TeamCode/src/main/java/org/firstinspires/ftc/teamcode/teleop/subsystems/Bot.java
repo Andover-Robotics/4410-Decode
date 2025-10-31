@@ -61,7 +61,7 @@ public class Bot {
     private final MotorEx bl;
     private final MotorEx br;
 
-    public static double shootTime = 0.2 , shootDelay = 0.3;
+    public static double shootTime = 0.15, shootDelay = 0.2;
     public boolean shooting = false;
 
     public static enum allianceOptions {
