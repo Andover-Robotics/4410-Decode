@@ -34,7 +34,7 @@ public class Turret {
 
     public boolean aprilTracking = true, imuFollow = true, shooterActive = true;
 
-    public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 0, llRearOffsetInches = 10;
+    public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 18;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -184.70009, shooterG = -6.47357, shooterH = 1499.98464, shooterI = 9403.26397;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
