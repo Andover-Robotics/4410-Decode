@@ -17,6 +17,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+import java.util.ArrayList;
+
 @Config
 public class Turret {
     private final MotorEx motor;
@@ -32,15 +34,17 @@ public class Turret {
 
     public boolean aprilTracking = true, imuFollow = true, shooterActive = true;
 
-    public static double p = 0.0105, i = 0, d = 0.00065, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = -3, llRearOffsetMeters = -0.27, llRearOffsetInches = llRearOffsetMeters * 39.37;
-    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 186612.646, shooterC = 4488695.3;
+    public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 18;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -184.70009, shooterG = -6.47357, shooterH = 1499.98464, shooterI = 9403.26397;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
+    public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
-    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0;
+    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 8;
     public static YawPitchRollAngles orientation;
 
     public int startingOffset = 0;
+
+    public ArrayList<Double> txArr, tyArr;
 
     private boolean isManual = false, wraparound = false;
 
@@ -72,6 +76,8 @@ public class Turret {
         timer.reset();
         lastTime = timer.seconds();
         startingOffset = 45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1);
+        txArr = new ArrayList<>(0);
+        tyArr = new ArrayList<>(0);
     }
 
     public void enableFullAuto(boolean on) {
@@ -126,6 +132,18 @@ public class Turret {
         }
     }
 
+    public void filtertx() {
+        txArr.add(tx);
+        if (txArr.size() > avgCount) {
+            txArr.remove(0);
+        }
+        double tempTxAvg = 0;
+        for (double i : txArr) {
+            tempTxAvg += i;
+        }
+        txAvg = tempTxAvg / txArr.size();
+    }
+
     public void periodic() {
         if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
             if (Bot.startingPos == Bot.startingPosition.FAR) {
@@ -142,12 +160,17 @@ public class Turret {
         }
         orientation = imu.getRobotYawPitchRollAngles();
         llResult = limelight.getLatestResult();
+        pos = getPosition();
         controller.setPID(p, i, d);
-        if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) {
+        if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
             wraparound = false;
             tx = llResult.getTx();
             ty = llResult.getTy();
-            runToAngle(getPositionDegs()+ty);
+            filtertx();
+            runToAngle(getPositionDegs()+ty);//not using avg here
+//            ty = llResult.getTy();
+//            setPoint = 0;
+//            pos = -1 * ty;
             controller.setPID(p, i, d);
             lastTime = timer.seconds();
         } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking){
@@ -156,8 +179,6 @@ public class Turret {
                 controller.setPID(p2, i2, d2);
             }
         }
-
-        pos = getPosition();
         controller.setSetPoint(setPoint);
 
         if(isManual || manualPower != 0) {
@@ -171,8 +192,8 @@ public class Turret {
 
         tAngle = getPositionDegs()-getHeading() - startingOffset;
         tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
-        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - tx)) - distanceOffset + tOffset;
-        shooterRpm = Math.sqrt(shooterA * (distance) + shooterC);
+        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
+        shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * distance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
 
         if (shooterActive) {
             shooter.periodic();
@@ -195,6 +216,7 @@ public class Turret {
     public double getPositionDegs() {
         return getPosition() * degsPerTick;
     }
+
     public double getPositionTicks() {
         return getPosition();
     }

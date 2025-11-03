@@ -50,7 +50,7 @@ public class Lift {
 
 
     public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.002, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 0.95, spoolRad = 14, liftWidth = 178;
-    public static int up = 1950, down = 0, balancing = 500;
+    public static int up = 2050, down = 0, balancing = 500;
 
     public static boolean LEFT_INVERTED = false, RIGHT_INVERTED = false, offsetLeftSide = false;
 
@@ -63,7 +63,7 @@ public class Lift {
     private final PIDController leftPID = new PIDController(kP, kI, kD);
     private final PIDController rightPID = new PIDController(kP, kI, kD);
 
-    public double leftTargetDeg, rightTargetDeg, leftOffsetDeg, rightOffsetDeg;     // continuous degrees
+    public double leftTargetDeg, rightTargetDeg, leftPidOut, rightPidOut;     // continuous degrees
     private double leftZeroDeg = 0.0, rightZeroDeg = 0.0;
 
     private boolean closedLoopEnabled = false;         // toggle
@@ -134,8 +134,8 @@ public class Lift {
         // PID
         leftPID.setSetPoint(leftTargetDeg);
         rightPID.setSetPoint(rightTargetDeg);
-        double leftPidOut  = leftPID.calculate(leftPos);
-        double rightPidOut = rightPID.calculate(rightPos);
+        leftPidOut  = leftPID.calculate(leftPos);
+        rightPidOut = rightPID.calculate(rightPos);
 
         // Feedforward
         double leftF  = kF;
