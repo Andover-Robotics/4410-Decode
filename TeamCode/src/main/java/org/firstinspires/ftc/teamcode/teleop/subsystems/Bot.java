@@ -182,10 +182,10 @@ public class Bot {
         double frontWheelModifier = 1;
         double rearWheelModifier = 1;
         double[] speeds = {
-                (forwardBackSpeed - strafeSpeed - turnSpeed) * frontWheelModifier,
                 (forwardBackSpeed + strafeSpeed + turnSpeed) * frontWheelModifier,
-                (forwardBackSpeed + strafeSpeed - turnSpeed) * rearWheelModifier,
-                (forwardBackSpeed - strafeSpeed + turnSpeed) * rearWheelModifier
+                (forwardBackSpeed - strafeSpeed - turnSpeed) * frontWheelModifier,
+                (forwardBackSpeed - strafeSpeed + turnSpeed) * rearWheelModifier,
+                (forwardBackSpeed + strafeSpeed - turnSpeed) * rearWheelModifier
         };
         double maxSpeed = 0;
         for (int i = 0; i < 4; i++) {
