@@ -97,6 +97,18 @@ public class Bot {
         turret.enableFullAuto(on);
     }
 
+    public void enableShooter(boolean on) {
+        turret.enableShooter(on);
+    }
+
+    public Action enableShooter() {
+        return new InstantAction(()-> enableShooter(true));
+    }
+
+    public Action disableShooter() {
+        return new InstantAction(() -> enableShooter(false));
+    }
+
     public Action shootOne() {
         return new SequentialAction(
                 new InstantAction(() -> shooting = true),

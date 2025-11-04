@@ -34,7 +34,7 @@ public class Turret {
 
     public Shooter shooter;
 
-    public boolean aprilTracking = true, imuFollow = true, shooterActive = true;
+    public boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false;
 
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0003, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 18;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -184.70009, shooterG = -6.47357, shooterH = 1499.98464, shooterI = 9403.26397;
@@ -50,6 +50,13 @@ public class Turret {
 
     private boolean isManual = false, wraparound = false;
 
+    public enum Motif {
+        GPP,
+        PGP,
+        PPG
+    }
+
+    public static Motif motif;
 
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
@@ -95,14 +102,17 @@ public class Turret {
 
     public void trackRedAlliance() {
         limelight.pipelineSwitch(1);
+        obelisk = false;
     }
 
     public void trackBlueAlliance() {
         limelight.pipelineSwitch(0);
+        obelisk = false;
     }
 
     public void trackObelisk() {
         limelight.pipelineSwitch(2);
+        obelisk = true;
     }
 
     public void enableFullAuto(boolean on) {
@@ -190,48 +200,62 @@ public class Turret {
                 startingOffset = 0;
             }
         }
+        power = 0;
         orientation = imu.getRobotYawPitchRollAngles();
         llResult = limelight.getLatestResult();
         pos = getPosition();
         controller.setPID(p, i, d);
-        if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
-            wraparound = false;
-            tx = llResult.getTx();
-            ty = llResult.getTy();
-            filtertx();
-            runToAngle(getPositionDegs()+ty);//not using avg here
+        if (!obelisk){
+            if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
+                wraparound = false;
+                tx = llResult.getTx();
+                ty = llResult.getTy();
+                filtertx();
+                runToAngle(getPositionDegs() + ty);//not using avg here
 //            ty = llResult.getTy();
 //            setPoint = 0;
 //            pos = -1 * ty;
-            controller.setPID(p, i, d);
-            lastTime = timer.seconds();
-        } else if ((timer.seconds()-lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking){
-            if (imuFollow) {
-                runToAngle(getHeading() + startingOffset) ;
-                controller.setPID(p2, i2, d2);
+                controller.setPID(p, i, d);
+                lastTime = timer.seconds();
+            } else if ((timer.seconds() - lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking) {
+                if (imuFollow) {
+                    runToAngle(getHeading() + startingOffset);
+                    controller.setPID(p2, i2, d2);
+                }
             }
-        }
-        controller.setSetPoint(setPoint);
+            controller.setSetPoint(setPoint);
 
-        if(isManual || manualPower != 0) {
-            power = manualPower;
+            if (isManual || manualPower != 0) {
+                power = manualPower;
+            } else {
+                power = controller.calculate(pos);
+            }
+
+            double maxPower = 1;
+            power = Math.max(-maxPower, Math.min(maxPower, power));
+
+            tAngle = getPositionDegs() - getHeading() - startingOffset;
+            tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
+            distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
+            shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * distance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+
+            if (shooterActive) {
+                shooter.periodic();
+                shooter.setVelocity(shooterRpm);
+            } else {
+                shooter.setPower(0);
+            }
         } else {
-            power = controller.calculate(pos);
-        }
-
-        double maxPower = 1;
-        power = Math.max(-maxPower, Math.min(maxPower, power));
-
-        tAngle = getPositionDegs()-getHeading() - startingOffset;
-        tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
-        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
-        shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * distance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
-
-        if (shooterActive) {
-            shooter.periodic();
-            shooter.setVelocity(shooterRpm);
-        } else {
-            shooter.setPower(0);
+            if (llResult != null && llResult.isValid() && llResult.getFiducialResults() != null) {
+                int id = llResult.getFiducialResults().get(0).getFiducialId();
+                if (id == 21) {
+                    motif = Motif.GPP;
+                } else if (id == 22) {
+                    motif = Motif.PGP;
+                } else if (id == 23) {
+                    motif = Motif.PPG;
+                }
+            }
         }
 
         motor.set(power);
