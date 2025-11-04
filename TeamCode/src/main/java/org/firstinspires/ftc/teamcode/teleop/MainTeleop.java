@@ -45,7 +45,32 @@ public class MainTeleop extends LinearOpMode {
         // Initialize bot
 //        bot.stopMotors();
 
-        waitForStart();
+//        waitForStart();
+        while (!isStarted()) {
+
+            gp1.readButtons();
+            gp2.readButtons();
+
+            TelemetryPacket packet = new TelemetryPacket();
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetHeading();
+                bot.turret.resetEncoder();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.switchAlliance();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.switchStartingPos();
+            }
+
+            telemetry.addData("ALLIANCE", Bot.alliance);
+            telemetry.addData("STARTING POSITION", Bot.startingPos);
+
+            telemetry.update();
+        }
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -75,6 +100,22 @@ public class MainTeleop extends LinearOpMode {
                 stallIntake = !stallIntake;
             }
 
+            // CLIMB
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
+                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.lift.liftUp();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.lift.balance();
+            }
+
+            // TURRET
+
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //imu follow only
                 bot.enableFullAuto(false);
                 bot.turret.enableImuFollow(true);
@@ -94,26 +135,12 @@ public class MainTeleop extends LinearOpMode {
                 manualTurret = true;
             }
 
-            if (manualTurret) {
-                bot.turret.runManual(gp2.getLeftX());
-            }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetEncoder();
-            }
+            // SHOOTING
 
             if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
-            }
-
-            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.intake.openGate();
-            }
-
-            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                bot.intake.closeGate();
             }
 
             if (gp2.getButton(GamepadKeys.Button.A) && !bot.shooting) {
@@ -124,18 +151,22 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.shootThree());
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
+            // FAILSAFES
+
+            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.intake.openGate();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
-                bot.lift.liftUp();
+            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.intake.closeGate();
             }
 
+            if (manualTurret) {
+                bot.turret.runManual(gp2.getLeftX());
+            }
 
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                bot.lift.balance();
+            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetEncoder();
             }
 
             bot.periodic();

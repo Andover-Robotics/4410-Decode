@@ -117,6 +117,13 @@ public class Turret {
 
     public void enableAprilTracking(boolean enable) {
         aprilTracking = enable;
+        if (enable) {
+            if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                trackBlueAlliance();
+            } else {
+                trackRedAlliance();
+            }
+        }
     }
 
     public void enableShooter(boolean enable) {
