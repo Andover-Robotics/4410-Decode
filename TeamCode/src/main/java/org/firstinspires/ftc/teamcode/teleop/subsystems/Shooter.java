@@ -20,11 +20,6 @@ public class Shooter {
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
     public static double p = 0.00125, i = 0.0, d = 0.0, f = 0.000197;
-
-    // mech conversion: motor ticks per rev and external gear ratio to flywheel
-    // effective ticks per flywheel revolution = motorTicksPerRev * gearRatio
-    public static double motorTicksPerRev = 28.0;
-    public static double gearRatio = 1.0;
     public static boolean inverted = false;
 
     // targeting and behavior

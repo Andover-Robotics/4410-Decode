@@ -9,6 +9,8 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -48,6 +50,7 @@ public class Turret {
 
     private boolean isManual = false, wraparound = false;
 
+
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         motor.setInverted(false);
@@ -69,6 +72,7 @@ public class Turret {
 
         // initialize limelight
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.setPollRateHz(100);
         limelight.start();
 
         shooter = new Shooter(opMode);
@@ -78,6 +82,27 @@ public class Turret {
         startingOffset = 45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1);
         txArr = new ArrayList<>(0);
         tyArr = new ArrayList<>(0);
+    }
+
+    public void setPipeline(int i) {
+        limelight.pipelineSwitch(i);
+        /*
+            0 is blue alliance
+            1 is red alliance
+            2 is obelisk tracking
+         */
+    }
+
+    public void trackRedAlliance() {
+        limelight.pipelineSwitch(1);
+    }
+
+    public void trackBlueAlliance() {
+        limelight.pipelineSwitch(0);
+    }
+
+    public void trackObelisk() {
+        limelight.pipelineSwitch(2);
     }
 
     public void enableFullAuto(boolean on) {
