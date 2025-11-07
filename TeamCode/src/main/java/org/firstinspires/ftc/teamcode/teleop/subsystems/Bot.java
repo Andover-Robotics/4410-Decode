@@ -143,6 +143,28 @@ public class Bot {
         );
     }
 
+    public Action shootThreeAuto() {
+        return new SequentialAction(
+                new InstantAction(() -> shooting = true),
+                new InstantAction(() -> intake.intake()),
+                new SleepAction(0.2),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new SleepAction(shootDelay),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new SleepAction(shootDelay),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new InstantAction(() -> intake.storage()),
+                new SleepAction(0.4),
+                new InstantAction(() -> shooting = false)
+        );
+    }
+
     public void periodic() {
         turret.periodic();
         lift.periodic();
