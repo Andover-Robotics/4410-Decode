@@ -74,9 +74,9 @@ public final class MecanumDrive {
         public double kA = 0.00005;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 50;
-        public double minProfileAccel = -40;
-        public double maxProfileAccel = 60;
+        public double maxWheelVel = 80;//50
+        public double minProfileAccel = -50;//-40
+        public double maxProfileAccel = 85;//60
 
         // turn profile parameters (in radians)
         public double maxAngVel = Math.PI; // shared with path
@@ -496,4 +496,40 @@ public final class MecanumDrive {
                 defaultVelConstraint, defaultAccelConstraint
         );
     }
+
+    public TrajectoryActionBuilder actionBuilderBlue(Pose2d beginPose) {
+        return new TrajectoryActionBuilder(
+                TurnAction::new,
+                FollowTrajectoryAction::new,
+                new TrajectoryBuilderParams(
+                        1e-6,
+                        new ProfileParams(
+                                0.25, 0.1, 1e-2
+                        )
+                ),
+                beginPose, 0.0,
+                defaultTurnConstraints,
+                defaultVelConstraint, defaultAccelConstraint
+        );
+    }
+
+    public TrajectoryActionBuilder actionBuilderRed(Pose2d beginPose) {
+        return new TrajectoryActionBuilder(
+                TurnAction::new,
+                FollowTrajectoryAction::new,
+                new TrajectoryBuilderParams(
+                        1e-6,
+                        new ProfileParams(
+                                0.25, 0.1, 1e-2
+                        )
+                ),
+                beginPose, 0.0,
+                defaultTurnConstraints,
+                defaultVelConstraint, defaultAccelConstraint
+        );
+    }
+
+//    public TrajectoryActionBuilder blueToRed(TrajectoryActionBuilder bluePath) {
+//        return bluePath.
+//    }
 }

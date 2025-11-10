@@ -160,7 +160,7 @@ public class Bot {
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
                 new InstantAction(() -> intake.storage()),
-                new SleepAction(0.4),
+                new SleepAction(0.2),
                 new InstantAction(() -> shooting = false)
         );
     }

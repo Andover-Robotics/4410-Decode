@@ -1,10 +1,16 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
+import static org.firstinspires.ftc.teamcode.teleop.subsystems.Intake.gateClosed;
+import static org.firstinspires.ftc.teamcode.teleop.subsystems.Intake.gateOpen;
+
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
@@ -60,6 +66,7 @@ public class Shooter {
         targetRPM = rpm;
         closedLoopEnabled = true;
     }
+
 
     //open loop - disables pidf
     public void setManualPower(double rpm) {
