@@ -12,6 +12,7 @@ import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -36,7 +37,7 @@ public class BlueFarAuto extends LinearOpMode {
     // INITIAL
     public static Pose2d initialFarBluePose = new Pose2d(-62, 12, Math.toRadians(90));
     public static Pose2d initialCloseBluePose = new Pose2d(63, 12, Math.toRadians(-135));
-    public static Pose2d initialFarRedPose = transformRed(initialFarBluePose);
+    public static Pose2d initialFarRedPose = new Pose2d(-62,-12, Math.toRadians(-90));
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
@@ -61,7 +62,7 @@ public class BlueFarAuto extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialFarBluePose);
 
-        Action shootPreload = drive.actionBuilderBlue(drive.localizer.getPose())
+        Action blueFarAuto = drive.actionBuilderBlue(initialFarBluePose)
                 .stopAndAdd(new SequentialAction(
                         bot.enableShooter(),
                         new SleepAction(0.5),
@@ -69,9 +70,6 @@ public class BlueFarAuto extends LinearOpMode {
                         bot.disableShooter()
                         )
                 )
-                .build();
-
-        Action intakeHPAndShoot = drive.actionBuilderBlue(initialFarBluePose)
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
 
@@ -86,9 +84,7 @@ public class BlueFarAuto extends LinearOpMode {
                 .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .stopAndAdd(bot.shootThreeAuto())
-                .build();
 
-        Action intakeCloseOpenGateShootThree = drive.actionBuilderBlue(new Pose2d(closeFirstShoot, Math.toRadians(90)))
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
                 .strafeToConstantHeading(new Vector2d(blueCloseIntake.component1().x, blueCloseIntake.component1().y + 18))
@@ -102,9 +98,7 @@ public class BlueFarAuto extends LinearOpMode {
 //                .setTangent(Math.toRadians(-90))
 //                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
                 .stopAndAdd(bot.shootThreeAuto())
-                .build();
 
-        Action intakeMidShootThree = drive.actionBuilderBlue(new Pose2d(closeShoot, Math.toRadians(135)))
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
                 .splineTo(blueMidIntake.position, Math.toRadians(90))
@@ -115,9 +109,64 @@ public class BlueFarAuto extends LinearOpMode {
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-60))
                 .stopAndAdd(bot.shootThreeAuto())
+
+                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+                .splineTo(blueFarIntake.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(blueFarIntake.component1().x, blueFarIntake.component1().y + 18))
+                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+                .setReversed(true)
+                .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
+                .stopAndAdd(bot.shootThreeAuto())
                 .build();
 
-        Action intakeFarShootThree = drive.actionBuilderBlue(new Pose2d(closeShoot, Math.toRadians(120)))
+        Action redFarAuto = drive.actionBuilderBlue(initialFarRedPose)
+                .stopAndAdd(new SequentialAction(
+                                bot.enableShooter(),
+                                new SleepAction(0.5),
+                                bot.shootThreeAuto(),
+                                bot.disableShooter()
+                        )
+                )
+
+                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+
+                // .setTangent(Math.toRadians(90))
+                .strafeToSplineHeading(new Vector2d(blueHpIntake.component1().x, blueHpIntake.component1().y), Math.toRadians(150))
+                //.splineToSplineHeading(blueHpIntake, Math.toRadians(150))
+                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 10, blueHpIntake.component1().y))
+
+                .setReversed(true)
+                .setTangent(Math.toRadians(-90))
+                .afterTime(0.1, bot.enableShooter())
+                .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
+                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+                .stopAndAdd(bot.shootThreeAuto())
+
+                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+                .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
+                .strafeToConstantHeading(new Vector2d(blueCloseIntake.component1().x, blueCloseIntake.component1().y + 18))
+                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+                .strafeToLinearHeading(gate.position, gate.heading)
+                .waitSeconds(1)
+
+                .stopAndAdd(bot.enableShooter())
+                .setReversed(true)
+                .strafeToSplineHeading(closeShoot, Math.toRadians(135))
+//                .setTangent(Math.toRadians(-90))
+//                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
+                .stopAndAdd(bot.shootThreeAuto())
+
+                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+                .setTangent(Math.toRadians(135))
+                .splineTo(blueMidIntake.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(blueMidIntake.component1().x, blueMidIntake.component1().y + 18))
+                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+
+                .stopAndAdd(bot.enableShooter())
+                .setReversed(true)
+                .splineTo(closeShoot, Math.toRadians(-60))
+                .stopAndAdd(bot.shootThreeAuto())
+
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueFarIntake.position, Math.toRadians(90))
                 .strafeToConstantHeading(new Vector2d(blueFarIntake.component1().x, blueFarIntake.component1().y + 18))
@@ -140,25 +189,39 @@ public class BlueFarAuto extends LinearOpMode {
             bot.periodic();
             gp1.readButtons();
 
-            telemetry.addData("ALLIANCE", Bot.alliance);
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.switchAlliance();
+            }
+
+            telemetry.addData("ALLIANCE (A)", Bot.alliance);
             telemetry.addData("STARTING POSITION", Bot.startingPos);
             telemetry.addData("DETECTED MOTIF", Turret.motif);
             telemetry.update();
         }
+        if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+            Actions.runBlocking(
+                    new ActionHelper.RaceParallelCommand(
+                            bot.actionPeriodic(),
+                            new SequentialAction(
+                                    blueFarAuto
+                            )
+                    )
+            );
+        } else {
+            drive.localizer.setPose(initialFarRedPose);
+            Actions.runBlocking(
+                    new ActionHelper.RaceParallelCommand(
+                            bot.actionPeriodic(),
+                            new SequentialAction(
+                                    redFarAuto
+                            )
+                    )
+            );
+        }
 
-        Actions.runBlocking(
-                new ActionHelper.RaceParallelCommand(
-                        bot.actionPeriodic(),
-                        new SequentialAction(
-                                shootPreload,
-                                intakeHPAndShoot,
-                                intakeCloseOpenGateShootThree,
-                                intakeMidShootThree,
-                                intakeFarShootThree
-                        )
-                )
-        );
+
     }
+
 
     public static Pose2d transformRed(Pose2d pose) {
         return new Pose2d(new Vector2d(-pose.position.x, pose.position.y), Math.PI - pose.heading.log());
