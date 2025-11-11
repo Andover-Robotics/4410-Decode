@@ -1,19 +1,19 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems.screen;
 
+import com.acmerobotics.dashboard.canvas.Circle;
+
 import team.techtigers.core.display.Color;
 import team.techtigers.core.display.DisplayRegion;
 import team.techtigers.core.display.sprites.Sprite;
-import team.techtigers.core.display.sprites.numbers.OneSprite;
-import team.techtigers.core.display.sprites.numbers.TwoSprite;
-import team.techtigers.core.display.sprites.numbers.ZeroSprite;
 
-public class FirstRegion extends DisplayRegion {
+public class CircleTestRegion extends DisplayRegion {
     private final Sprite[] sprites;
 
-    public FirstRegion(int x, int y, int width, int height) {
+    public CircleTestRegion(int x, int y, int width, int height) {
         super(x,y,width,height);
         this.sprites = new Sprite[]{
-                new RectangleSprite(1,1,6, 6, Color.GREEN)
+//                new RectangleSprite(0,3,1, 4, Color.GREEN)
+            new CircleSprite(4, 4, 4, Color.WHITE)
         };
     }
 

@@ -64,6 +64,8 @@ public class Bot {
     public static double shootTime = 0.3, shootDelay = 0.4;
     public boolean shooting = false;
 
+    public DigitalChannel bottomBB, middleBB, topBB;
+
     public static enum allianceOptions {
         RED_ALLIANCE,
         BLUE_ALLIANCE
@@ -208,6 +210,21 @@ public class Bot {
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
+        bottomBB = opMode.hardwareMap.get(DigitalChannel.class, "bottomBB");
+        middleBB = opMode.hardwareMap.get(DigitalChannel.class, "middleBB");
+        topBB = opMode.hardwareMap.get(DigitalChannel.class, "topBB");
+    }
+
+    public boolean holdingBottom() {
+        return !bottomBB.getState();
+    }
+
+    public boolean holdingMiddle() {
+        return !middleBB.getState();
+    }
+
+    public boolean holdingTop() {
+        return !topBB.getState();
     }
 
     public void driveRobotCentric(double strafeSpeed, double forwardBackSpeed, double turnSpeed) {

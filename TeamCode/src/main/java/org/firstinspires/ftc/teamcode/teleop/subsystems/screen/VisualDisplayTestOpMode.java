@@ -12,8 +12,8 @@ import team.techtigers.core.display.VisualDisplay;
 public class VisualDisplayTestOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        AdafruitNeoPixel driver = hardwareMap.get(AdafruitNeoPixel.class, "visual_display");
-        driver.initialize(240,3);
+        AdafruitNeoPixel driver = hardwareMap.get(AdafruitNeoPixel.class, "screen");
+        driver.initialize(192,3);
         TestView view = new TestView();
         VisualDisplay visualDisplay = new VisualDisplay(driver, view);
 

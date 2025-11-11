@@ -74,7 +74,7 @@ public final class MecanumDrive {
         public double kA = 0.00005;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 80;//50
+        public double maxWheelVel = 65;//50
         public double minProfileAccel = -50;//-40
         public double maxProfileAccel = 85;//60
 
@@ -525,11 +525,10 @@ public final class MecanumDrive {
                 ),
                 beginPose, 0.0,
                 defaultTurnConstraints,
-                defaultVelConstraint, defaultAccelConstraint
+                defaultVelConstraint, defaultAccelConstraint,
+                pose -> new Pose2dDual<>(
+                        pose.position.x, pose.position.y.unaryMinus(), pose.heading.inverse())
         );
     }
 
-//    public TrajectoryActionBuilder blueToRed(TrajectoryActionBuilder bluePath) {
-//        return bluePath.
-//    }
 }

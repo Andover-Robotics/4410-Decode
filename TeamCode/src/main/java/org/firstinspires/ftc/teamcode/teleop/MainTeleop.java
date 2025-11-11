@@ -186,6 +186,10 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("alliance", Bot.alliance);
             telemetry.addData("starting pos", Bot.startingPos);
 
+            telemetry.addData("Top", bot.holdingTop());
+            telemetry.addData("Middle", bot.holdingMiddle());
+            telemetry.addData("Bottom", bot.holdingBottom());
+
             telemetry.addData("\ntx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
 
