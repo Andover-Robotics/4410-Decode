@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -56,13 +57,19 @@ public class Bot {
     public Turret turret;
     public Intake intake;
     public Lift lift;
-    private final MotorEx fl;
-    private final MotorEx fr;
-    private final MotorEx bl;
-    private final MotorEx br;
+
+    public static Pose2d storedPose = new Pose2d(0, 0, 0);
+    public static Vector2d blueGoal = new Vector2d(59, 60);
+//    private final MotorEx fl;
+//    private final MotorEx fr;
+//    private final MotorEx bl;
+//    private final MotorEx br;
+    public DigitalChannel bottomBB, middleBB, topBB;
 
     public static double shootTime = 0.3, shootDelay = 0.4;
     public boolean shooting = false;
+
+    public static MecanumDrive drive;
 
     public static enum allianceOptions {
         RED_ALLIANCE,
@@ -76,6 +83,38 @@ public class Bot {
 
     public static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     public static startingPosition startingPos = startingPosition.FAR;
+
+    private Bot(OpMode opMode) {
+        this.opMode = opMode;
+
+//        fl = new MotorEx(opMode.hardwareMap, "motorFL", Motor.GoBILDA.RPM_312);
+//        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_312);
+//        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_312);
+//        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_312);
+        drive = new MecanumDrive(opMode.hardwareMap, new Pose2d(0,0,0));
+        turret = new Turret(opMode);
+        intake = new Intake(opMode);
+        lift = new Lift(opMode);
+        bottomBB = opMode.hardwareMap.get(DigitalChannel.class, "bottomBB");
+        middleBB = opMode.hardwareMap.get(DigitalChannel.class, "middleBB");
+        topBB = opMode.hardwareMap.get(DigitalChannel.class, "topBB");
+    }
+
+    public boolean holdingBottom() {
+        return !bottomBB.getState();
+    }
+
+    public boolean holdingMiddle() {
+        return !middleBB.getState();
+    }
+
+    public boolean holdingTop() {
+        return !topBB.getState();
+    }
+
+    public int storageCount() {
+        return (holdingBottom()? 1 : 0) + (holdingMiddle()? 1 : 0) + (holdingTop()? 1 : 0);
+    }
 
     public void switchAlliance() {
         if (alliance == allianceOptions.RED_ALLIANCE) {
@@ -198,70 +237,58 @@ public class Bot {
         return instance;
     }
 
-    private Bot(OpMode opMode) {
-        this.opMode = opMode;
-
-        fl = new MotorEx(opMode.hardwareMap, "motorFL", Motor.GoBILDA.RPM_312);
-        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_312);
-        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_312);
-        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_312);
-        turret = new Turret(opMode);
-        intake = new Intake(opMode);
-        lift = new Lift(opMode);
-    }
-
-    public void driveRobotCentric(double strafeSpeed, double forwardBackSpeed, double turnSpeed) {
-        double frontWheelModifier = 1;
-        double rearWheelModifier = 1;
-        double[] speeds = {
-                (forwardBackSpeed + strafeSpeed + turnSpeed) * frontWheelModifier,
-                (forwardBackSpeed - strafeSpeed - turnSpeed) * frontWheelModifier,
-                (forwardBackSpeed - strafeSpeed + turnSpeed) * rearWheelModifier,
-                (forwardBackSpeed + strafeSpeed - turnSpeed) * rearWheelModifier
-        };
-        double maxSpeed = 0;
-        for (int i = 0; i < 4; i++) {
-            maxSpeed = Math.max(maxSpeed, speeds[i]);
-        }
-        if (maxSpeed > 1) {
-            for (int i = 0; i < 4; i++) {
-                speeds[i] /= maxSpeed;
-            }
-        }
-        fl.set(speeds[0]);
-        fr.set(-speeds[1]);
-        bl.set(speeds[2]);
-        br.set(-speeds[3]);
-    }
+//    public void driveRobotCentric(double strafeSpeed, double forwardBackSpeed, double turnSpeed) {
+//        double frontWheelModifier = 1;
+//        double rearWheelModifier = 1;
+//        double[] speeds = {
+//                (forwardBackSpeed + strafeSpeed + turnSpeed) * frontWheelModifier,
+//                (forwardBackSpeed - strafeSpeed - turnSpeed) * frontWheelModifier,
+//                (forwardBackSpeed - strafeSpeed + turnSpeed) * rearWheelModifier,
+//                (forwardBackSpeed + strafeSpeed - turnSpeed) * rearWheelModifier
+//        };
+//        double maxSpeed = 0;
+//        for (int i = 0; i < 4; i++) {
+//            maxSpeed = Math.max(maxSpeed, speeds[i]);
+//        }
+//        if (maxSpeed > 1) {
+//            for (int i = 0; i < 4; i++) {
+//                speeds[i] /= maxSpeed;
+//            }
+//        }
+//        fl.set(speeds[0]);
+//        fr.set(-speeds[1]);
+//        bl.set(speeds[2]);
+//        br.set(-speeds[3]);
+//    }
 
 
-    public void fixMotors() {
-        fl.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        fr.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        bl.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        br.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+//    public void fixMotors() {
+//        fl.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+//        fr.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+//        bl.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+//        br.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+//
+////        fl.setInverted(false);
+////        fr.setInverted(true);
+////        bl.setInverted(false);
+////        br.setInverted(true);
+//
+//        fl.setRunMode(Motor.RunMode.RawPower);
+//        fr.setRunMode(Motor.RunMode.RawPower);
+//        bl.setRunMode(Motor.RunMode.RawPower);
+//        br.setRunMode(Motor.RunMode.RawPower);
+//    }
 
-//        fl.setInverted(false);
-//        fr.setInverted(true);
-//        bl.setInverted(false);
-//        br.setInverted(true);
+//    public void stopMotors() {
+//        fl.set(0.0);
+//        fr.set(0.0);
+//        bl.set(0.0);
+//        br.set(0.0);
+//    }
 
-        fl.setRunMode(Motor.RunMode.RawPower);
-        fr.setRunMode(Motor.RunMode.RawPower);
-        bl.setRunMode(Motor.RunMode.RawPower);
-        br.setRunMode(Motor.RunMode.RawPower);
-    }
-
-    public void stopMotors() {
-        fl.set(0.0);
-        fr.set(0.0);
-        bl.set(0.0);
-        br.set(0.0);
-    }
-
-    public double getMotorCurrent() {
-        return fl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + fr.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + bl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + br.motorEx.getCurrent(CurrentUnit.MILLIAMPS);
-    }
+//    public double getMotorCurrent() {
+//        return fl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + fr.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + bl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + br.motorEx.getCurrent(CurrentUnit.MILLIAMPS);
+//    }
 
 
 
