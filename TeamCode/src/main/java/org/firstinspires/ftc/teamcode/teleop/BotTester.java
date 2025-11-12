@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.auto.FarAuto;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
@@ -32,8 +33,9 @@ public class BotTester extends LinearOpMode {
     private int degTarget = 0;
     public static boolean runTurret = false;
     public static double rpm = 4800;
-    public static boolean shoot = false, stallIntake = true;
+    public static boolean shoot = false, stallIntake = true, fullIntake = false;
     public static boolean manualRPM = false;
+    public static boolean autoPos = false;
 
 
     @Override
@@ -49,7 +51,52 @@ public class BotTester extends LinearOpMode {
         // Initialize bot
 //        bot.stopMotors();
 
-        waitForStart();
+        while (!isStarted()) {
+
+            gp1.readButtons();
+            gp2.readButtons();
+
+            TelemetryPacket packet = new TelemetryPacket();
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetHeading();
+                bot.turret.resetEncoder();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.switchAlliance();
+                autoPos = false;
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
+                bot.switchStartingPos();
+                autoPos = false;
+            }
+
+            telemetry.addData("ALLIANCE (A)", Bot.alliance);
+            telemetry.addData("STARTING POSITION (B)", Bot.startingPos);
+            telemetry.addData("AUTO POSITION", autoPos);
+
+            telemetry.update();
+        }
+
+        if (!autoPos) {
+            if (Bot.startingPos == Bot.startingPosition.FAR) {
+                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                    Bot.drive.localizer.setPose(FarAuto.initialFarBluePose);
+                } else {
+                    Bot.drive.localizer.setPose(FarAuto.initialFarRedPose);
+                }
+            } else {
+                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                    Bot.drive.localizer.setPose(FarAuto.initialCloseBluePose);
+                } else {
+                    Bot.drive.localizer.setPose(FarAuto.initialCloseRedPose);
+                }
+            }
+        }
+
+
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -89,7 +136,11 @@ public class BotTester extends LinearOpMode {
                     if (stallIntake) {
                         bot.intake.storage();
                     } else {
-                        bot.intake.stop();
+                        if (fullIntake) {
+                            bot.intake.intake();
+                        } else {
+                            bot.intake.stop();
+                        }
                     }
                 }
             }
@@ -147,7 +198,17 @@ public class BotTester extends LinearOpMode {
             runningActions = newActions;
 
 //            // TELEMETRY
-            telemetry.addData("tx", Turret.tx);
+            telemetry.addData("alliance", Bot.alliance);
+            telemetry.addData("starting pos", Bot.startingPos);
+
+            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
+            telemetry.addData("Velocity", Bot.drive.localizer.update());
+            telemetry.addData("Goal Distance", Turret.trackingDistance);
+
+            telemetry.addData("\ntx", Turret.tx);
+            telemetry.addData("ty", Turret.ty);
+
+            telemetry.addData("\ntx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
             telemetry.addData( "tag angle", Turret.tAngle);
             telemetry.addData("tOffset", Turret.tOffset);
@@ -173,6 +234,7 @@ public class BotTester extends LinearOpMode {
 //            telemetry.addData("On?", shoot);
 
             telemetry.update();
+            Bot.drive.localizer.update();
 
         }
     }
@@ -181,12 +243,12 @@ public class BotTester extends LinearOpMode {
     private void drive() { // Robot centric, drive multiplier default 1
         driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
-        bot.fixMotors();
+//        bot.fixMotors();
         Vector2d driveVector = new Vector2d(gp1.getLeftX(), gp1.getLeftY()),
                 turnVector = new Vector2d(gp1.getRightX(), 0);
-        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
-                driveVector.getY() * driveSpeed,
-                turnVector.getX() * driveSpeed
-        );
+//        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
+//                driveVector.getY() * driveSpeed,
+//                turnVector.getX() * driveSpeed
+//        );
     }
 }
