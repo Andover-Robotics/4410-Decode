@@ -1,53 +1,20 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ProfileAccelConstraint;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.auto.ActionHelper;
-import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.auto.MecanumDrive;
-
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Config
 public class Bot {
@@ -59,7 +26,8 @@ public class Bot {
     public Lift lift;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
-    public static Vector2d blueGoal = new Vector2d(59, 60);
+    public static Pose2d resetPose = new Pose2d(63, -63, Math.toRadians(90)); //TODO TUNE THIS POSITION
+    public static Vector2d goalPose = new Vector2d(59, 60); //initializes with blue, switches based on alliance
 //    private final MotorEx fl;
 //    private final MotorEx fr;
 //    private final MotorEx bl;
@@ -81,8 +49,8 @@ public class Bot {
         FAR
     }
 
-    public static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
-    public static startingPosition startingPos = startingPosition.FAR;
+    private static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
+    private static startingPosition startingPos = startingPosition.FAR;
 
     private Bot(OpMode opMode) {
         this.opMode = opMode;
@@ -91,13 +59,15 @@ public class Bot {
 //        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_312);
 //        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_312);
 //        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_312);
-        drive = new MecanumDrive(opMode.hardwareMap, new Pose2d(0,0,0));
+
+        drive = new MecanumDrive(opMode.hardwareMap, storedPose);
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
         bottomBB = opMode.hardwareMap.get(DigitalChannel.class, "bottomBB");
         middleBB = opMode.hardwareMap.get(DigitalChannel.class, "middleBB");
         topBB = opMode.hardwareMap.get(DigitalChannel.class, "topBB");
+        updatePoses();
     }
 
     public boolean holdingBottom() {
@@ -117,11 +87,73 @@ public class Bot {
     }
 
     public void switchAlliance() {
-        if (alliance == allianceOptions.RED_ALLIANCE) {
-            alliance = allianceOptions.BLUE_ALLIANCE;
+        if (isRed()) {
+            setAllianceBlue();
         } else {
-            alliance = allianceOptions.RED_ALLIANCE;
+            setAllianceRed();
         }
+    }
+
+    public void setAllianceBlue() {
+        alliance = allianceOptions.BLUE_ALLIANCE;
+        turret.trackBlueAlliance();
+        updatePoses();
+    }
+
+    public void setAllianceRed() {
+        alliance = allianceOptions.RED_ALLIANCE;
+        turret.trackRedAlliance();
+        updatePoses();
+    }
+
+    public void setFar() {
+        startingPos = startingPosition.FAR;
+    }
+
+    public void setClose() {
+        startingPos = startingPosition.CLOSE;
+    }
+
+    public static void updatePoses() {
+        if (isRed()) {
+            goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
+            resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
+        } else {
+            goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
+            resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
+        }
+    }
+
+    public void resetPose() {
+        drive.localizer.setPose(resetPose);
+    }
+
+    public static void useStoredPose() {
+        drive.localizer.setPose(storedPose);
+    }
+
+    public static boolean isRed() {
+        return alliance == allianceOptions.RED_ALLIANCE;
+    }
+
+    public static boolean isBlue() {
+        return alliance == allianceOptions.BLUE_ALLIANCE;
+    }
+
+    public static allianceOptions getAlliance() {
+        return alliance;
+    }
+
+    public static boolean isFar() {
+        return startingPos == startingPosition.FAR;
+    }
+
+    public static boolean isClose() {
+        return startingPos == startingPosition.CLOSE;
+    }
+
+    public static startingPosition getStartingPos() {
+        return startingPos;
     }
 
     public void switchStartingPos() {

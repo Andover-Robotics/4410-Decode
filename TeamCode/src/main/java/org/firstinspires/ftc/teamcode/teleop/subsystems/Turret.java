@@ -1,17 +1,12 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -37,8 +32,8 @@ public class Turret {
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
 
-    public static double POS_TRACK_X = Bot.blueGoal.x;
-    public static double POS_TRACK_Y = Bot.blueGoal.y;
+    public static double POS_TRACK_X = Bot.goalPose.x;
+    public static double POS_TRACK_Y = Bot.goalPose.y;
 
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.00033, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -184.70009, shooterG = -6.47357, shooterH = 1499.98464, shooterI = 9403.26397;
@@ -90,16 +85,11 @@ public class Turret {
 
         timer.reset();
         lastTime = timer.seconds();
-        startingOffset = 45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1);
+        startingOffset = 45 * ((Bot.isBlue())? -1 : 1);
         txArr = new ArrayList<>(0);
         tyArr = new ArrayList<>(0);
-        POS_TRACK_X = Bot.blueGoal.x;
-        POS_TRACK_Y = Bot.blueGoal.y;
-        if (Bot.alliance == Bot.allianceOptions.RED_ALLIANCE) {
-            trackRedAlliance();
-        } else {
-            trackBlueAlliance();
-        }
+        POS_TRACK_X = Bot.goalPose.x;
+        POS_TRACK_Y = Bot.goalPose.y;
     }
 
     public void setPipeline(int i) {
@@ -113,13 +103,13 @@ public class Turret {
 
     public void trackRedAlliance() {
         setPipeline(1);
-        POS_TRACK_X = Math.abs(POS_TRACK_X) * -1;
+//        POS_TRACK_X = Math.abs(POS_TRACK_X) * -1;
         obelisk = false;
     }
 
     public void trackBlueAlliance() {
         setPipeline(0);
-        POS_TRACK_X = Math.abs(POS_TRACK_X);
+//        POS_TRACK_X = Math.abs(POS_TRACK_X);
         obelisk = false;
     }
 
@@ -142,7 +132,7 @@ public class Turret {
     public void enableAprilTracking(boolean enable) {
         aprilTracking = enable;
         if (enable) {
-            if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+            if (Bot.isBlue()) {
                 trackBlueAlliance();
             } else {
                 trackRedAlliance();
@@ -242,14 +232,14 @@ public class Turret {
     }
 
     public void periodic() {
-        if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
-            if (Bot.startingPos == Bot.startingPosition.FAR) {
+        if (Bot.isBlue()) {
+            if (Bot.isFar()) {
                 startingOffset = -135;
             } else {
                 startingOffset = 0;
             }
         } else {
-            if (Bot.startingPos == Bot.startingPosition.FAR) {
+            if (Bot.isFar()) {
                 startingOffset = 135;
             } else {
                 startingOffset = 0;
