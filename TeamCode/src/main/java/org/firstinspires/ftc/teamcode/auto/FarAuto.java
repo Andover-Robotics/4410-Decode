@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 @Config
-@TeleOp(name = "Blue Far Auto", group = "Teleop")
-public class BlueFarAuto extends LinearOpMode {
+@Autonomous(name = "Far Auto", group = "Teleop")
+public class FarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
@@ -35,24 +35,23 @@ public class BlueFarAuto extends LinearOpMode {
     public static final double WALL_INTAKE_ANGLE = Math.toRadians(170);
 
     // INITIAL
-    public static Pose2d initialFarBluePose = new Pose2d(-62, 12, Math.toRadians(90));
+    public static Pose2d initialFarBluePose = new Pose2d(-63, 9, Math.toRadians(90));
     public static Pose2d initialCloseBluePose = new Pose2d(63, 12, Math.toRadians(-135));
-    public static Pose2d initialFarRedPose = new Pose2d(-62,-12, Math.toRadians(-90));
+    public static Pose2d initialFarRedPose = new Pose2d(-63,-9, Math.toRadians(-90));
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueHpIntake = new Pose2d(-48, 64, WALL_INTAKE_ANGLE);
-    public static Pose2d blueFarIntake = new Pose2d(-32, 32, Math.toRadians(90));
-    public static Pose2d blueMidIntake = new Pose2d(-10, 32, Math.toRadians(90));
-    public static Pose2d blueCloseIntake = new Pose2d(14, 32, Math.toRadians(90));
+    public static Pose2d blueHpIntake = new Pose2d(-49, 61, WALL_INTAKE_ANGLE);
+    public static Pose2d blueFarIntake = new Pose2d(-33, 29, Math.toRadians(90));
+    public static Pose2d blueMidIntake = new Pose2d(-11, 29, Math.toRadians(90));
+    public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
-    public static Vector2d closeShoot = new Vector2d(6, 18);
-    public static Vector2d closeFirstShoot = new Vector2d(14, 18);
-    public static Vector2d farShoot = new Vector2d(-60, 12);
+    public static Vector2d closeShoot = new Vector2d(5, 15);
+    public static Vector2d closeFirstShoot = new Vector2d(13, 15);
+    public static Vector2d farShoot = new Vector2d(-61, 9);
 
-    public static Pose2d gate = new Pose2d(8, 60, Math.toRadians(0));
-//    public static Pose2d leave = new Pose2d(-24, 12, Math.toRadians(0));
+    public static Pose2d gate = new Pose2d(7, 57, Math.toRadians(0));
 
     public void runOpMode() throws InterruptedException {
         Bot.instance = null;
@@ -199,6 +198,7 @@ public class BlueFarAuto extends LinearOpMode {
             telemetry.update();
         }
         if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+            drive.localizer.setPose(initialFarBluePose);
             Actions.runBlocking(
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),
@@ -218,6 +218,7 @@ public class BlueFarAuto extends LinearOpMode {
                     )
             );
         }
+
 
 
     }

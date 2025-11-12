@@ -46,6 +46,7 @@ import org.firstinspires.ftc.teamcode.auto.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.PoseMessage;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 import java.lang.Math;
 import java.util.Arrays;
@@ -453,6 +454,7 @@ public final class MecanumDrive {
     public PoseVelocity2d updatePoseEstimate() {
         PoseVelocity2d vel = localizer.update();
         poseHistory.add(localizer.getPose());
+        Bot.storedPose = localizer.getPose();
         
         while (poseHistory.size() > 100) {
             poseHistory.removeFirst();

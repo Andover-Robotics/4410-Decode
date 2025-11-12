@@ -5,13 +5,17 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.geometry.Vector2d;
+//import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.auto.FarAuto;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
@@ -27,9 +31,9 @@ public class MainTeleop extends LinearOpMode {
     private GamepadEx gp1, gp2;
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
+    private boolean autoPos = true;
 
     public static boolean stallIntake = true, manualTurret = false;
-
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -46,6 +50,7 @@ public class MainTeleop extends LinearOpMode {
 //        bot.stopMotors();
 
 //        waitForStart();
+
         while (!isStarted()) {
 
             gp1.readButtons();
@@ -60,17 +65,37 @@ public class MainTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 bot.switchAlliance();
+                autoPos = false;
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
                 bot.switchStartingPos();
+                autoPos = false;
             }
 
-            telemetry.addData("ALLIANCE", Bot.alliance);
-            telemetry.addData("STARTING POSITION", Bot.startingPos);
+            telemetry.addData("ALLIANCE (A)", Bot.alliance);
+            telemetry.addData("STARTING POSITION (B)", Bot.startingPos);
+            telemetry.addData("AUTO POSITION", autoPos);
 
             telemetry.update();
         }
+
+        if (!autoPos) {
+            if (Bot.startingPos == Bot.startingPosition.FAR) {
+                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                    Bot.drive.localizer.setPose(FarAuto.initialFarBluePose);
+                } else {
+                    Bot.drive.localizer.setPose(FarAuto.initialFarRedPose);
+                }
+            } else {
+                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                    Bot.drive.localizer.setPose(FarAuto.initialCloseBluePose);
+                } else {
+                    Bot.drive.localizer.setPose(FarAuto.initialCloseRedPose);
+                }
+            }
+        }
+
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -116,7 +141,7 @@ public class MainTeleop extends LinearOpMode {
 
             // TURRET
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //imu follow only
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //imu follow only
                 bot.enableFullAuto(false);
                 bot.turret.enableImuFollow(true);
                 manualTurret = false;
@@ -130,10 +155,16 @@ public class MainTeleop extends LinearOpMode {
                 bot.turret.enableAprilTracking(true);
                 manualTurret = false;
             }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //disable all
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
+                bot.enableFullAuto(false);
+                bot.turret.enablePositionTracking(true);
+                manualTurret = false;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) { //no tracking
                 bot.enableFullAuto(false);
                 manualTurret = true;
             }
+
 
             // SHOOTING
 
@@ -182,21 +213,29 @@ public class MainTeleop extends LinearOpMode {
             }
             runningActions = newActions;
 
-//            // TELEMETRY
+            // TELEMETRY
             telemetry.addData("alliance", Bot.alliance);
             telemetry.addData("starting pos", Bot.startingPos);
+
+            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
+            telemetry.addData("Velocity", Bot.drive.localizer.update());
+            telemetry.addData("Goal Distance", Turret.trackingDistance);
+
+            telemetry.addData("Ball Count", bot.storageCount());
+            telemetry.addData("Holding Bottom", bot.holdingBottom());
+            telemetry.addData("Holding Middle", bot.holdingMiddle());
+            telemetry.addData("Holding Top", bot.holdingTop());
 
             telemetry.addData("\ntx", Turret.tx);
             telemetry.addData("ty", Turret.ty);
 
-            telemetry.addData("\ntxAvg", bot.turret.txAvg);
-            telemetry.addData("tyAvg", bot.turret.tyAvg);
+            telemetry.addData("txAvg", bot.turret.txAvg);
 
-            telemetry.addData("\ncorrect distance", Turret.distance);
+            telemetry.addData("correct distance", Turret.distance);
             telemetry.addData( "tag angle", Turret.tAngle);
             telemetry.addData("tOffset", Turret.tOffset);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-            telemetry.addData("\nPower", bot.turret.shooter.getPower());
+
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 
@@ -212,6 +251,7 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Offset", bot.lift.offset);
 //            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.update();
+            Bot.drive.localizer.update();
 
         }
     }
@@ -220,12 +260,14 @@ public class MainTeleop extends LinearOpMode {
     private void drive() { // Robot centric, drive multiplier default 1
         driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
-        bot.fixMotors();
-        Vector2d driveVector = new Vector2d(-gp1.getLeftX(), -gp1.getLeftY()),
-                turnVector = new Vector2d(-gp1.getRightX(), 0);
-        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
-                driveVector.getY() * driveSpeed,
-                turnVector.getX() * driveSpeed
-        );
+//        bot.fixMotors();
+        com.arcrobotics.ftclib.geometry.Vector2d driveVector = new com.arcrobotics.ftclib.geometry.Vector2d(-gp1.getLeftX(), -gp1.getLeftY());
+//                turnVector = new com.arcrobotics.ftclib.geometry.Vector2d(-gp1.getRightX(), 0);
+//        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
+//                driveVector.getY() * driveSpeed,
+//                turnVector.getX() * driveSpeed
+//        );
+
+        Bot.drive.setDrivePowers(new PoseVelocity2d(new com.acmerobotics.roadrunner.Vector2d(gp1.getLeftY(), -gp1.getLeftX()), -gp1.getRightX()));
     }
 }
