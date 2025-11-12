@@ -59,7 +59,7 @@ public class FarAuto extends LinearOpMode {
 
         gp1 = new GamepadEx(gamepad1);
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialFarBluePose);
+        MecanumDrive drive = Bot.drive;
 
         Action blueFarAuto = drive.actionBuilderBlue(initialFarBluePose)
                 .stopAndAdd(new SequentialAction(
