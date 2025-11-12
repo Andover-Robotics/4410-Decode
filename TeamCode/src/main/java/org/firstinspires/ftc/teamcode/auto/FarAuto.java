@@ -118,7 +118,7 @@ public class FarAuto extends LinearOpMode {
                 .stopAndAdd(bot.shootThreeAuto())
                 .build();
 
-        Action redFarAuto = drive.actionBuilderBlue(initialFarRedPose)
+        Action redFarAuto = drive.actionBuilderRed(initialFarRedPose)
                 .stopAndAdd(new SequentialAction(
                                 bot.enableShooter(),
                                 new SleepAction(0.5),
@@ -180,8 +180,8 @@ public class FarAuto extends LinearOpMode {
 
         bot.enableFullAuto(true);
         bot.enableShooter(false);
-        Bot.alliance = Bot.allianceOptions.BLUE_ALLIANCE;
-        Bot.startingPos = Bot.startingPosition.FAR;
+        bot.setAllianceBlue();
+        bot.setFar();
         bot.intake.closeGate();
         bot.intake.storage();
         while (!isStarted()) {
@@ -192,12 +192,12 @@ public class FarAuto extends LinearOpMode {
                 bot.switchAlliance();
             }
 
-            telemetry.addData("ALLIANCE (A)", Bot.alliance);
-            telemetry.addData("STARTING POSITION", Bot.startingPos);
+            telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
+            telemetry.addData("STARTING POSITION", Bot.getStartingPos());
             telemetry.addData("DETECTED MOTIF", Turret.motif);
             telemetry.update();
         }
-        if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+        if (Bot.isBlue()) {
             drive.localizer.setPose(initialFarBluePose);
             Actions.runBlocking(
                     new ActionHelper.RaceParallelCommand(

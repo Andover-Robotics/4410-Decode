@@ -1,17 +1,12 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -37,11 +32,12 @@ public class Turret {
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
 
-    public static double POS_TRACK_X = Bot.blueGoal.x;
-    public static double POS_TRACK_Y = Bot.blueGoal.y;
+    public static double POS_TRACK_X = Bot.goalPose.x;
+    public static double POS_TRACK_Y = Bot.goalPose.y;
+    public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
 
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.00033, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
-    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -184.70009, shooterG = -6.47357, shooterH = 1499.98464, shooterI = 9403.26397;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -5135.52, shooterG = -0.00678212, shooterH = 1.6709, shooterI = 9199.73374;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
@@ -90,16 +86,11 @@ public class Turret {
 
         timer.reset();
         lastTime = timer.seconds();
-        startingOffset = 45 * ((Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE)? -1 : 1);
+        startingOffset = 45 * ((Bot.isBlue())? -1 : 1);
         txArr = new ArrayList<>(0);
         tyArr = new ArrayList<>(0);
-        POS_TRACK_X = Bot.blueGoal.x;
-        POS_TRACK_Y = Bot.blueGoal.y;
-        if (Bot.alliance == Bot.allianceOptions.RED_ALLIANCE) {
-            trackRedAlliance();
-        } else {
-            trackBlueAlliance();
-        }
+        POS_TRACK_X = Bot.goalPose.x;
+        POS_TRACK_Y = Bot.goalPose.y;
     }
 
     public void setPipeline(int i) {
@@ -113,13 +104,13 @@ public class Turret {
 
     public void trackRedAlliance() {
         setPipeline(1);
-        POS_TRACK_X = Math.abs(POS_TRACK_X) * -1;
+//        POS_TRACK_X = Math.abs(POS_TRACK_X) * -1;
         obelisk = false;
     }
 
     public void trackBlueAlliance() {
         setPipeline(0);
-        POS_TRACK_X = Math.abs(POS_TRACK_X);
+//        POS_TRACK_X = Math.abs(POS_TRACK_X);
         obelisk = false;
     }
 
@@ -142,7 +133,7 @@ public class Turret {
     public void enableAprilTracking(boolean enable) {
         aprilTracking = enable;
         if (enable) {
-            if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+            if (Bot.isBlue()) {
                 trackBlueAlliance();
             } else {
                 trackRedAlliance();
@@ -224,32 +215,46 @@ public class Turret {
     private void aimAtGlobalPoint(double targetX, double targetY) {
         Pose2d pose = Bot.drive.localizer.getPose();
 
+        // Robot heading in radians (CCW+)
+        double headingRad = pose.heading.log();
+
+        // Turret position in field frame:
+        // "back" = negative X in robot frame, rotated into field frame
+        double turretX = pose.position.x - TURRET_OFFSET_BACK_IN * Math.cos(headingRad);
+        double turretY = pose.position.y - TURRET_OFFSET_BACK_IN * Math.sin(headingRad);
+
+        // Vector from turret to target in field frame
+        double dx = targetX - turretX;
+        double dy = targetY - turretY;
+
         // Field-bearing CCW to target
-        double dx = targetX - pose.position.x;
-        double dy = targetY - pose.position.y;
         double fieldAngleCCW = Math.toDegrees(Math.atan2(dy, dx)); // CCW+
 
-        // Robot heading CCW (IMU)
-        double robotHeadingCCW = Math.toDegrees(pose.heading.log()); // CCW+
+        // Robot heading CCW
+        double robotHeadingCCW = Math.toDegrees(headingRad); // CCW+
 
         // Robot-relative CCW angle to target
         double relToRobotCCW = normDeg(fieldAngleCCW - robotHeadingCCW);
 
-        // Convert to turret CW-positive convention and apply 180° zero offset (0° on the turret is backwards)
+        // Turret is CW-positive and zero is backwards, so:
+        // 0° turret = 180° robot-relative CCW
         double turretTargetCW = normDeg(-relToRobotCCW + 180);
-        trackingDistance = Math.sqrt(dy*dy + dx*dx);
+
+        // Tracking distance from turret to goal
+        trackingDistance = Math.sqrt(dx * dx + dy * dy);
+
         runToAngle(turretTargetCW);
     }
 
     public void periodic() {
-        if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
-            if (Bot.startingPos == Bot.startingPosition.FAR) {
+        if (Bot.isBlue()) {
+            if (Bot.isFar()) {
                 startingOffset = -135;
             } else {
                 startingOffset = 0;
             }
         } else {
-            if (Bot.startingPos == Bot.startingPosition.FAR) {
+            if (Bot.isFar()) {
                 startingOffset = 135;
             } else {
                 startingOffset = 0;
@@ -275,14 +280,6 @@ public class Turret {
                     power = controller.calculate(pos);
                 }
                 power = Math.max(-1, Math.min(1, power));
-
-                // Keep shooter behavior same as non-position-tracking when active
-                if (shooterActive) {
-                    shooter.periodic();
-                    shooter.setVelocity(shooterRpm);
-                } else {
-                    shooter.setPower(0);
-                }
 
                 motor.set(power);
                 return;
@@ -316,7 +313,7 @@ public class Turret {
             tAngle = getPositionDegs() - getHeading() - startingOffset;
             tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
             distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
-            shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * distance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+            shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
 
             if (shooterActive) {
                 shooter.periodic();

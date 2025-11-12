@@ -31,7 +31,7 @@ public class MainTeleop extends LinearOpMode {
     private GamepadEx gp1, gp2;
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
-    private boolean autoPos = true;
+    private boolean useStoredPose = true;
 
     public static boolean stallIntake = true, manualTurret = false;
 
@@ -65,35 +65,37 @@ public class MainTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 bot.switchAlliance();
-                autoPos = false;
+                useStoredPose = false;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
                 bot.switchStartingPos();
-                autoPos = false;
+                useStoredPose = false;
             }
 
-            telemetry.addData("ALLIANCE (A)", Bot.alliance);
-            telemetry.addData("STARTING POSITION (B)", Bot.startingPos);
-            telemetry.addData("AUTO POSITION", autoPos);
+            telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
+            telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
+            telemetry.addData("STORED POSITION", useStoredPose);
 
             telemetry.update();
         }
 
-        if (!autoPos) {
-            if (Bot.startingPos == Bot.startingPosition.FAR) {
-                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+        if (!useStoredPose) {
+            if (Bot.isFar()) {
+                if (Bot.isBlue()) {
                     Bot.drive.localizer.setPose(FarAuto.initialFarBluePose);
                 } else {
                     Bot.drive.localizer.setPose(FarAuto.initialFarRedPose);
                 }
             } else {
-                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                if (Bot.isBlue()) {
                     Bot.drive.localizer.setPose(FarAuto.initialCloseBluePose);
                 } else {
                     Bot.drive.localizer.setPose(FarAuto.initialCloseRedPose);
                 }
             }
+        } else {
+            Bot.useStoredPose();
         }
 
 
@@ -102,10 +104,6 @@ public class MainTeleop extends LinearOpMode {
 
             gp1.readButtons();
             gp2.readButtons();
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetHeading();
-            }
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
@@ -150,7 +148,7 @@ public class MainTeleop extends LinearOpMode {
                 bot.enableFullAuto(true);
                 manualTurret = false;
             }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) { //auto aim only
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) { //auto aim + IMU only
                 bot.enableFullAuto(false);
                 bot.turret.enableAprilTracking(true);
                 manualTurret = false;
@@ -164,7 +162,6 @@ public class MainTeleop extends LinearOpMode {
                 bot.enableFullAuto(false);
                 manualTurret = true;
             }
-
 
             // SHOOTING
 
@@ -183,6 +180,14 @@ public class MainTeleop extends LinearOpMode {
             }
 
             // FAILSAFES
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetHeading();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.resetPose();
+            }
 
             if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
                 bot.intake.openGate();
@@ -214,8 +219,8 @@ public class MainTeleop extends LinearOpMode {
             runningActions = newActions;
 
             // TELEMETRY
-            telemetry.addData("alliance", Bot.alliance);
-            telemetry.addData("starting pos", Bot.startingPos);
+            telemetry.addData("alliance", Bot.getAlliance());
+            telemetry.addData("starting pos", Bot.getStartingPos());
 
             telemetry.addData("\nPose", Bot.drive.localizer.getPose());
             telemetry.addData("Velocity", Bot.drive.localizer.update());
@@ -268,6 +273,6 @@ public class MainTeleop extends LinearOpMode {
 //                turnVector.getX() * driveSpeed
 //        );
 
-        Bot.drive.setDrivePowers(new PoseVelocity2d(new com.acmerobotics.roadrunner.Vector2d(gp1.getLeftY(), -gp1.getLeftX()), -gp1.getRightX()));
+        Bot.drive.setDrivePowers(new PoseVelocity2d(new com.acmerobotics.roadrunner.Vector2d(driveSpeed * gp1.getLeftY(),driveSpeed * -gp1.getLeftX()),driveSpeed * -gp1.getRightX()));
     }
 }

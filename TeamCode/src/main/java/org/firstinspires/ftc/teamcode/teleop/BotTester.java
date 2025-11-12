@@ -73,22 +73,22 @@ public class BotTester extends LinearOpMode {
                 autoPos = false;
             }
 
-            telemetry.addData("ALLIANCE (A)", Bot.alliance);
-            telemetry.addData("STARTING POSITION (B)", Bot.startingPos);
+            telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
+            telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("AUTO POSITION", autoPos);
 
             telemetry.update();
         }
 
         if (!autoPos) {
-            if (Bot.startingPos == Bot.startingPosition.FAR) {
-                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+            if (Bot.isFar()) {
+                if (Bot.isBlue()) {
                     Bot.drive.localizer.setPose(FarAuto.initialFarBluePose);
                 } else {
                     Bot.drive.localizer.setPose(FarAuto.initialFarRedPose);
                 }
             } else {
-                if (Bot.alliance == Bot.allianceOptions.BLUE_ALLIANCE) {
+                if (Bot.isBlue()) {
                     Bot.drive.localizer.setPose(FarAuto.initialCloseBluePose);
                 } else {
                     Bot.drive.localizer.setPose(FarAuto.initialCloseRedPose);
@@ -198,8 +198,8 @@ public class BotTester extends LinearOpMode {
             runningActions = newActions;
 
 //            // TELEMETRY
-            telemetry.addData("alliance", Bot.alliance);
-            telemetry.addData("starting pos", Bot.startingPos);
+            telemetry.addData("alliance", Bot.getAlliance());
+            telemetry.addData("starting pos", Bot.getStartingPos());
 
             telemetry.addData("\nPose", Bot.drive.localizer.getPose());
             telemetry.addData("Velocity", Bot.drive.localizer.update());
