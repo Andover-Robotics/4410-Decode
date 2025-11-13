@@ -212,7 +212,7 @@ public class Turret {
      *  2) relToRobotCCW = fieldAngleCCW - robotHeadingCCW
      *  3) turretTargetCW = -relToRobotCCW + TURRET_ZERO_CW_OFFSET
      */
-    private void aimAtGlobalPoint(double targetX, double targetY) {
+    private double aimAtGlobalPoint(double targetX, double targetY) {
         Pose2d pose = Bot.drive.localizer.getPose();
 
         // Robot heading in radians (CCW+)
@@ -243,7 +243,7 @@ public class Turret {
         // Tracking distance from turret to goal
         trackingDistance = Math.sqrt(dx * dx + dy * dy);
 
-        runToAngle(turretTargetCW);
+        return turretTargetCW;
     }
 
     public void periodic() {
@@ -270,30 +270,8 @@ public class Turret {
             // Early-out: position tracking mode
             if (positionTracking) {
                 controller.setPID(p2, i2, d2);
-                aimAtGlobalPoint(POS_TRACK_X, POS_TRACK_Y);
-                controller.setSetPoint(setPoint);
-
-                if (isManual || manualPower != 0) {
-                    power = manualPower;
-                } else {
-                    pos = getPosition();
-                    power = controller.calculate(pos);
-                }
-                power = Math.max(-1, Math.min(1, power));
-
-                motor.set(power);
-                shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
-
-                if (shooterActive) {
-                    shooter.periodic();
-                    shooter.setVelocity(shooterRpm);
-                } else {
-                    shooter.setPower(0);
-                }
-                return;
-            }
-
-            if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
+                runToAngle(aimAtGlobalPoint(POS_TRACK_X, POS_TRACK_Y));
+            } else if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
                 wraparound = false;
                 tx = llResult.getTx();
                 ty = llResult.getTy();
