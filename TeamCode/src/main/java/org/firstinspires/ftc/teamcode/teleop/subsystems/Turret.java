@@ -37,7 +37,7 @@ public class Turret {
     public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
 
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.00033, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
-    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -5135.52, shooterG = -0.00678212, shooterH = 1.6709, shooterI = 9199.73374;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF = -3793.94098, shooterG = -0.00967802, shooterH = 1.9677, shooterI = 7891.51326;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
@@ -281,9 +281,15 @@ public class Turret {
                 }
                 power = Math.max(-1, Math.min(1, power));
 
-                updateShooter();
-
                 motor.set(power);
+                shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+
+                if (shooterActive) {
+                    shooter.periodic();
+                    shooter.setVelocity(shooterRpm);
+                } else {
+                    shooter.setPower(0);
+                }
                 return;
             }
 
@@ -312,7 +318,17 @@ public class Turret {
             double maxPower = 1;
             power = Math.max(-maxPower, Math.min(maxPower, power));
 
-            updateShooter();
+            tAngle = getPositionDegs() - getHeading() - startingOffset;
+            tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
+            distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
+            shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+
+            if (shooterActive) {
+                shooter.periodic();
+                shooter.setVelocity(shooterRpm);
+            } else {
+                shooter.setPower(0);
+            }
         } else {
             if (llResult != null && llResult.isValid() && llResult.getFiducialResults() != null && !llResult.getFiducialResults().isEmpty()) {
                 int id = llResult.getFiducialResults().get(0).getFiducialId();
@@ -327,20 +343,6 @@ public class Turret {
         }
 
         motor.set(power);
-    }
-
-    private void updateShooter() {
-        tAngle = getPositionDegs() - getHeading() - startingOffset;
-        tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
-        distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
-        shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
-
-        if (shooterActive) {
-            shooter.setVelocity(shooterRpm);
-            shooter.periodic();
-        } else {
-            shooter.setPower(0);
-        }
     }
 
     public void resetEncoder() {

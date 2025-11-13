@@ -98,6 +98,7 @@ public class MainTeleop extends LinearOpMode {
             Bot.useStoredPose();
         }
 
+        bot.intake.closeGate();
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();

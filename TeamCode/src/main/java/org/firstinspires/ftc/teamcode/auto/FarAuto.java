@@ -191,6 +191,11 @@ public class FarAuto extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
                 bot.switchAlliance();
             }
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(initialFarBluePose);
+            } else {
+                drive.localizer.setPose(initialFarRedPose);
+            }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
             telemetry.addData("STARTING POSITION", Bot.getStartingPos());
