@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
 
 import java.util.ArrayList;
 
@@ -32,8 +33,8 @@ public class Turret {
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
 
-    public static double POS_TRACK_X = Bot.goalPose.x;
-    public static double POS_TRACK_Y = Bot.goalPose.y;
+//    public static double POS_TRACK_X = Bot.goalPose.x; Now directly referenced in methods
+//    public static double POS_TRACK_Y = Bot.goalPose.y;
     public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
 
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.00033, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
@@ -89,8 +90,6 @@ public class Turret {
         startingOffset = 45 * ((Bot.isBlue())? -1 : 1);
         txArr = new ArrayList<>(0);
         tyArr = new ArrayList<>(0);
-        POS_TRACK_X = Bot.goalPose.x;
-        POS_TRACK_Y = Bot.goalPose.y;
     }
 
     public void setPipeline(int i) {
@@ -270,7 +269,7 @@ public class Turret {
             // Early-out: position tracking mode
             if (positionTracking) {
                 controller.setPID(p2, i2, d2);
-                runToAngle(aimAtGlobalPoint(POS_TRACK_X, POS_TRACK_Y));
+                runToAngle(aimAtGlobalPoint(Bot.goalPose.x, Bot.goalPose.y));
             } else if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
                 wraparound = false;
                 tx = llResult.getTx();
@@ -300,6 +299,9 @@ public class Turret {
             tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
             distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
             shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+            if (MainTeleop.manualTurret) {
+                shooterRpm = 4600;
+            }
 
             if (shooterActive) {
                 shooter.periodic();
