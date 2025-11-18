@@ -63,8 +63,9 @@ public class FarAuto extends LinearOpMode {
 
         Action blueFarAuto = drive.actionBuilderBlue(initialFarBluePose)
                 .stopAndAdd(new SequentialAction(
+//                        new SleepAction(20),
                         bot.enableShooter(),
-                        new SleepAction(0.5),
+                        new SleepAction(0.4),
                         bot.shootThreeAuto(),
                         bot.disableShooter()
                         )
@@ -75,7 +76,7 @@ public class FarAuto extends LinearOpMode {
                 // .setTangent(Math.toRadians(90))
                 .strafeToSplineHeading(new Vector2d(blueHpIntake.component1().x, blueHpIntake.component1().y), Math.toRadians(150))
                 //.splineToSplineHeading(blueHpIntake, Math.toRadians(150))
-                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 10, blueHpIntake.component1().y))
+                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 11.5, blueHpIntake.component1().y))
 
                 .setReversed(true)
                 .setTangent(Math.toRadians(-90))
@@ -132,7 +133,7 @@ public class FarAuto extends LinearOpMode {
                 // .setTangent(Math.toRadians(90))
                 .strafeToSplineHeading(new Vector2d(blueHpIntake.component1().x, blueHpIntake.component1().y), Math.toRadians(150))
                 //.splineToSplineHeading(blueHpIntake, Math.toRadians(150))
-                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 10, blueHpIntake.component1().y))
+                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 11.5, blueHpIntake.component1().y))
 
                 .setReversed(true)
                 .setTangent(Math.toRadians(-90))

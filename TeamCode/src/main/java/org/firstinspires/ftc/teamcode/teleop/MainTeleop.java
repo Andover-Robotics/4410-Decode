@@ -243,6 +243,7 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
             telemetry.addData("Goal Distance", Turret.trackingDistance);
+            telemetry.addData("ShootDelay", Bot.shootDelay);
 
 //
 //            telemetry.addData("\ntx", Turret.tx);

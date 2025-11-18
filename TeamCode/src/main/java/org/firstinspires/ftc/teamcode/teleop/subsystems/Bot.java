@@ -26,8 +26,8 @@ public class Bot {
     public Lift lift;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
-    public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90)); //TODO TUNE THIS POSITION
-    public static Vector2d goalPose = new Vector2d(59, 60); //initializes with blue, switches based on alliance
+    public static Pose2d resetPose = new Pose2d(-61, -63, Math.toRadians(-90)); //TODO TUNE THIS POSITION
+    public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
 //    private final MotorEx fl;
 //    private final MotorEx fr;
 //    private final MotorEx bl;
@@ -193,7 +193,14 @@ public class Bot {
         );
     }
 
+    public void updateShootingTime() {
+        if (Turret.trackingDistance > 90) {
+            shootDelay = 0.4 + (Turret.trackingDistance - 90) * 0.006;
+        }
+    }
+
     public Action shootThree() {
+        updateShootingTime();
         return new SequentialAction(
                 new InstantAction(() -> shooting = true),
                 new InstantAction(() -> intake.intake()),
