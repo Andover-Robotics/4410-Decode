@@ -55,6 +55,9 @@ public final class PinpointLocalizer implements Localizer {
         return txWorldPinpoint.times(txPinpointRobot);
     }
 
+    public double getXVelInches() { return driver.getVelX(DistanceUnit.INCH); }
+    public double getYVelInches() { return driver.getVelY(DistanceUnit.INCH); }
+
     @Override
     public PoseVelocity2d update() {
         driver.update();

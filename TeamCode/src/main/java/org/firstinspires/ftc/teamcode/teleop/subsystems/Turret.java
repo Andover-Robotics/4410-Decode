@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
@@ -33,8 +34,8 @@ public class Turret {
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
 
-//    public static double POS_TRACK_X = Bot.goalPose.x; Now directly referenced in methods
-//    public static double POS_TRACK_Y = Bot.goalPose.y;
+    public static double POS_TRACK_X = 0;
+    public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
 
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.00033, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
@@ -50,6 +51,9 @@ public class Turret {
     public ArrayList<Double> txArr, tyArr;
 
     private boolean isManual = false, wraparound = false;
+
+    public Pose2d pose;
+    public PoseVelocity2d velocity;
 
     public enum Motif {
         GPP,
@@ -212,7 +216,7 @@ public class Turret {
      *  3) turretTargetCW = -relToRobotCCW + TURRET_ZERO_CW_OFFSET
      */
     private double aimAtGlobalPoint(double targetX, double targetY) {
-        Pose2d pose = Bot.drive.localizer.getPose();
+        pose = Bot.drive.localizer.getPose();
 
         // Robot heading in radians (CCW+)
         double headingRad = pose.heading.log();
@@ -226,8 +230,10 @@ public class Turret {
         double dx = targetX - turretX;
         double dy = targetY - turretY;
 
+        velocityCompensation(dx, dy);
+
         // Field-bearing CCW to target
-        double fieldAngleCCW = Math.toDegrees(Math.atan2(dy, dx)); // CCW+
+        double fieldAngleCCW = Math.toDegrees(Math.atan2(POS_TRACK_Y, POS_TRACK_X)); // CCW+
 
         // Robot heading CCW
         double robotHeadingCCW = Math.toDegrees(headingRad); // CCW+
@@ -240,9 +246,42 @@ public class Turret {
         double turretTargetCW = normDeg(-relToRobotCCW + 180);
 
         // Tracking distance from turret to goal
-        trackingDistance = Math.sqrt(dx * dx + dy * dy);
+        trackingDistance = Math.sqrt(POS_TRACK_X * POS_TRACK_X + POS_TRACK_Y * POS_TRACK_Y);
+
 
         return turretTargetCW;
+    }
+
+    public void velocityCompensation(double dx, double dy) {
+        double time = calculateTime(dx, dy);
+        velocity = Bot.drive.localizer.update();
+        double dispX = velocity.linearVel.x * time;
+        double dispY = velocity.linearVel.y * time;
+        POS_TRACK_X = dx + dispX;
+        POS_TRACK_Y = dy + dispY;
+    }
+
+    public double calculateTime(double dx, double dy) {
+        // Constants
+        final double G = 386.09;                 // in/s^2 (gravity in inches)
+        final double heightDisplacement = 20.0;  // inches (Δz)
+        final double launchAngleAboveHorizDeg = 57.0;  // 90 - 33 degrees
+        final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
+
+        // Horizontal distance (XY plane)
+        double R = Math.sqrt(dx * dx + dy * dy);
+
+        // t^2 = (2/g) * (R * tan(theta) - Δz)
+        double term = R * Math.tan(launchAngleRad) - heightDisplacement;
+        double tSquared = (2.0 / G) * term;
+
+        if (tSquared <= 0) {
+            // No ballistic solution (target too low for given angle)
+            return 0;  // or any fallback (0 means “no adjustment”)
+        }
+
+        double t = Math.sqrt(tSquared);
+        return t;
     }
 
     public void periodic() {
