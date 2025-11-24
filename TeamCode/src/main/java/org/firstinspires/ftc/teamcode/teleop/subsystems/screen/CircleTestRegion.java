@@ -13,7 +13,7 @@ public class CircleTestRegion extends DisplayRegion {
         super(x,y,width,height);
         this.sprites = new Sprite[]{
 //                new RectangleSprite(0,3,1, 4, Color.GREEN)
-            new CircleSprite(4, 4, 4, Color.WHITE)
+            new CircleSprite(4, 4, 4, Color.PURPLE)
         };
     }
 

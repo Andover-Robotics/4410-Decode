@@ -10,7 +10,7 @@ public class PurpleSquareFirstRegion extends DisplayRegion {
     public PurpleSquareFirstRegion(int x, int y, int width, int height) {
         super(x,y,width,height);
         this.sprites = new Sprite[]{
-                new RectangleSprite(1,1,6, 6, Color.PURPLE)
+                new RectangleSprite(x,y,width, height, Color.PURPLE)
         };
     }
 

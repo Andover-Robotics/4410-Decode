@@ -12,6 +12,9 @@ public class TestView extends DisplayView {
 
     public TestView() {
         super(new DisplayRegion[]{
+//                new PurpleSquareFirstRegion(0, 0, 8, 8),
+//                new PurpleSquareFirstRegion(8, 0, 8, 8),
+//                new PurpleSquareFirstRegion(16, 0, 8, 8),
                 new CircleTestRegion(0,0,8,8),
                 new CircleTestRegion(8,0,8,8),
                 new CircleTestRegion(16,0,8,8)
