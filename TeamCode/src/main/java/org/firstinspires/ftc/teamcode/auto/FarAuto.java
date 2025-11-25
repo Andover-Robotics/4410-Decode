@@ -38,7 +38,7 @@ public class FarAuto extends LinearOpMode {
     public static Pose2d initialFarBluePose = new Pose2d(-63, 9, Math.toRadians(90));
     public static Pose2d initialCloseBluePose = new Pose2d(63, 12, Math.toRadians(-135));
     public static Pose2d initialFarRedPose = new Pose2d(-63,-9, Math.toRadians(-90));
-    public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
+    public static Pose2d initialCloseRedPose = new Pose2d(63, -12, Math.toRadians(-135));
 
     // INTAKE
     public static Pose2d blueHpIntake = new Pose2d(-49, 61, WALL_INTAKE_ANGLE);
@@ -119,7 +119,7 @@ public class FarAuto extends LinearOpMode {
                 .stopAndAdd(bot.shootThreeAuto())
                 .build();
 
-        Action redFarAuto = drive.actionBuilderRed(initialFarRedPose)
+        Action redFarAuto = drive.actionBuilderRed(initialFarBluePose)//switched on purpose - DO NOT CHANGE
                 .stopAndAdd(new SequentialAction(
                                 bot.enableShooter(),
                                 new SleepAction(0.5),
