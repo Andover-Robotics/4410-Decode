@@ -32,8 +32,6 @@ public class Bot {
 //    private final MotorEx fr;
 //    private final MotorEx bl;
 //    private final MotorEx br;
-    public DigitalChannel bottomBB, middleBB, topBB;
-
     public static double shootTime = 0.3, shootDelay = 0.4;
     public boolean shooting = false;
 
@@ -64,26 +62,7 @@ public class Bot {
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
-        bottomBB = opMode.hardwareMap.get(DigitalChannel.class, "bottomBB");
-        middleBB = opMode.hardwareMap.get(DigitalChannel.class, "middleBB");
-        topBB = opMode.hardwareMap.get(DigitalChannel.class, "topBB");
         updatePoses();
-    }
-
-    public boolean holdingBottom() {
-        return !bottomBB.getState();
-    }
-
-    public boolean holdingMiddle() {
-        return !middleBB.getState();
-    }
-
-    public boolean holdingTop() {
-        return !topBB.getState();
-    }
-
-    public int storageCount() {
-        return (holdingBottom()? 1 : 0) + (holdingMiddle()? 1 : 0) + (holdingTop()? 1 : 0);
     }
 
     public void switchAlliance() {

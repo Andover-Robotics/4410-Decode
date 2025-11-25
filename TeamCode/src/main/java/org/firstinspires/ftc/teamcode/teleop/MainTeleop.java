@@ -235,10 +235,10 @@ public class MainTeleop extends LinearOpMode {
             // TELEMETRY
             telemetry.addData("alliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
-            telemetry.addData("\n", bot.storageCount());
-            telemetry.addData("\nHolding Bottom", bot.holdingBottom());
-            telemetry.addData("Holding Middle", bot.holdingMiddle());
-            telemetry.addData("Holding Top", bot.holdingTop());
+            telemetry.addData("\n", bot.intake.storageCount());
+            telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
+            telemetry.addData("Holding Middle", bot.intake.holdingMiddle());
+            telemetry.addData("Holding Top", bot.intake.holdingTop());
 //
 //            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
