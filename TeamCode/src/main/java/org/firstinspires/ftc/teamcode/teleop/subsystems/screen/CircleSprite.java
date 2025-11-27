@@ -19,13 +19,20 @@ public class CircleSprite extends Sprite {
         double centerX = this.getX() + radius - 0.5;
         double centerY = this.getY() + radius - 0.5;
 
+        int maxY = leds.length;
+        int maxX = maxY > 0 ? leds[0].length : 0;
+
         for (int x = this.getX(); x < this.getX() + this.getWidth(); x++) {
             for (int y = this.getY(); y < this.getY() + this.getHeight(); y++) {
+                if (y < 0 || y >= maxY || x < 0 || x >= maxX) {
+                    continue;
+                }
+
                 double dx = x - centerX;
                 double dy = y - centerY;
 
                 if (dx * dx + dy * dy <= radius * radius) {
-                    leds[x][y] = this.getColor();
+                    leds[y][x] = this.getColor();
                 }
             }
         }
