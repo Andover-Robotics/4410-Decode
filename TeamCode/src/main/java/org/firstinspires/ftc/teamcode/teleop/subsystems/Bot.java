@@ -225,6 +225,7 @@ public class Bot {
     public void periodic() {
         turret.periodic();
         lift.periodic();
+        intake.periodic();
     }
 
     public Action actionPeriodic() {

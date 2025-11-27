@@ -115,14 +115,14 @@ public class MainTeleop extends LinearOpMode {
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                    bot.intake.intake();
+                    bot.intake.requestIntake();
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                    bot.intake.reverse();
+                    bot.intake.requestReverse();
                 } else {
                     if (stallIntake) {
-                        bot.intake.storage();
+                        bot.intake.requestStorage();
                     } else {
-                        bot.intake.stop();
+                        bot.intake.requestStop();
                     }
                 }
             }
@@ -235,10 +235,17 @@ public class MainTeleop extends LinearOpMode {
             // TELEMETRY
             telemetry.addData("alliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
-            telemetry.addData("\n", bot.intake.storageCount());
-            telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
+            telemetry.addData("Storage Count", bot.intake.storageCount());
+            telemetry.addData("Holding Bottom", bot.intake.holdingBottom());
             telemetry.addData("Holding Middle", bot.intake.holdingMiddle());
             telemetry.addData("Holding Top", bot.intake.holdingTop());
+
+            telemetry.addData("Color1", bot.intake.getColor1());
+            telemetry.addData("Color2", bot.intake.getColor2());
+            telemetry.addData("Color3", bot.intake.getColor3());
+
+            telemetry.addData("Intake Requested", bot.intake.getRequestedState());
+            telemetry.addData("Intake Active", bot.intake.getActiveState());
 //
 //            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
