@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -33,6 +34,8 @@ public class MainTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
+
+    NormalizedRGBA colors;
 
     public static boolean stallIntake = true, manualTurret = false;
 
@@ -233,16 +236,45 @@ public class MainTeleop extends LinearOpMode {
             runningActions = newActions;
 
             // TELEMETRY
+
+//
+//            colors = bot.intake.color.getNormalizedColors();
+//
+//            telemetry.addData("rgb: ", colors.red + " " + colors.blue + " " + colors.green);
+//
+//            double r = colors.red, g = colors.green, b = colors.blue;
+//            double cmax = Math.max(r, Math.max(g, b)), cmin = Math.min(r, Math.min(g, b));
+//            double d = cmax - cmin;
+//
+//            double h = d == 0 ? 0 :
+//                    cmax == r ? 60 * (((g - b) / d) % 6) :
+//                            cmax == g ? 60 * (((b - r) / d) + 2) :
+//                                    60 * (((r - g) / d) + 4);
+//
+//            double s = cmax == 0 ? 0 : (d / cmax);
+//            double v = cmax;
+//
+//            telemetry.addData("hsv: ", h + " " + s + " " + v);
+
             telemetry.addData("alliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
             telemetry.addData("\n", bot.intake.storageCount());
             telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
-            telemetry.addData("Holding Middle", bot.intake.holdingMiddle());
-            telemetry.addData("Holding Top", bot.intake.holdingTop());
+            telemetry.addData("Color Bottom", bot.intake.blbColor());
+//            telemetry.addData("Bottom Purple State", bot.intake.blb0.getState());
+//            telemetry.addData("Bottom Green State", bot.intake.blb1.getState());
+            telemetry.addData("\nHolding Middle", bot.intake.holdingMiddle());
+            telemetry.addData("Color Middle", bot.intake.blmColor());
+//            telemetry.addData("Middle Purple State", bot.intake.blm0.getState());
+//            telemetry.addData("CMiddle Green State", bot.intake.blm1.getState());
+            telemetry.addData("\nHolding Top", bot.intake.holdingTop());
+            telemetry.addData("Color Top", bot.intake.bltColor());
+//            telemetry.addData("Top Purple State", bot.intake.blt0.getState());
+//            telemetry.addData("Top Green State", bot.intake.blt1.getState());
 //
 //            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
-            telemetry.addData("Goal Distance", Turret.trackingDistance);
+            telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("ShootDelay", Bot.shootDelay);
 
 //
