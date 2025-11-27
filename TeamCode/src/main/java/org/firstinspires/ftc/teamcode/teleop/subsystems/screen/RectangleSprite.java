@@ -11,9 +11,21 @@ public class RectangleSprite extends Sprite {
 
     @Override
     protected void showSprite(Color[][] leds) {
-        for(int x = this.getX(); x < this.getX() + this.getWidth(); x++){
-            for(int y = this.getY(); y < this.getY() + this.getHeight(); y++)
-                leds[x][y] = this.getColor();
+        int maxY = leds.length;
+        int maxX = maxY > 0 ? leds[0].length : 0;
+
+        for (int y = this.getY(); y < this.getY() + this.getHeight(); y++) {
+            if (y < 0 || y >= maxY) {
+                continue;
+            }
+
+            for (int x = this.getX(); x < this.getX() + this.getWidth(); x++) {
+                if (x < 0 || x >= maxX) {
+                    continue;
+                }
+
+                leds[y][x] = this.getColor();
+            }
         }
     }
 }
