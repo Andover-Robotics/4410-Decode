@@ -41,7 +41,7 @@ public class FarAuto extends LinearOpMode {
     public static Pose2d initialCloseRedPose = new Pose2d(63, -12, Math.toRadians(-135));
 
     // INTAKE
-    public static Pose2d blueHpIntake = new Pose2d(-49, 61, WALL_INTAKE_ANGLE);
+    public static Pose2d blueHpIntake = new Pose2d(-50, 61.5, WALL_INTAKE_ANGLE);
     public static Pose2d blueFarIntake = new Pose2d(-33, 29, Math.toRadians(90));
     public static Pose2d blueMidIntake = new Pose2d(-11, 29, Math.toRadians(90));
     public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
@@ -63,10 +63,12 @@ public class FarAuto extends LinearOpMode {
 
         Action blueFarAuto = drive.actionBuilderBlue(initialFarBluePose)
                 .stopAndAdd(new SequentialAction(
-//                        new SleepAction(20),
                         bot.enableShooter(),
-                        new SleepAction(0.4),
-                        bot.shootThreeAuto(),
+                        new InstantAction(() -> bot.setTargetFarAutoGoal()),
+                        new SleepAction(0.9),
+                        bot.shootThreeAutoFar(),
+                        new SleepAction(0.1),
+                        new InstantAction(() -> bot.setTargetGoalPose()),
                         bot.disableShooter()
                         )
                 )
@@ -83,7 +85,7 @@ public class FarAuto extends LinearOpMode {
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
@@ -97,7 +99,7 @@ public class FarAuto extends LinearOpMode {
                 .strafeToSplineHeading(closeShoot, Math.toRadians(135))
 //                .setTangent(Math.toRadians(-90))
 //                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
@@ -108,7 +110,7 @@ public class FarAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-60))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueFarIntake.position, Math.toRadians(90))
@@ -116,14 +118,14 @@ public class FarAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
                 .build();
 
         Action redFarAuto = drive.actionBuilderRed(initialFarBluePose)//switched on purpose - DO NOT CHANGE
                 .stopAndAdd(new SequentialAction(
                                 bot.enableShooter(),
                                 new SleepAction(0.5),
-                                bot.shootThreeAuto(),
+                                bot.shootThree(),
                                 bot.disableShooter()
                         )
                 )
@@ -140,7 +142,7 @@ public class FarAuto extends LinearOpMode {
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
@@ -154,7 +156,7 @@ public class FarAuto extends LinearOpMode {
                 .strafeToSplineHeading(closeShoot, Math.toRadians(135))
 //                .setTangent(Math.toRadians(-90))
 //                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
@@ -165,7 +167,7 @@ public class FarAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-60))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueFarIntake.position, Math.toRadians(90))
@@ -173,7 +175,7 @@ public class FarAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
                 .build();
 
 
@@ -185,6 +187,7 @@ public class FarAuto extends LinearOpMode {
         bot.setFar();
         bot.intake.closeGate();
         bot.intake.storage();
+        bot.setTargetFarAutoGoal();
         while (!isStarted()) {
             bot.periodic();
             gp1.readButtons();

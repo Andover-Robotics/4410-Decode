@@ -37,9 +37,8 @@ public class Turret {
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
-
-    public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.00033, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
-    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-3019.47842, shooterG = -0.0114473, shooterH = 1.9676, shooterI = 6840.2621;
+    public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0004, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=2497.21286, shooterG = 0.083356, shooterH = 33.65606, shooterI = -12409.0664;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
@@ -51,6 +50,7 @@ public class Turret {
     public ArrayList<Double> txArr, tyArr;
 
     private boolean isManual = false, wraparound = false;
+    private boolean velComp = true;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -248,24 +248,44 @@ public class Turret {
         // Tracking distance from turret to goal
         trackingDistance = Math.sqrt(POS_TRACK_X * POS_TRACK_X + POS_TRACK_Y * POS_TRACK_Y);
 
-
         return turretTargetCW;
     }
 
     public void velocityCompensation(double dx, double dy) {
         double time = calculateTime(dx, dy);
         velocity = Bot.drive.localizer.update();
-        double dispX = velocity.linearVel.x * time;
-        double dispY = velocity.linearVel.y * time;
-        POS_TRACK_X = dx + dispX;
-        POS_TRACK_Y = dy + dispY;
+//        double dispX = velocity.linearVel.x * time;
+//        double dispY = velocity.linearVel.y * time;
+//        POS_TRACK_X = dx + dispX;
+//        POS_TRACK_Y = dy + dispY;
+        double heading = pose.heading.log();
+
+        // Convert robot-centric velocity to field frame
+        double velocityXField = velocity.linearVel.x * Math.cos(heading) - velocity.linearVel.y * Math.sin(heading);
+        double velocityYField = velocity.linearVel.x * Math.sin(heading) + velocity.linearVel.y * Math.cos(heading);
+
+        // Offset the target opposite the robot's drift so that the added launch
+        // velocity from the robot's motion lands on the goal.
+        double dispX = velocityXField * time;
+        double dispY = velocityYField * time;
+        if (velComp) {
+            POS_TRACK_X = dx - dispX;
+            POS_TRACK_Y = dy - dispY;
+        } else {
+            POS_TRACK_X = dx;
+            POS_TRACK_Y = dy;
+        }
+    }
+    
+    public void setVelComp(boolean i) {
+        velComp = i;
     }
 
     public double calculateTime(double dx, double dy) {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
-        final double heightDisplacement = 20.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 57.0;  // 90 - 33 degrees
+        final double heightDisplacement = 23.0;  // inches (Δz)
+        final double launchAngleAboveHorizDeg = 51.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
@@ -308,7 +328,7 @@ public class Turret {
             // Early-out: position tracking mode
             if (positionTracking) {
                 controller.setPID(p2, i2, d2);
-                runToAngle(aimAtGlobalPoint(Bot.goalPose.x, Bot.goalPose.y));
+                runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
             } else if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
                 wraparound = false;
                 tx = llResult.getTx();

@@ -96,7 +96,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         bot.intake.storage();
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
-        while (!isStarted() && !isStopRequested()) {
+        while (opModeInInit() && !isStopRequested()) {
             handleConfigInput();
 
             // keep pose synced to chosen alliance
@@ -125,6 +125,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
             bot.periodic();
         }
 
+        waitForStart();
+        if (isStopRequested()) return;
         // Safety: if driver did not build in init, build now with current config
         if (builtAuto == null) {
             builtAuto = buildFarAuto(drive, Bot.isBlue(), cfg);
@@ -258,7 +260,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     new SequentialAction(
                             bot.enableShooter(),
                             new SleepAction(0.4),
-                            bot.shootThreeAuto(),
+                            bot.shootThree(),
                             bot.disableShooter()
                     )
             );
@@ -292,7 +294,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                             Math.toRadians(0)
                     )
                     .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
-                    .stopAndAdd(bot.shootThreeAuto());
+                    .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterHp > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
@@ -321,7 +323,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(closeShoot, Math.toRadians(135))
-                    .stopAndAdd(bot.shootThreeAuto());
+                    .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterClose > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
@@ -344,7 +346,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .splineTo(closeShoot, Math.toRadians(-60))
-                    .stopAndAdd(bot.shootThreeAuto());
+                    .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterMid > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
@@ -370,7 +372,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                             drive.defaultVelConstraint,
                             new ProfileAccelConstraint(-50, 70)
                     )
-                    .stopAndAdd(bot.shootThreeAuto());
+                    .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterFar > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));

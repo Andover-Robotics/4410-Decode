@@ -25,7 +25,7 @@ public class Shooter {
     private final ElapsedTime timer = new ElapsedTime();
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.00125, i = 0.0, d = 0.0, f = 0.000197;
+    public static double p = 0.0015, i = 0.0, d = 0.0, f = 0.000197;
     public static boolean inverted = false;
 
     // targeting and behavior

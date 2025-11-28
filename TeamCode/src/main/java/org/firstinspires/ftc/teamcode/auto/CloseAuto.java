@@ -64,10 +64,10 @@ public class CloseAuto extends LinearOpMode {
         //intake and shoot far three
         //intake and shoot hp balls
 
-        Action blueFarAuto = drive.actionBuilderBlue(initialCloseBluePose)
+        Action blueCloseAuto = drive.actionBuilderBlue(initialCloseBluePose)
                 .afterTime(0.2, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0))
-                .stopAndAdd(new InstantAction(()-> bot.shootThreeAuto()))
+                .stopAndAdd(new InstantAction(()-> bot.shootThree()))
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
@@ -78,7 +78,7 @@ public class CloseAuto extends LinearOpMode {
                 .setTangent(Math.toRadians(-90))
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(0))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
@@ -92,7 +92,7 @@ public class CloseAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .strafeToSplineHeading(closeShoot, Math.toRadians(135))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueFarIntake.position, Math.toRadians(90))
@@ -100,7 +100,7 @@ public class CloseAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
 
                 //NEED TO FIX
@@ -114,15 +114,15 @@ public class CloseAuto extends LinearOpMode {
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .build();
 
-        Action redFarAuto = drive.actionBuilderRed(initialCloseBluePose)//switched on purpose - DO NOT CHANGE
+        Action redCloseAuto = drive.actionBuilderRed(initialCloseBluePose)//switched on purpose - DO NOT CHANGE
                 .stopAndAdd(new SequentialAction(
                                 bot.enableShooter(),
                                 new SleepAction(0.5),
-                                bot.shootThreeAuto(),
+                                bot.shootThree(),
                                 bot.disableShooter()
                         )
                 )
@@ -139,7 +139,7 @@ public class CloseAuto extends LinearOpMode {
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
@@ -153,7 +153,7 @@ public class CloseAuto extends LinearOpMode {
                 .strafeToSplineHeading(closeShoot, Math.toRadians(135))
 //                .setTangent(Math.toRadians(-90))
 //                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
@@ -164,7 +164,7 @@ public class CloseAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-60))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(blueFarIntake.position, Math.toRadians(90))
@@ -172,7 +172,7 @@ public class CloseAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .setReversed(true)
                 .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThreeAuto())
+                .stopAndAdd(bot.shootThree())
 
                 .build();
 
@@ -208,7 +208,7 @@ public class CloseAuto extends LinearOpMode {
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),
                             new SequentialAction(
-                                    blueFarAuto
+                                    blueCloseAuto
                             )
                     )
             );
@@ -218,7 +218,7 @@ public class CloseAuto extends LinearOpMode {
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),
                             new SequentialAction(
-                                    redFarAuto
+                                    redCloseAuto
                             )
                     )
             );

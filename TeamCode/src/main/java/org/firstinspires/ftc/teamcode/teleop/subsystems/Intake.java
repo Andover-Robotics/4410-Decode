@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class Intake {
 
-    public static double intakePower = -1, storagePower = -0.3, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
+    public static double intakePower = -1, storagePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
     private final MotorEx motor;
     public Servo gate;
 

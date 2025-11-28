@@ -26,13 +26,11 @@ public class Bot {
     public Lift lift;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
-    public static Pose2d resetPose = new Pose2d(-61, -63, Math.toRadians(-90)); //TODO TUNE THIS POSITION
-    public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
-//    private final MotorEx fl;
-//    private final MotorEx fr;
-//    private final MotorEx bl;
-//    private final MotorEx br;
-    public static double shootTime = 0.3, shootDelay = 0.4;
+    public static Pose2d resetPose = new Pose2d(-61, -63, Math.toRadians(-90));
+    public static Vector2d goalPose = new Vector2d(67, 60); //initializes with blue, switches based on alliance
+    public static Vector2d farAutoGoalPose = new Vector2d(61, 64);
+    public static Vector2d targetPose = goalPose;
+    public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.0024, shootDelayRPMThreshold = 3900;
     public boolean shooting = false;
 
     public static MecanumDrive drive;
@@ -53,10 +51,6 @@ public class Bot {
     private Bot(OpMode opMode) {
         this.opMode = opMode;
 
-//        fl = new MotorEx(opMode.hardwareMap, "motorFL", Motor.GoBILDA.RPM_312);
-//        fr = new MotorEx(opMode.hardwareMap, "motorFR", Motor.GoBILDA.RPM_312);
-//        bl = new MotorEx(opMode.hardwareMap, "motorBL", Motor.GoBILDA.RPM_312);
-//        br = new MotorEx(opMode.hardwareMap, "motorBR", Motor.GoBILDA.RPM_312);
 
         drive = new MecanumDrive(opMode.hardwareMap, storedPose);
         turret = new Turret(opMode);
@@ -96,11 +90,22 @@ public class Bot {
     public static void updatePoses() {
         if (isRed()) {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
+            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, -1 * Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
+            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
         }
+        targetPose = goalPose;
+    }
+
+    public void setTargetFarAutoGoal() {
+        targetPose = farAutoGoalPose;
+    }
+
+    public void setTargetGoalPose() {
+        targetPose = goalPose;
     }
 
     public void resetPose() {
@@ -163,7 +168,7 @@ public class Bot {
         return new SequentialAction(
                 new InstantAction(() -> shooting = true),
                 new InstantAction(() -> intake.intake()),
-                new SleepAction(0.2),
+                new SleepAction(0.1),
                 new InstantAction(() -> intake.openGate()),
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
@@ -173,9 +178,7 @@ public class Bot {
     }
 
     public void updateShootingTime() {
-        if (Turret.trackingDistance > 90) {
-            shootDelay = 0.4 + (Turret.trackingDistance - 90) * 0.006;
-        }
+        shootDelay = Math.max((Turret.shooterRpm - shootDelayRPMThreshold), 0) * shootDelayCF;
     }
 
     public Action shootThree() {
@@ -183,7 +186,7 @@ public class Bot {
         return new SequentialAction(
                 new InstantAction(() -> shooting = true),
                 new InstantAction(() -> intake.intake()),
-                new SleepAction(0.2),
+                new SleepAction(0.1),
                 new InstantAction(() -> intake.openGate()),
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
@@ -200,24 +203,26 @@ public class Bot {
         );
     }
 
-    public Action shootThreeAuto() {
+    public Action shootThreeAutoFar() {
+        updateShootingTime();
+        setTargetFarAutoGoal();
         return new SequentialAction(
                 new InstantAction(() -> shooting = true),
                 new InstantAction(() -> intake.intake()),
-                new SleepAction(0.2),
+                new SleepAction(0.1),
                 new InstantAction(() -> intake.openGate()),
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
-                new SleepAction(shootDelay),
+                new SleepAction(autoFarShootDeley),
                 new InstantAction(() -> intake.openGate()),
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
-                new SleepAction(shootDelay),
+                new SleepAction(autoFarShootDeley),
                 new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
+                new SleepAction(shootTime + 0.1),
                 new InstantAction(() -> intake.closeGate()),
                 new InstantAction(() -> intake.storage()),
-                new SleepAction(0.2),
+                new InstantAction(this::setTargetGoalPose),
                 new InstantAction(() -> shooting = false)
         );
     }

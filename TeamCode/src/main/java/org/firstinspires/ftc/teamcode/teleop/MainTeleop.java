@@ -256,6 +256,8 @@ public class MainTeleop extends LinearOpMode {
 //
 //            telemetry.addData("hsv: ", h + " " + s + " " + v);
 
+
+
             telemetry.addData("alliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
             telemetry.addData("\n", bot.intake.storageCount());
@@ -275,7 +277,7 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-            telemetry.addData("ShootDelay", Bot.shootDelay);
+            telemetry.addData("Shoot Delay", Bot.shootDelay);
 
 //
 //            telemetry.addData("\ntx", Turret.tx);
@@ -302,8 +304,9 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
 //            telemetry.addData("Offset", bot.lift.offset);
 //            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
+            telemetry.addData("Velocity", Bot.drive.localizer.update());
             telemetry.update();
-            Bot.drive.localizer.update();
+
 
         }
     }
