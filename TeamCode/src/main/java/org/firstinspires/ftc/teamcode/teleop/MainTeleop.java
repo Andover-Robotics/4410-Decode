@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.FarAuto;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
@@ -65,7 +66,6 @@ public class MainTeleop extends LinearOpMode {
             TelemetryPacket packet = new TelemetryPacket();
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetHeading();
                 bot.turret.resetEncoder();
             }
 
@@ -150,18 +150,8 @@ public class MainTeleop extends LinearOpMode {
 
             // TURRET
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //imu follow only
-                bot.enableFullAuto(false);
-                bot.turret.enableImuFollow(true);
-                manualTurret = false;
-            }
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
                 bot.enableFullAuto(true);
-                manualTurret = false;
-            }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) { //auto aim + IMU only
-                bot.enableFullAuto(false);
-                bot.turret.enableAprilTracking(true);
                 manualTurret = false;
             }
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
@@ -169,7 +159,7 @@ public class MainTeleop extends LinearOpMode {
                 bot.turret.enablePositionTracking(true);
                 manualTurret = false;
             }
-            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) { //no tracking
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
                 bot.enableFullAuto(false);
                 manualTurret = true;
             }
@@ -197,7 +187,7 @@ public class MainTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetHeading();
+                bot.turret.relocalizeBotPose();
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -257,8 +247,9 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("hsv: ", h + " " + s + " " + v);
 
 
-
-            telemetry.addData("alliance", Bot.getAlliance());
+        telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+        telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
             telemetry.addData("\n", bot.intake.storageCount());
             telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());

@@ -60,7 +60,6 @@ public class BotTester extends LinearOpMode {
             TelemetryPacket packet = new TelemetryPacket();
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetHeading();
                 bot.turret.resetEncoder();
             }
 
@@ -105,25 +104,10 @@ public class BotTester extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetHeading();
-            }
 
-            telemetry.addData("Heading (deg)", bot.turret.getHeading());
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) { //imu follow only
-                runTurret = true;
-                bot.enableFullAuto(false);
-                bot.turret.enableImuFollow(true);
-            }
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) { //everything!
                 runTurret = true;
                 bot.enableFullAuto(true);
-            }
-            if (gp1.wasJustPressed(GamepadKeys.Button.X)) { //auto aim only
-                runTurret = true;
-                bot.enableFullAuto(false);
-                bot.turret.enableAprilTracking(true);
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) { //disable all
                 runTurret = false;

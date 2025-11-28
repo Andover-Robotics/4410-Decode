@@ -14,6 +14,10 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
 
@@ -29,6 +33,7 @@ public class Turret {
 
     private Limelight3A limelight;
     public LLResult llResult;
+    public static Pose3D llBotPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0));
 
     public Shooter shooter;
 
@@ -36,6 +41,7 @@ public class Turret {
 
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
+    public static double llxRLOffset = 120, llyRLOffset = 108.5;
     public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0004, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
     private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=2497.21286, shooterG = 0.083356, shooterH = 33.65606, shooterI = -12409.0664;
@@ -129,27 +135,11 @@ public class Turret {
 
     public void enableAutoAim(boolean on) {
         enablePositionTracking(on);
-        enableAprilTracking(on);
-        enableImuFollow(on);
     }
 
-    public void enableAprilTracking(boolean enable) {
-        aprilTracking = enable;
-        if (enable) {
-            if (Bot.isBlue()) {
-                trackBlueAlliance();
-            } else {
-                trackRedAlliance();
-            }
-        }
-    }
 
     public void enableShooter(boolean enable) {
         shooterActive = enable;
-    }
-
-    public void enableImuFollow(boolean enable) {
-        imuFollow = enable;
     }
 
     public void enablePositionTracking(boolean enable) {
@@ -185,18 +175,6 @@ public class Turret {
             manualPower = 0;
             isManual = false;
         }
-    }
-
-    public void filtertx() {
-        txArr.add(tx);
-        if (txArr.size() > avgCount) {
-            txArr.remove(0);
-        }
-        double tempTxAvg = 0;
-        for (double i : txArr) {
-            tempTxAvg += i;
-        }
-        txAvg = tempTxAvg / txArr.size();
     }
 
     // Normalize to [-180, 180)
@@ -305,22 +283,7 @@ public class Turret {
     }
 
     public void periodic() {
-        if (Bot.isBlue()) {
-            if (Bot.isFar()) {
-                startingOffset = -135;
-            } else {
-                startingOffset = 0;
-            }
-        } else {
-            if (Bot.isFar()) {
-                startingOffset = 135;
-            } else {
-                startingOffset = 0;
-            }
-        }
         power = 0;
-        orientation = imu.getRobotYawPitchRollAngles();
-        llResult = limelight.getLatestResult();
         pos = getPosition();
         controller.setPID(p, i, d);
 
@@ -329,20 +292,12 @@ public class Turret {
             if (positionTracking) {
                 controller.setPID(p2, i2, d2);
                 runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
-            } else if ((llResult != null && llResult.isValid() && aprilTracking) && (!wraparound || (wraparound == (timer.seconds() - lastTime > wraparoundTime)))) { //checks if LL valid, and its not in the middle of wrapping around
-                wraparound = false;
-                tx = llResult.getTx();
-                ty = llResult.getTy();
-                filtertx();
-                runToAngle(getPositionDegs() + ty);// not using avg here (kept as in original)
-                controller.setPID(p, i, d);
-                lastTime = timer.seconds();
             } else if ((timer.seconds() - lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking) {
-                if (imuFollow) {
-                    runToAngle(getHeading() + startingOffset);
-                    controller.setPID(p2, i2, d2);
-                }
+            if (imuFollow) {
+                runToAngle(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) + startingOffset);
+                controller.setPID(p2, i2, d2);
             }
+        }
             controller.setSetPoint(setPoint);
 
             if (isManual || manualPower != 0) {
@@ -354,12 +309,10 @@ public class Turret {
             double maxPower = 1;
             power = Math.max(-maxPower, Math.min(maxPower, power));
 
-            tAngle = getPositionDegs() - getHeading() - startingOffset;
-            tOffset = llRearOffsetInches * Math.cos(Math.toRadians(tAngle));
-            distance = (29.5 - 17) / Math.tan(Math.toRadians(25 - txAvg)) - distanceOffset + tOffset;
             shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+
             if (MainTeleop.manualTurret) {
-                shooterRpm = 4600;
+                shooterRpm = 3000;
             }
 
             if (shooterActive) {
@@ -367,6 +320,16 @@ public class Turret {
                 shooter.setVelocity(shooterRpm);
             } else {
                 shooter.setPower(0);
+            }
+            // LIMELIGHT RELOCALIZATION
+            limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
+            LLResult result = limelight.getLatestResult();
+            if (result != null) {
+                if (result.isValid()) {
+                    llBotPose = result.getBotpose_MT2();
+                }
+                //odom x = llx + 120
+                //odom y = lly + 105
             }
         } else {
             if (llResult != null && llResult.isValid() && llResult.getFiducialResults() != null && !llResult.getFiducialResults().isEmpty()) {
@@ -382,6 +345,10 @@ public class Turret {
         }
 
         motor.set(power);
+    }
+
+    public void relocalizeBotPose() {
+        Bot.drive.localizer.setPose(new Pose2d(llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset, llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset, Math.toRadians(llBotPose.getOrientation().getYaw())));
     }
 
     public void resetEncoder() {
@@ -410,20 +377,6 @@ public class Turret {
 
     public double getPower() {
         return power;
-    }
-
-    public double getHeading() {
-        orientation = imu.getRobotYawPitchRollAngles();
-        return orientation.getYaw(AngleUnit.DEGREES);
-    }
-
-    public double getRoll() {
-        orientation = imu.getRobotYawPitchRollAngles();
-        return orientation.getRoll(AngleUnit.DEGREES);
-    }
-
-    public void resetHeading() {
-        imu.resetYaw();
     }
 
 }
