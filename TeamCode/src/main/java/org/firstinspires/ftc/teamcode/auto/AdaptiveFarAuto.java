@@ -80,16 +80,16 @@ public class AdaptiveFarAuto extends LinearOpMode {
             // Telemetry for configuration
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
             telemetry.addData("STARTING POSITION", Bot.getStartingPos());
-            telemetry.addData("Selected segment", segmentName(selectedSegment));
-            telemetry.addData("Preload: run / delay", "%b / %ds",
+            telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
+            telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
-            telemetry.addData("HP:      run / delay", "%b / %ds",
+            telemetry.addData("HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayAfterHp);
-            telemetry.addData("Close:   run / delay", "%b / %ds",
+            telemetry.addData("Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayAfterClose);
-            telemetry.addData("Mid:     run / delay", "%b / %ds",
+            telemetry.addData("Mid:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runMid, cfg.delayAfterMid);
-            telemetry.addData("Far:     run / delay", "%b / %ds",
+            telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
             if (builtAuto != null)
