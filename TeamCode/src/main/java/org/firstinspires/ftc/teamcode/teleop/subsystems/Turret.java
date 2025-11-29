@@ -289,19 +289,14 @@ public class Turret {
         pos = getPosition();
         controller.setPID(p, i, d);
 
-        if (!obelisk){
+        if (!obelisk) {
             // Early-out: position tracking mode
             if (positionTracking) {
                 controller.setPID(p2, i2, d2);
                 runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
 //                runToAngle(aimAtGlobalPoint(goalX, goalY));
-
-            } else if ((timer.seconds() - lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking) {
-            if (imuFollow) {
-                runToAngle(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) + startingOffset);
-                controller.setPID(p2, i2, d2);
             }
-        }
+
             controller.setSetPoint(setPoint);
 
             if (isManual || manualPower != 0) {
@@ -326,11 +321,11 @@ public class Turret {
                 shooter.setPower(0);
             }
             // LIMELIGHT RELOCALIZATION
-            limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
+//            limelight.updateRobotOrientation();
             LLResult result = limelight.getLatestResult();
             if (result != null) {
                 if (result.isValid()) {
-                    llBotPose = result.getBotpose_MT2();
+                    llBotPose = result.getBotpose();
                 }
                 //odom x = llx + 120
                 //odom y = lly + 105
