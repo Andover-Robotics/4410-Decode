@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 import java.util.Map.Entry;
 
-@Autonomous(name = "Reset Everything", group = "Utility")
+@Autonomous(name = "Reset Everything", group = "Competition")
 public class ResetEverything extends LinearOpMode {
     public void runOpMode() {
         Bot.instance = null;

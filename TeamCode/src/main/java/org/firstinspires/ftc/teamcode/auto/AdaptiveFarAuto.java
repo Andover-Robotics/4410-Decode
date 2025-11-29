@@ -75,7 +75,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         bot.setTargetGoalPose();
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
-        while (opModeInInit() && !isStopRequested() && !isStarted()) {
+        while (!isStarted() && !isStopRequested()) {
             handleConfigInput();
 
             // keep pose synced to chosen alliance

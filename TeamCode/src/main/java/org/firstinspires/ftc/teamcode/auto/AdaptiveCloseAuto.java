@@ -16,13 +16,12 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 @Config
-@Autonomous(name = "Close Auto", group = "Competition")
-public class CloseAuto extends LinearOpMode {
+@Autonomous(name = "Adaptive Close Auto", group = "Competition")
+public class AdaptiveCloseAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
@@ -276,15 +275,14 @@ public class CloseAuto extends LinearOpMode {
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()));
+                            Pos.blueCloseIntake.position.y + 18));
             addedAction = true;
         }
 
         if (cfg.runGate) {
             builder = builder
                     .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
-                    .waitSeconds(1);
+                    .waitSeconds(1.6);
 
             if (cfg.delayAfterGate > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterGate));
@@ -310,7 +308,6 @@ public class CloseAuto extends LinearOpMode {
                     .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
                             Pos.blueMidIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
@@ -324,14 +321,13 @@ public class CloseAuto extends LinearOpMode {
 
         if (cfg.runFar) {
             builder = builder
+
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
                             Pos.blueFarIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(155), drive.defaultVelConstraint,
-                            new ProfileAccelConstraint(-50, 70))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterFar > 0) {
@@ -345,16 +341,20 @@ public class CloseAuto extends LinearOpMode {
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(bot.disableShooter())
                     .setTangent(Math.toRadians(155))
-                    .splineTo(Pos.blueHpIntake.component1(), Math.toRadians(135))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.component1().x - 14,
-                            Pos.blueHpIntake.component1().y - 1.5))
-                    .waitSeconds(0.5)
+                    .splineToSplineHeading(Pos.blueStraightHpIntake, Math.toRadians(135))
+//                .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(90))
+                    .stopAndAdd(new SleepAction(0.1))
+
+                    .strafeToConstantHeading(new Vector2d(Pos.blueStraightHpIntake.component1().x - 14, Pos.blueStraightHpIntake.component1().y))
+                    .stopAndAdd(new SleepAction(0.1))
+                    .setTangent(0)
+                    .splineToSplineHeading(new Pose2d(Pos.blueStraightHpIntake.component1().x - 4, Pos.blueStraightHpIntake.component1().y - 4, Math.toRadians(168)), Math.toRadians(-90))
+                    .splineToSplineHeading(new Pose2d(Pos.blueStraightHpIntake.component1().x - 12, Pos.blueStraightHpIntake.component1().y - 6, Math.toRadians(-165)), Math.toRadians(180))
+
                     .setTangent(Math.toRadians(-90))
                     .afterTime(0.1, bot.enableShooter())
-                    .splineToLinearHeading(new Pose2d(Pos.blueHpIntakeInter, Math.toRadians(180)),
-                            Math.toRadians(-89))
-                    .splineToLinearHeading(new Pose2d(Pos.closeShoot, Math.toRadians(-90)),
-                            Math.toRadians(0))
+                    .splineToLinearHeading(new Pose2d(Pos.blueHpIntakeInter, Math.toRadians(180)), Math.toRadians(-89))
+                    .splineToLinearHeading(new Pose2d(Pos.closeShoot, Math.toRadians(-90)), Math.toRadians(0))
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterHp > 0) {
