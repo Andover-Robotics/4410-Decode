@@ -31,6 +31,12 @@ public class AdaptiveFarAuto extends LinearOpMode {
         public boolean runMid     = true;
         public boolean runFar     = true;
 
+        // whether to drive to the field gate after the close intake
+        public boolean pushFieldGate = true;
+
+        // delay before starting preload actions (seconds, 0-20)
+        public int startDelay = 0;
+
         // delay after each segment (seconds, 0-20)
         public int delayAfterPreload = 0;
         public int delayAfterHp      = 0;
@@ -42,7 +48,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
     private AutoConfig cfg = new AutoConfig();
 
     // index of which segment driver is editing in init:
-    // 0 = preload, 1 = hp, 2 = close, 3 = mid, 4 = far
+    // 0 = preload, 1 = hp, 2 = close, 3 = mid, 4 = far, 5 = start delay, 6 = field gate push
     private int selectedSegment = 0;
 
     // built auto we will run after start
@@ -78,7 +84,12 @@ public class AdaptiveFarAuto extends LinearOpMode {
             }
 
             // Telemetry for configuration
-            telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
+            telemetry.addData("ALLIANCE (A)", Bot.getAlliance()); 
+            telemetry.addData("STARTING POSITION", Bot.getStartingPos());
+            telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
+            telemetry.addData("Start delay (LEFT/RIGHT)", "%ds", cfg.startDelay);
+            telemetry.addData("Push field gate (X on Push Gate)", cfg.pushFieldGate);
+            telemetry.addData("Preload: run / delay", "%b / %ds",
             telemetry.addData("STARTING POSITION", Bot.getStartingPos());
             telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
             telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
@@ -147,10 +158,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         // Move selected segment up/down
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 5 - 1) % 5;
+            selectedSegment = (selectedSegment + 7 - 1) % 7;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 5;
+            selectedSegment = (selectedSegment + 1) % 7;
         }
 
         // Toggle run/skip for selected segment
@@ -170,6 +181,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     break;
                 case 4:
                     cfg.runFar = !cfg.runFar;
+                    break;
+                case 6:
+                    cfg.pushFieldGate = !cfg.pushFieldGate;
                     break;
             }
         }
@@ -205,6 +219,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     cfg.delayAfterFar =
                             clampDelay(cfg.delayAfterFar + delta);
                     break;
+                case 5:
+                    cfg.startDelay = clampDelay(cfg.startDelay + delta);
+                    break;
             }
         }
 //
@@ -238,6 +255,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
             case 2: return "Close";
             case 3: return "Mid";
             case 4: return "Far";
+            case 5: return "Start Delay";
+            case 6: return "Push Gate";
             default: return "?";
         }
     }
@@ -251,6 +270,13 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         boolean addedAction = false;
 
+        // START DELAY
+        if (cfg.startDelay > 0) {
+            builder = builder.stopAndAdd(new SleepAction(cfg.startDelay));
+            addedAction = true;
+        }
+
+        // PRELOAD SEGMENT
         if (cfg.runPreload) {
             builder = builder
                     .afterTime(0.1, bot.enableShooter())
@@ -287,14 +313,27 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (cfg.runClose) {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint,
-                            new ProfileAccelConstraint(-45, 65))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
-                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
-                    .waitSeconds(1)
-                    .stopAndAdd(bot.enableShooter())
+                    .splineTo(
+                            blueCloseIntake.position,
+                            Math.toRadians(90),
+                            drive.defaultVelConstraint,
+                            new ProfileAccelConstraint(-45, 65)
+                    )
+                    .strafeToConstantHeading(
+                            new Vector2d(
+                                    blueCloseIntake.position.x,
+                                    blueCloseIntake.position.y + 18
+                            )
+                    )
+                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()));
+
+            if (cfg.pushFieldGate) {
+                builder = builder
+                        .strafeToLinearHeading(gate.position, gate.heading)
+                        .waitSeconds(1);
+            }
+
+            builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.shootThree());
