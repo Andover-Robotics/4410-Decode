@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.Map;
 
-@TeleOp(name = "Servo Tester", group = "Toolbox")
+@TeleOp(name = "Servo Tester", group = "Utility")
 public class ServoTester extends OpMode {
     private static double POS_DELTA = 0.02;
 

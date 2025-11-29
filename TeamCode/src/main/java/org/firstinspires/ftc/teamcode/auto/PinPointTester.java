@@ -59,7 +59,6 @@ For support, contact tech@gobilda.com
 -Ethan Doak
  */
 
-@TeleOp(name="pinpoint test code", group="Linear OpMode")
 //@Disabled
 
 public class PinPointTester extends LinearOpMode {

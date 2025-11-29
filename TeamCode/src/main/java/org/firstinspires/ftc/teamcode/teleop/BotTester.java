@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.auto.FarAuto;
+import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "Bot Tester")
+@TeleOp(name = "Bot Tester", group = "Utility")
 public class BotTester extends LinearOpMode {
 
     private Bot bot;
@@ -83,15 +84,15 @@ public class BotTester extends LinearOpMode {
         if (!autoPos) {
             if (Bot.isFar()) {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(FarAuto.initialFarBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialFarBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(FarAuto.initialFarRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialFarRedPose);
                 }
             } else {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(FarAuto.initialCloseBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(FarAuto.initialCloseRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseRedPose);
                 }
             }
         }

@@ -27,7 +27,7 @@ public class Bot {
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-61, -63, Math.toRadians(-90));
-    public static Vector2d goalPose = new Vector2d(67, 60); //initializes with blue, switches based on alliance
+    public static Vector2d goalPose = new Vector2d(64, 61); //initializes with blue, switches based on alliance
     public static Vector2d farAutoGoalPose = new Vector2d(61, 64);
     public static Vector2d targetPose = goalPose;
     public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.0024, shootDelayRPMThreshold = 3900;

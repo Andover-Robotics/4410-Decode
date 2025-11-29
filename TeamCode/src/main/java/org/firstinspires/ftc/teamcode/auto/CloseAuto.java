@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 @Config
-@Autonomous(name = "Close Auto", group = "Teleop")
+@Autonomous(name = "Close Auto", group = "Competition")
 public class CloseAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
@@ -30,26 +30,6 @@ public class CloseAuto extends LinearOpMode {
     // positive X is towards goal side, negative x is towards HP Stations
     // positive Y is towards blue goal / red driver side, negative Y is towards red goal / blue driver side
     // 0 degrees is toward goals, -45 is red goal, +45 is blue goal
-
-    // SOME VARIABLES
-    public static final double WALL_INTAKE_ANGLE = Math.toRadians(170);
-
-    // INITIAL STILL NEED TO SET
-    public static Pose2d initialCloseBluePose = new Pose2d(63, 12, Math.toRadians(-135));
-    public static Pose2d initialCloseRedPose = new Pose2d(63, -12, Math.toRadians(-135));
-
-    // INTAKE
-    public static Pose2d blueHpIntake = new Pose2d(-49, 61, WALL_INTAKE_ANGLE);
-    public static Pose2d blueFarIntake = new Pose2d(-33, 29, Math.toRadians(90));
-    public static Pose2d blueMidIntake = new Pose2d(-11, 29, Math.toRadians(90));
-    public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
-
-    // SHOOTING (Vectors, as we do not care about robot orientation here)
-    public static Vector2d closeShoot = new Vector2d(5, 15);
-    public static Vector2d closeFirstShoot = new Vector2d(13, 15);
-    public static Vector2d farShoot = new Vector2d(-61, 9);
-
-    public static Pose2d gate = new Pose2d(7, 57, Math.toRadians(0));
 
     public void runOpMode() throws InterruptedException {
         Bot.instance = null;
@@ -64,61 +44,65 @@ public class CloseAuto extends LinearOpMode {
         //intake and shoot far three
         //intake and shoot hp balls
 
-        Action blueCloseAuto = drive.actionBuilderBlue(initialCloseBluePose)
-                .afterTime(0.2, bot.enableShooter())
-                .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0))
-                .stopAndAdd(new InstantAction(()-> bot.shootThree()))
-
-                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-                .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
-                .strafeToConstantHeading(new Vector2d(blueCloseIntake.component1().x, blueCloseIntake.component1().y + 18))
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-
-                .setReversed(true)
-                .setTangent(Math.toRadians(-90))
-                .afterTime(0.1, bot.enableShooter())
-                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(0))
+        Action blueCloseAuto = drive.actionBuilderBlue(Pos.initialCloseBluePose)
+                .stopAndAdd(bot.enableShooter())
+                .strafeToLinearHeading(Pos.closeFirstShoot, Math.toRadians(90))
                 .stopAndAdd(bot.shootThree())
-
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-                .setTangent(Math.toRadians(135))
-                .splineTo(blueMidIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(blueMidIntake.component1().x, blueMidIntake.component1().y + 18))
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
 
-                .strafeToLinearHeading(gate.position, gate.heading) //might need to be a spline
+                //copied from far
+                .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
+                .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.component1().x, Pos.blueCloseIntake.component1().y + 18))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+                .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
                 .waitSeconds(1)
 
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
-                .strafeToSplineHeading(closeShoot, Math.toRadians(135))
+                .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                 .stopAndAdd(bot.shootThree())
-
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-                .splineTo(blueFarIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(blueFarIntake.component1().x, blueFarIntake.component1().y + 18))
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+                .stopAndAdd(bot.disableShooter())
+
+                .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.component1().x, Pos.blueMidIntake.component1().y + 18))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+
+                .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
-                .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
+                .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                 .stopAndAdd(bot.shootThree())
+                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+                .stopAndAdd(bot.disableShooter())
 
+                .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.component1().x, Pos.blueFarIntake.component1().y + 18))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
 
-                //NEED TO FIX
-                .setTangent(Math.toRadians(90))
-                .strafeToSplineHeading(new Vector2d(blueHpIntake.component1().x, blueHpIntake.component1().y), Math.toRadians(150))
-                .splineToSplineHeading(blueHpIntake, Math.toRadians(150))
-                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 11.5, blueHpIntake.component1().y))
-
+                .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
+                .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
+                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+                .stopAndAdd(bot.disableShooter())
+
+                .setTangent(Math.toRadians(155))
+                .splineTo(Pos.blueHpIntake.component1(), Math.toRadians(135))
+//                .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(90))
+
+                .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.component1().x - 14, Pos.blueHpIntake.component1().y - 1.5))
+                .waitSeconds(0.5)
+
                 .setTangent(Math.toRadians(-90))
                 .afterTime(0.1, bot.enableShooter())
-                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+                .splineToLinearHeading(new Pose2d(Pos.blueHpIntakeInter, Math.toRadians(180)), Math.toRadians(-89))
+                .splineToLinearHeading(new Pose2d(Pos.closeShoot, Math.toRadians(-90)), Math.toRadians(0))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .stopAndAdd(bot.shootThree())
 
                 .build();
 
-        Action redCloseAuto = drive.actionBuilderRed(initialCloseBluePose)//switched on purpose - DO NOT CHANGE
+        Action redCloseAuto = drive.actionBuilderRed(Pos.initialCloseBluePose)//switched on purpose - DO NOT CHANGE
                 .stopAndAdd(new SequentialAction(
                                 bot.enableShooter(),
                                 new SleepAction(0.5),
@@ -126,53 +110,53 @@ public class CloseAuto extends LinearOpMode {
                                 bot.disableShooter()
                         )
                 )
-
-                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-
-                // .setTangent(Math.toRadians(90))
-                .strafeToSplineHeading(new Vector2d(blueHpIntake.component1().x, blueHpIntake.component1().y), Math.toRadians(150))
-                //.splineToSplineHeading(blueHpIntake, Math.toRadians(150))
-                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 11.5, blueHpIntake.component1().y))
-
-                .setReversed(true)
-                .setTangent(Math.toRadians(-90))
-                .afterTime(0.1, bot.enableShooter())
-                .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThree())
-
-                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-                .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
-                .strafeToConstantHeading(new Vector2d(blueCloseIntake.component1().x, blueCloseIntake.component1().y + 18))
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .strafeToLinearHeading(gate.position, gate.heading)
-                .waitSeconds(1)
-
-                .stopAndAdd(bot.enableShooter())
-                .setReversed(true)
-                .strafeToSplineHeading(closeShoot, Math.toRadians(135))
+//
+//                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+//
+//                // .setTangent(Math.toRadians(90))
+//                .strafeToSplineHeading(new Vector2d(blueHpIntake.component1().x, blueHpIntake.component1().y), Math.toRadians(150))
+//                //.splineToSplineHeading(blueHpIntake, Math.toRadians(150))
+//                .strafeToConstantHeading(new Vector2d(blueHpIntake.component1().x - 11.5, blueHpIntake.component1().y))
+//
+//                .setReversed(true)
 //                .setTangent(Math.toRadians(-90))
-//                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
-                .stopAndAdd(bot.shootThree())
-
-                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-                .setTangent(Math.toRadians(135))
-                .splineTo(blueMidIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(blueMidIntake.component1().x, blueMidIntake.component1().y + 18))
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-
-                .stopAndAdd(bot.enableShooter())
-                .setReversed(true)
-                .splineTo(closeShoot, Math.toRadians(-60))
-                .stopAndAdd(bot.shootThree())
-
-                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
-                .splineTo(blueFarIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(blueFarIntake.component1().x, blueFarIntake.component1().y + 18))
-                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .setReversed(true)
-                .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThree())
+//                .afterTime(0.1, bot.enableShooter())
+//                .splineToSplineHeading(new Pose2d(closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+//                .stopAndAdd(bot.shootThree())
+//
+//                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+//                .splineTo(blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
+//                .strafeToConstantHeading(new Vector2d(blueCloseIntake.component1().x, blueCloseIntake.component1().y + 18))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+//                .strafeToLinearHeading(gate.position, gate.heading)
+//                .waitSeconds(1)
+//
+//                .stopAndAdd(bot.enableShooter())
+//                .setReversed(true)
+//                .strafeToSplineHeading(closeShoot, Math.toRadians(135))
+////                .setTangent(Math.toRadians(-90))
+////                .splineToSplineHeading(new Pose2d(closeShoot, Math.toRadians(90)), Math.toRadians(-90))
+//                .stopAndAdd(bot.shootThree())
+//
+//                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+//                .setTangent(Math.toRadians(135))
+//                .splineTo(blueMidIntake.position, Math.toRadians(90))
+//                .strafeToConstantHeading(new Vector2d(blueMidIntake.component1().x, blueMidIntake.component1().y + 18))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+//
+//                .stopAndAdd(bot.enableShooter())
+//                .setReversed(true)
+//                .splineTo(closeShoot, Math.toRadians(-60))
+//                .stopAndAdd(bot.shootThree())
+//
+//                .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
+//                .splineTo(blueFarIntake.position, Math.toRadians(90))
+//                .strafeToConstantHeading(new Vector2d(blueFarIntake.component1().x, blueFarIntake.component1().y + 18))
+//                .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
+//                .setReversed(true)
+//                .splineTo(closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
+//                .stopAndAdd(bot.shootThree())
 
                 .build();
 
@@ -192,9 +176,9 @@ public class CloseAuto extends LinearOpMode {
                 bot.switchAlliance();
             }
             if (Bot.isBlue()) {
-                drive.localizer.setPose(initialCloseBluePose);
+                drive.localizer.setPose(Pos.initialCloseBluePose);
             } else {
-                drive.localizer.setPose(initialCloseRedPose);
+                drive.localizer.setPose(Pos.initialCloseRedPose);
             }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
@@ -203,7 +187,7 @@ public class CloseAuto extends LinearOpMode {
             telemetry.update();
         }
         if (Bot.isBlue()) {
-            drive.localizer.setPose(initialCloseBluePose);
+            drive.localizer.setPose(Pos.initialCloseBluePose);
             Actions.runBlocking(
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),
@@ -213,7 +197,7 @@ public class CloseAuto extends LinearOpMode {
                     )
             );
         } else {
-            drive.localizer.setPose(initialCloseRedPose);
+            drive.localizer.setPose(Pos.initialCloseRedPose);
             Actions.runBlocking(
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),

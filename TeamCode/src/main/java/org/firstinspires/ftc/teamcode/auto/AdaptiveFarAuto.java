@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
-@Autonomous(name = "Adaptive Far Auto", group = "Teleop")
+@Autonomous(name = "Adaptive Far Auto", group = "Competition")
 public class AdaptiveFarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
@@ -132,6 +132,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builtAuto = buildFarAuto(drive, Bot.isBlue(), cfg);
         }
 
+        telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
+        telemetry.addData("Segments", "preload:%b hp:%b close:%b mid:%b far:%b",
+                cfg.runPreload, cfg.runHp, cfg.runClose, cfg.runMid, cfg.runFar);
+        telemetry.update();
+
         // Set starting pose again at start
         if (Bot.isBlue()) {
             drive.localizer.setPose(initialFarBluePose);
@@ -140,6 +145,15 @@ public class AdaptiveFarAuto extends LinearOpMode {
         }
 
         // ------------- RUN AUTO -------------
+        if (builtAuto == null) {
+            telemetry.addData("Auto", "Build failed, nothing to run");
+            telemetry.update();
+            return;
+        } else {
+            telemetry.addData("build", builtAuto.toString());
+            telemetry.update();
+        }
+
         Actions.runBlocking(
                 new ActionHelper.RaceParallelCommand(
                         bot.actionPeriodic(),
@@ -223,8 +237,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         // Y: build the auto with current config
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-            builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
-        }
+            /*builtAuto = */buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            }
     }
 
     private int clampDelay(int d) {
@@ -253,6 +267,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
         TrajectoryActionBuilder builder = isBlue
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
+//        TrajectoryActionBuilder builder = drive.actionBuilderBlue(startPose);
+
+        boolean addedAction = false;
+
+        builder.stopAndAdd(bot.shootThree());
 
         // PRELOAD SEGMENT
         if (cfg.runPreload) {
@@ -267,6 +286,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             if (cfg.delayAfterPreload > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
             }
+            addedAction = true;
         }
 
         // HP SEGMENT: go to HP intake, collect, go to closeFirstShoot and shoot 3
@@ -299,6 +319,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             if (cfg.delayAfterHp > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
             }
+            addedAction = true;
         }
 
         // CLOSE SEGMENT: close intake -> gate -> shoot at closeShoot
@@ -328,6 +349,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             if (cfg.delayAfterClose > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
             }
+            addedAction = true;
         }
 
         // MID SEGMENT
@@ -351,6 +373,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             if (cfg.delayAfterMid > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
             }
+            addedAction = true;
         }
 
         // FAR SEGMENT
@@ -377,7 +400,14 @@ public class AdaptiveFarAuto extends LinearOpMode {
             if (cfg.delayAfterFar > 0) {
                 builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
             }
+            addedAction = true;
         }
+
+        if (!addedAction) {
+            builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
+        }
+
+        builtAuto = builder.build();
 
         return builder.build();
     }

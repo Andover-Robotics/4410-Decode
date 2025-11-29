@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
 
 
-@TeleOp
+@TeleOp(group = "Utility")
 @Config
 public class ConfigureColorRangefinder extends LinearOpMode {
 

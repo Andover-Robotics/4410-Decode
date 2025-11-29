@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.FarAuto;
+import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "MainTeleop")
+@TeleOp(name = "MainTeleop", group = "Competition")
 public class MainTeleop extends LinearOpMode {
 
     private Bot bot;
@@ -93,15 +94,15 @@ public class MainTeleop extends LinearOpMode {
         if (!useStoredPose) {
             if (Bot.isFar()) {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(FarAuto.initialFarBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialFarBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(FarAuto.initialFarRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialFarRedPose);
                 }
             } else {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(FarAuto.initialCloseBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(FarAuto.initialCloseRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseRedPose);
                 }
             }
         } else {

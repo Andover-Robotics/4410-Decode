@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@TeleOp(name = "Motor Tester Position", group = "Test")
+@TeleOp(name = "Motor Tester Position", group = "Utility")
 public class MotorTesterPosition extends OpMode {
     private double POWER = 0.4, KP = 0.2, FEEDFORWARD = 0, TOLERANCE = 30;
     private int TARGET = 0;

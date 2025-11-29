@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.Map;
 
-@TeleOp(name = "Motor Tester Power", group = "Test")
+@TeleOp(name = "Motor Tester Power", group = "Utility")
 public class MotorTesterPower extends OpMode {
     private static int TP_DELTA = 5;
 

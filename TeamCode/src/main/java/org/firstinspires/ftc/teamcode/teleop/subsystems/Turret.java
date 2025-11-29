@@ -38,13 +38,15 @@ public class Turret {
     public Shooter shooter;
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
+//    public static double goalX = 65;
+//    public static double goalY = 60;
 
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double llxRLOffset = 120, llyRLOffset = 108.5;
-    public static double TURRET_OFFSET_BACK_IN = 2.5; // inches back from robot center
+    public static double TURRET_OFFSET_BACK_IN = 3.25; // inches back from robot center
     public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.008, i2 = 0, d2 = 0.0004, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
-    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=2497.21286, shooterG = 0.083356, shooterH = 33.65606, shooterI = -12409.0664;
+    private double tolerance = 5, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-4096.01855, shooterG = -0.00809392, shooterH = 1.81342, shooterI = 7854.91759;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
@@ -292,6 +294,8 @@ public class Turret {
             if (positionTracking) {
                 controller.setPID(p2, i2, d2);
                 runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
+//                runToAngle(aimAtGlobalPoint(goalX, goalY));
+
             } else if ((timer.seconds() - lastTime) > (wraparoundTime + timerTolerance) || !aprilTracking) {
             if (imuFollow) {
                 runToAngle(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) + startingOffset);
