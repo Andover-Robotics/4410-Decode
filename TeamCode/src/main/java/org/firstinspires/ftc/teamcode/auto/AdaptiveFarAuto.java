@@ -31,11 +31,13 @@ public class AdaptiveFarAuto extends LinearOpMode {
         public boolean runMid     = true;
         public boolean runFar     = true;
 
-        // whether to drive to the field gate after the close intake
-        public boolean pushFieldGate = true;
-
         // delay before starting preload actions (seconds, 0-20)
         public int startDelay = 0;
+
+        // whether to drive to the field gate after the close intake
+        public boolean pushFieldGate = true;
+        // delay after pushing the field gate (seconds, 0-20)
+        public int delayAfterGate = 0;
 
         // delay after each segment (seconds, 0-20)
         public int delayAfterPreload = 0;
@@ -48,7 +50,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
     private AutoConfig cfg = new AutoConfig();
 
     // index of which segment driver is editing in init:
-    // 0 = preload, 1 = hp, 2 = close, 3 = mid, 4 = far, 5 = start delay, 6 = field gate push
+    // 0 = start delay, 1 = preload, 2 = hp, 3 = close, 4 = field gate push, 5 = mid, 6 = far
     private int selectedSegment = 0;
 
     // built auto we will run after start
@@ -87,7 +89,6 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance()); 
             telemetry.addData("STARTING POSITION", Bot.getStartingPos());
             telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
-            telemetry.addData("Push field gate (X on Push Gate)", cfg.pushFieldGate);
             telemetry.addData("Start: delay (L/R)", "%ds", cfg.startDelay);
             telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
@@ -95,6 +96,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     cfg.runHp, cfg.delayAfterHp);
             telemetry.addData("Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayAfterClose);
+            telemetry.addData("Push gate: run (X) / delay (L/R)", "%b / %ds",
+                    cfg.pushFieldGate, cfg.delayAfterGate);
             telemetry.addData("Mid:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runMid, cfg.delayAfterMid);
             telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
@@ -166,22 +169,25 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
             switch (selectedSegment) {
                 case 0:
-                    cfg.runPreload = !cfg.runPreload;
+                    // start delay has no enable/disable toggle
                     break;
                 case 1:
-                    cfg.runHp = !cfg.runHp;
+                    cfg.runPreload = !cfg.runPreload;
                     break;
                 case 2:
-                    cfg.runClose = !cfg.runClose;
+                    cfg.runHp = !cfg.runHp;
                     break;
                 case 3:
-                    cfg.runMid = !cfg.runMid;
+                    cfg.runClose = !cfg.runClose;
                     break;
                 case 4:
-                    cfg.runFar = !cfg.runFar;
+                    cfg.pushFieldGate = !cfg.pushFieldGate;
+                    break;
+                case 5:
+                    cfg.runMid = !cfg.runMid;
                     break;
                 case 6:
-                    cfg.pushFieldGate = !cfg.pushFieldGate;
+                    cfg.runFar = !cfg.runFar;
                     break;
             }
         }
@@ -198,27 +204,30 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (delta != 0) {
             switch (selectedSegment) {
                 case 0:
+                    cfg.startDelay = clampDelay(cfg.startDelay + delta);
+                    break;
+                case 1:
                     cfg.delayAfterPreload =
                             clampDelay(cfg.delayAfterPreload + delta);
                     break;
-                case 1:
+                case 2:
                     cfg.delayAfterHp =
                             clampDelay(cfg.delayAfterHp + delta);
                     break;
-                case 2:
+                case 3:
                     cfg.delayAfterClose =
                             clampDelay(cfg.delayAfterClose + delta);
                     break;
-                case 3:
+                case 4:
+                    cfg.delayAfterGate = clampDelay(cfg.delayAfterGate + delta);
+                    break;
+                case 5:
                     cfg.delayAfterMid =
                             clampDelay(cfg.delayAfterMid + delta);
                     break;
-                case 4:
+                case 6:
                     cfg.delayAfterFar =
                             clampDelay(cfg.delayAfterFar + delta);
-                    break;
-                case 5:
-                    cfg.startDelay = clampDelay(cfg.startDelay + delta);
                     break;
             }
         }
@@ -248,13 +257,13 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
     private String segmentName(int idx) {
         switch (idx) {
-            case 0: return "Preload";
-            case 1: return "HP";
-            case 2: return "Close";
-            case 3: return "Mid";
-            case 4: return "Far";
-            case 5: return "Start Delay";
-            case 6: return "Push Gate";
+            case 0: return "Start Delay";
+            case 1: return "Preload";
+            case 2: return "HP";
+            case 3: return "Close";
+            case 4: return "Push Gate";
+            case 5: return "Mid";
+            case 6: return "Far";
             default: return "?";
         }
     }
@@ -319,6 +328,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
                 builder = builder
                         .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
                         .waitSeconds(1);
+
+                if (cfg.delayAfterGate > 0) {
+                    builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterGate));
+                }
             }
 
             builder = builder.stopAndAdd(bot.enableShooter())
