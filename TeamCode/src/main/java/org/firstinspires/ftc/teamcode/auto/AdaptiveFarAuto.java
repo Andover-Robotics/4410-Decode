@@ -87,11 +87,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance()); 
             telemetry.addData("STARTING POSITION", Bot.getStartingPos());
             telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
-            telemetry.addData("Start delay (LEFT/RIGHT)", "%ds", cfg.startDelay);
             telemetry.addData("Push field gate (X on Push Gate)", cfg.pushFieldGate);
-            telemetry.addData("Preload: run / delay", "%b / %ds",
-            telemetry.addData("STARTING POSITION", Bot.getStartingPos());
-            telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
+            telemetry.addData("Start: delay (L/R)", "%ds", cfg.startDelay);
             telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
             telemetry.addData("HP:      run (X) / delay (L/R)", "%b / %ds",
@@ -103,8 +100,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
-            if (builtAuto != null)
+            if (builtAuto != null) {
                 telemetry.addData("build", builtAuto);
+            }
             telemetry.update();
 
             bot.periodic();
@@ -313,23 +311,13 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (cfg.runClose) {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .splineTo(
-                            blueCloseIntake.position,
-                            Math.toRadians(90),
-                            drive.defaultVelConstraint,
-                            new ProfileAccelConstraint(-45, 65)
-                    )
-                    .strafeToConstantHeading(
-                            new Vector2d(
-                                    blueCloseIntake.position.x,
-                                    blueCloseIntake.position.y + 18
-                            )
-                    )
+                    .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,Pos.blueCloseIntake.position.y + 18))
                     .stopAndAdd(new InstantAction(() -> bot.intake.storage()));
 
             if (cfg.pushFieldGate) {
                 builder = builder
-                        .strafeToLinearHeading(gate.position, gate.heading)
+                        .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
                         .waitSeconds(1);
             }
 
@@ -349,8 +337,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(135))
                     .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + 18))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,Pos.blueMidIntake.position.y + 18))
                     .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
@@ -367,12 +354,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + 18))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
                     .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint,
-                            new ProfileAccelConstraint(-50, 70))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 70))
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterFar > 0) {

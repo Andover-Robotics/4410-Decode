@@ -202,7 +202,5 @@ public class FarAuto extends LinearOpMode {
     }
 
 
-    public static Pose2d transformRed(Pose2d pose) {
-        return new Pose2d(new Vector2d(-pose.position.x, pose.position.y), Math.PI - pose.heading.log());
-    }
+    
 }

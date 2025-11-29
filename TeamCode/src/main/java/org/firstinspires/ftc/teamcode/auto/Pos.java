@@ -13,8 +13,8 @@ public class Pos {
     // INITIAL
     public static Pose2d initialFarBluePose = new Pose2d(-63, 9, Math.toRadians(90));
     public static Pose2d initialCloseBluePose = new Pose2d(61, 40, Math.toRadians(-180));
-    public static Pose2d initialFarRedPose = new Pose2d(-63,-9, Math.toRadians(-90));
-    public static Pose2d initialCloseRedPose = new Pose2d(63, -12, Math.toRadians(-135));
+    public static Pose2d initialFarRedPose = transformRed(initialFarBluePose);
+    public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
     public static Pose2d blueHpIntake = new Pose2d(-47, 61.5, WALL_INTAKE_ANGLE);
@@ -30,4 +30,8 @@ public class Pos {
     public static Vector2d edgeShoot = new Vector2d(3,6.7);
 
     public static Pose2d gate = new Pose2d(7, 57, Math.toRadians(0));
+
+    public static Pose2d transformRed(Pose2d pose) {
+        return new Pose2d(new Vector2d(-pose.position.x, pose.position.y), Math.PI - pose.heading.log());
+    }
 }

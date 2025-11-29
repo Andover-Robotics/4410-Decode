@@ -321,7 +321,7 @@ public class Turret {
                 shooter.setPower(0);
             }
             // LIMELIGHT RELOCALIZATION
-//            limelight.updateRobotOrientation();
+            limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
             LLResult result = limelight.getLatestResult();
             if (result != null) {
                 if (result.isValid()) {
