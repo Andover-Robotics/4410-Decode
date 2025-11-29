@@ -77,6 +77,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
     // built auto we will run after start
     private Action builtAuto = null;
+    private TrajectoryActionBuilder builder;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -96,7 +97,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         bot.intake.storage();
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
-        while (opModeInInit() && !isStopRequested()) {
+        while (opModeInInit() && !isStopRequested() && !isStarted()) {
             handleConfigInput();
 
             // keep pose synced to chosen alliance
@@ -120,6 +121,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("Far:     run / delay", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
+            if (builtAuto != null)
+                telemetry.addData("build", builtAuto);
             telemetry.update();
 
             bot.periodic();
@@ -128,9 +131,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
         // Safety: if driver did not build in init, build now with current config
-        if (builtAuto == null) {
-            builtAuto = buildFarAuto(drive, Bot.isBlue(), cfg);
-        }
+//        if (builtAuto == null) {
+//            builtAuto = buildFarAuto(drive, Bot.isBlue(), cfg);
+//        }
+        buildFarAuto(drive, Bot.isBlue(), cfg);
+        builtAuto = builder.build();
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
         telemetry.addData("Segments", "preload:%b hp:%b close:%b mid:%b far:%b",
@@ -234,6 +239,17 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     break;
             }
         }
+//
+        if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+            TrajectoryActionBuilder tester = Bot.drive.actionBuilderBlue(Pos.initialFarBluePose)
+                    .stopAndAdd(new SleepAction(6.7));
+            tester = tester.stopAndAdd(bot.shootThree());
+            builtAuto = tester.build();
+        }
+
+        if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+            builtAuto = builder.build();
+        }
 
         // Y: build the auto with current config
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
@@ -260,22 +276,20 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
     // ---------------- BUILDER: BUILD BLUE/RED FAR AUTO ----------------
 
-    private Action buildFarAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
+    private void buildFarAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
         Pose2d startPose = isBlue ? initialFarBluePose : initialFarRedPose;
 
         // Assuming your MecanumDrive has these methods:
-        TrajectoryActionBuilder builder = isBlue
+        builder = isBlue
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
 //        TrajectoryActionBuilder builder = drive.actionBuilderBlue(startPose);
 
         boolean addedAction = false;
 
-        builder.stopAndAdd(bot.shootThree());
-
         // PRELOAD SEGMENT
         if (cfg.runPreload) {
-            builder.stopAndAdd(
+            builder = builder.stopAndAdd(
                     new SequentialAction(
                             bot.enableShooter(),
                             new SleepAction(0.4),
@@ -284,14 +298,14 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     )
             );
             if (cfg.delayAfterPreload > 0) {
-                builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
             }
             addedAction = true;
         }
 
         // HP SEGMENT: go to HP intake, collect, go to closeFirstShoot and shoot 3
         if (cfg.runHp) {
-            builder
+            builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .strafeToSplineHeading(
                             new Vector2d(
@@ -317,14 +331,14 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterHp > 0) {
-                builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
             }
             addedAction = true;
         }
 
         // CLOSE SEGMENT: close intake -> gate -> shoot at closeShoot
         if (cfg.runClose) {
-            builder
+            builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(
                             blueCloseIntake.position,
@@ -347,14 +361,14 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterClose > 0) {
-                builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
             }
             addedAction = true;
         }
 
         // MID SEGMENT
         if (cfg.runMid) {
-            builder
+            builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(135))
                     .splineTo(blueMidIntake.position, Math.toRadians(90))
@@ -371,14 +385,14 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterMid > 0) {
-                builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
             }
             addedAction = true;
         }
 
         // FAR SEGMENT
         if (cfg.runFar) {
-            builder
+            builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(
@@ -398,18 +412,18 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.shootThree());
 
             if (cfg.delayAfterFar > 0) {
-                builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
             }
             addedAction = true;
         }
 
         if (!addedAction) {
-            builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
+            builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
         }
 
-        builtAuto = builder.build();
+//        builtAuto = builder.build();
 
-        return builder.build();
+//        return builder.build();
     }
 
     // ---------------- HELPER: RED TRANSFORM ----------------
