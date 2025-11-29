@@ -58,14 +58,13 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         MecanumDrive drive = Bot.drive;
 
-        bot.turret.trackObelisk();
         bot.enableFullAuto(true);
         bot.enableShooter(false);
         bot.setAllianceBlue();
         bot.setFar();
         bot.intake.closeGate();
         bot.intake.storage();
-        bot.turret.trackObelisk();
+        bot.setTargetGoalPose();
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
         while (opModeInInit() && !isStopRequested() && !isStarted()) {
@@ -80,6 +79,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
             // Telemetry for configuration
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
+            telemetry.addData("STARTING POSITION", Bot.getStartingPos());
             telemetry.addData("Selected segment", segmentName(selectedSegment));
             telemetry.addData("Preload: run / delay", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
@@ -101,8 +101,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        buildFarAuto(drive, Bot.isBlue(), cfg);
-        builtAuto = builder.build();
+        if (builtAuto == null) {
+            builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+        }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
         telemetry.addData("Segments", "preload:%b hp:%b close:%b mid:%b far:%b",
@@ -220,7 +221,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         // Y: build the auto with current config
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-            /*builtAuto = */buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
         }
     }
 
@@ -243,7 +244,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
     // ---------------- BUILDER: BUILD BLUE/RED FAR AUTO ----------------
 
-    private void buildFarAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
+    private Action buildFarAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
         builder = isBlue
                 ? drive.actionBuilderBlue(Pos.initialFarBluePose)
                 : drive.actionBuilderRed(Pos.initialFarBluePose);
@@ -252,7 +253,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         if (cfg.runPreload) {
             builder = builder
-                    .afterTime(0.2, bot.enableShooter())
+                    .afterTime(0.1, bot.enableShooter())
                     .strafeToConstantHeading(Pos.edgeShoot)
                     .stopAndAdd(bot.shootThree())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
@@ -344,6 +345,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
         }
+        return builder.build();
     }
 
 }
