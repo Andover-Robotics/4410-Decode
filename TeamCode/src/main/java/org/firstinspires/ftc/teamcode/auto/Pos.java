@@ -18,7 +18,7 @@ public class Pos {
 
     // INTAKE
     public static Pose2d blueHpIntake = new Pose2d(-49, 61.5, WALL_INTAKE_ANGLE);
-    public static Pose2d blueStraightHpIntake = new Pose2d(-47, 61.5, Math.toRadians(128));
+    public static Pose2d blueStraightHpIntake = new Pose2d(-50, 61.5, Math.toRadians(128));
     public static Pose2d blueFarIntake = new Pose2d(-35, 29, Math.toRadians(90));
     public static Pose2d blueMidIntake = new Pose2d(-11, 29, Math.toRadians(90));
     public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
@@ -28,9 +28,9 @@ public class Pos {
     public static Vector2d closeShoot = new Vector2d(6, 17);
     public static Vector2d closeFirstShoot = new Vector2d(13, 15);
     public static Vector2d farShoot = new Vector2d(-61, 9);
-    public static Vector2d edgeShoot = new Vector2d(6,10);
+    public static Vector2d edgeShoot = new Vector2d(6,15);
 
-    public static Pose2d gate = new Pose2d(7, 57, Math.toRadians(0));
+    public static Pose2d gate = new Pose2d(5, 57, Math.toRadians(0));
 
     public static Pose2d transformRed(Pose2d pose) {
         return new Pose2d(new Vector2d(pose.position.x, -pose.position.y), -pose.heading.log());
