@@ -50,7 +50,7 @@ public class Lift {
 
 
     public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.002, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 0.95, spoolRad = 14, liftWidth = 178;
-    public static int up = -1550, down = 0, balancing = -500;
+    public static int up = -1350, down = 0, balancing = -500;
 
     public static boolean LEFT_INVERTED = false, RIGHT_INVERTED = false, offsetLeftSide = false;
 
@@ -94,22 +94,22 @@ public class Lift {
         setBothTargetDeg(up);
     }
 
-    public void balance() {
-        offset =-360 * liftWidth * Math.toRadians(Turret.orientation.getRoll(AngleUnit.DEGREES)) / (2 * Math.PI * spoolRad);
-        if (offset > 0) {
-            if (offsetLeftSide) {
-                setLeftTargetDeg(leftTargetDeg + offset);
-            } else {
-                setRightTargetDeg(rightTargetDeg + offset);
-            }
-        } else {
-            if (offsetLeftSide) {
-                setRightTargetDeg(rightTargetDeg + offset);
-            } else {
-                setLeftTargetDeg(leftTargetDeg + offset);
-            }
-        }
-    }
+//    public void balance() {
+//        offset =-360 * liftWidth * Math.toRadians(Turret.orientation.getRoll(AngleUnit.DEGREES)) / (2 * Math.PI * spoolRad);
+//        if (offset > 0) {
+//            if (offsetLeftSide) {
+//                setLeftTargetDeg(leftTargetDeg + offset);
+//            } else {
+//                setRightTargetDeg(rightTargetDeg + offset);
+//            }
+//        } else {
+//            if (offsetLeftSide) {
+//                setRightTargetDeg(rightTargetDeg + offset);
+//            } else {
+//                setLeftTargetDeg(leftTargetDeg + offset);
+//            }
+//        }
+//    }
 
     /** Call this from your parent loop. Runs PIDF only when enabled. */
     public void periodic() {

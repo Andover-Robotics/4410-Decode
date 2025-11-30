@@ -50,7 +50,7 @@ public class Turret {
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
-    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 8, trackingDistance;
+    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 8, trackingDistance, pureDistance;
     public static YawPitchRollAngles orientation;
 
     public int startingOffset = 0;
@@ -225,6 +225,8 @@ public class Turret {
         // 0° turret = 180° robot-relative CCW
         double turretTargetCW = normDeg(-relToRobotCCW + 180);
 
+        pureDistance = Math.sqrt(dx*dx + dy*dy);
+
         // Tracking distance from turret to goal
         trackingDistance = Math.sqrt(POS_TRACK_X * POS_TRACK_X + POS_TRACK_Y * POS_TRACK_Y);
 
@@ -232,28 +234,30 @@ public class Turret {
     }
 
     public void velocityCompensation(double dx, double dy) {
-        double time = calculateTime(dx, dy);
-        velocity = Bot.drive.localizer.update();
+        if (getPositionDegs() < 175 && getPositionDegs() > -175) {
+            double time = calculateTime(dx, dy);
+            velocity = Bot.drive.localizer.update();
 //        double dispX = velocity.linearVel.x * time;
 //        double dispY = velocity.linearVel.y * time;
 //        POS_TRACK_X = dx + dispX;
 //        POS_TRACK_Y = dy + dispY;
-        double heading = pose.heading.log();
+            double heading = pose.heading.log();
 
-        // Convert robot-centric velocity to field frame
-        double velocityXField = velocity.linearVel.x * Math.cos(heading) - velocity.linearVel.y * Math.sin(heading);
-        double velocityYField = velocity.linearVel.x * Math.sin(heading) + velocity.linearVel.y * Math.cos(heading);
+            // Convert robot-centric velocity to field frame
+            double velocityXField = velocity.linearVel.x * Math.cos(heading) - velocity.linearVel.y * Math.sin(heading);
+            double velocityYField = velocity.linearVel.x * Math.sin(heading) + velocity.linearVel.y * Math.cos(heading);
 
-        // Offset the target opposite the robot's drift so that the added launch
-        // velocity from the robot's motion lands on the goal.
-        double dispX = velocityXField * time;
-        double dispY = velocityYField * time;
-        if (velComp) {
-            POS_TRACK_X = dx - dispX;
-            POS_TRACK_Y = dy - dispY;
-        } else {
-            POS_TRACK_X = dx;
-            POS_TRACK_Y = dy;
+            // Offset the target opposite the robot's drift so that the added launch
+            // velocity from the robot's motion lands on the goal.
+            double dispX = velocityXField * time;
+            double dispY = velocityYField * time;
+            if (velComp) {
+                POS_TRACK_X = dx - dispX;
+                POS_TRACK_Y = dy - dispY;
+            } else {
+                POS_TRACK_X = dx;
+                POS_TRACK_Y = dy;
+            }
         }
     }
     
@@ -320,12 +324,13 @@ public class Turret {
             } else {
                 shooter.setPower(0);
             }
+
             // LIMELIGHT RELOCALIZATION
             limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
             LLResult result = limelight.getLatestResult();
             if (result != null) {
                 if (result.isValid()) {
-                    llBotPose = result.getBotpose();
+                    llBotPose = result.getBotpose_MT2();
                 }
                 //odom x = llx + 120
                 //odom y = lly + 105

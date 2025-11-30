@@ -235,7 +235,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
             TrajectoryActionBuilder tester = Bot.drive.actionBuilderBlue(Pos.initialFarBluePose)
                     .stopAndAdd(new SleepAction(6.7));
-            tester = tester.stopAndAdd(bot.shootThree());
+            tester = tester.stopAndAdd(bot.shootThreeAutoClose());
             builtAuto = tester.build();
         }
 
@@ -288,7 +288,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .afterTime(0.1, bot.enableShooter())
                     .strafeToConstantHeading(Pos.edgeShoot)
-                    .stopAndAdd(bot.shootThree())
+                    .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
             if (cfg.delayAfterPreload > 0) {
@@ -301,15 +301,19 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .setTangent(Math.toRadians(160))
                     .splineTo(Pos.blueHpIntakeInter, Math.toRadians(180))
+                    .setTangent(Math.toRadians(93))
                     .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(80))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y - 2))
+
+                    .setTangent(Math.toRadians(-90))
+                    .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 5, Pos.blueHpIntake.position.y - 7), Math.toRadians(90))
+                    .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
+
                     .setReversed(true)
                     .setTangent(Math.toRadians(-90))
                     .afterTime(0.1, bot.enableShooter())
                     .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterHp > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
@@ -321,8 +325,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,Pos.blueCloseIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()));
+                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,Pos.blueCloseIntake.position.y + 18));
 
             if (cfg.pushFieldGate) {
                 builder = builder
@@ -337,7 +340,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterClose > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
@@ -351,11 +354,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .setTangent(Math.toRadians(135))
                     .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,Pos.blueMidIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-60))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterMid > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
@@ -368,10 +370,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
-                    .stopAndAdd(new InstantAction(() -> bot.intake.storage()))
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 70))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterFar > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));

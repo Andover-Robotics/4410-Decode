@@ -261,7 +261,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(bot.enableShooter())
                     .strafeToLinearHeading(Pos.closeFirstShoot, Math.toRadians(90))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterPreload > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
@@ -294,7 +294,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
         }
 
         if (cfg.delayAfterClose > 0 && cfg.runClose) {
@@ -311,7 +311,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterMid > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
@@ -328,7 +328,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                             Pos.blueFarIntake.position.y + 18))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterFar > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
@@ -342,20 +342,19 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .stopAndAdd(bot.disableShooter())
                     .setTangent(Math.toRadians(155))
                     .splineToSplineHeading(Pos.blueStraightHpIntake, Math.toRadians(135))
-//                .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(90))
-                    .stopAndAdd(new SleepAction(0.1))
+//                    .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(90))
+                    .stopAndAdd(new SleepAction(0.05))
 
                     .strafeToConstantHeading(new Vector2d(Pos.blueStraightHpIntake.component1().x - 14, Pos.blueStraightHpIntake.component1().y))
-                    .stopAndAdd(new SleepAction(0.1))
+                    .stopAndAdd(new SleepAction(0.05))
                     .setTangent(0)
-                    .splineToSplineHeading(new Pose2d(Pos.blueStraightHpIntake.component1().x - 4, Pos.blueStraightHpIntake.component1().y - 4, Math.toRadians(168)), Math.toRadians(-90))
-                    .splineToSplineHeading(new Pose2d(Pos.blueStraightHpIntake.component1().x - 12, Pos.blueStraightHpIntake.component1().y - 6, Math.toRadians(-165)), Math.toRadians(180))
+                    .splineToSplineHeading(new Pose2d(Pos.blueStraightHpIntake.component1().x - 14, Pos.blueStraightHpIntake.component1().y - 5, Math.toRadians(-135)), Math.toRadians(-90))
+                    .splineTo(new Vector2d(Pos.blueHpIntakeInter.x, Pos.blueHpIntakeInter.y + 3), Math.toRadians(-90))
 
-                    .setTangent(Math.toRadians(-90))
+//                    .setTangent(Math.toRadians(-90))
                     .afterTime(0.1, bot.enableShooter())
-                    .splineToLinearHeading(new Pose2d(Pos.blueHpIntakeInter, Math.toRadians(180)), Math.toRadians(-89))
                     .splineToLinearHeading(new Pose2d(Pos.closeShoot, Math.toRadians(-90)), Math.toRadians(0))
-                    .stopAndAdd(bot.shootThree());
+                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterHp > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));

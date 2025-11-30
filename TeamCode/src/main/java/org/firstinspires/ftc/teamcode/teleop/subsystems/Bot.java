@@ -26,11 +26,11 @@ public class Bot {
     public Lift lift;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
-    public static Pose2d resetPose = new Pose2d(-61, -63, Math.toRadians(-90));
-    public static Vector2d goalPose = new Vector2d(64, 61); //initializes with blue, switches based on alliance
+    public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90));
+    public static Vector2d goalPose = new Vector2d(65, 60); //initializes with blue, switches based on alliance
 //    public static Vector2d farAutoGoalPose = new Vector2d(61, 64);
     public static Vector2d targetPose = goalPose;
-    public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.0024, shootDelayRPMThreshold = 3900;
+    public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.02, shootDelayDihThreshold = 100;
     public boolean shooting = false;
 
     public static MecanumDrive drive;
@@ -92,10 +92,13 @@ public class Bot {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
 //            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, -1 * Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
+            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset) * -1;
+
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
 //            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
+            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset);
         }
         targetPose = goalPose;
     }
@@ -178,7 +181,7 @@ public class Bot {
     }
 
     public void updateShootingTime() {
-        shootDelay = Math.max((Turret.shooterRpm - shootDelayRPMThreshold), 0) * shootDelayCF;
+        shootDelay = Math.max((Turret.pureDistance - shootDelayDihThreshold), 0) * shootDelayCF;
     }
 
     public Action shootThree() {
@@ -196,6 +199,22 @@ public class Bot {
                 new InstantAction(() -> intake.closeGate()),
                 new SleepAction(shootDelay),
                 new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new InstantAction(() -> intake.storage()),
+                new InstantAction(() -> shooting = false)
+        );
+    }
+
+    public Action shootThreeAutoClose() {
+        updateShootingTime();
+        return new SequentialAction(
+                new InstantAction(() -> shooting = true),
+                new InstantAction(() -> intake.intake()),
+                new SleepAction(0.1),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new SleepAction(shootTime),
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
                 new InstantAction(() -> intake.storage()),

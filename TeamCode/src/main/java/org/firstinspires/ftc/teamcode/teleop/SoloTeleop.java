@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "MainTeleop", group = "Competition")
-public class MainTeleop extends LinearOpMode {
+@TeleOp(name = "Solo Teleop", group = "Competition")
+public class SoloTeleop extends LinearOpMode {
 
     private Bot bot;
     private double driveSpeed = 1, driveMultiplier = 1 ;
-    private GamepadEx gp1, gp2;
+    private GamepadEx gp1;
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
@@ -50,7 +50,6 @@ public class MainTeleop extends LinearOpMode {
         bot = Bot.getInstance(this);
 
         gp1 = new GamepadEx(gamepad1);
-        gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
 
         // Initialize bot
@@ -61,7 +60,6 @@ public class MainTeleop extends LinearOpMode {
         while (!isStarted()) {
 
             gp1.readButtons();
-            gp2.readButtons();
 
             TelemetryPacket packet = new TelemetryPacket();
 
@@ -114,7 +112,6 @@ public class MainTeleop extends LinearOpMode {
             TelemetryPacket packet = new TelemetryPacket();
 
             gp1.readButtons();
-            gp2.readButtons();
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
@@ -144,39 +141,19 @@ public class MainTeleop extends LinearOpMode {
                 bot.lift.liftUp();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
-                bot.lift.balance();
-            }
-
-            // TURRET
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
-                bot.enableFullAuto(true);
-                manualTurret = false;
-            }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
-                bot.enableFullAuto(false);
-                bot.turret.enablePositionTracking(true);
-                manualTurret = false;
-            }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
-                bot.enableFullAuto(false);
-                manualTurret = true;
-            }
-
             // SHOOTING
 
-            if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+            if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp2.getButton(GamepadKeys.Button.A) && !bot.shooting) {
+            if (gp1.getButton(GamepadKeys.Button.A) && !bot.shooting) {
                 runningActions.add(bot.shootOne());
             }
 
-            if (gp2.getButton(GamepadKeys.Button.B) && !bot.shooting) {
+            if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
                 runningActions.add(bot.shootThree());
             }
 
@@ -193,23 +170,6 @@ public class MainTeleop extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
                 bot.resetPose();
             }
-
-            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.intake.openGate();
-            }
-
-            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                bot.intake.closeGate();
-            }
-
-            if (manualTurret) {
-                bot.turret.runManual(gp2.getLeftX());
-            }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetEncoder();
-            }
-
 
 
             bot.periodic();
@@ -247,8 +207,8 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("hsv: ", h + " " + s + " " + v);
 
 
-        telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
-        telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
             telemetry.addData("\n", bot.intake.storageCount());

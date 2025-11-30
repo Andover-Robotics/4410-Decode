@@ -40,7 +40,7 @@ public class OldFarAuto extends LinearOpMode {
 
                 .afterTime(0.2, bot.enableShooter())
                 .strafeToConstantHeading(Pos.edgeShoot)
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .stopAndAdd(new InstantAction(()-> bot.disableShooter()))
 
@@ -55,7 +55,7 @@ public class OldFarAuto extends LinearOpMode {
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
@@ -67,7 +67,7 @@ public class OldFarAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
@@ -78,7 +78,7 @@ public class OldFarAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .splineTo(Pos.closeShoot, Math.toRadians(-60))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
@@ -86,14 +86,14 @@ public class OldFarAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .setReversed(true)
                 .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
                 .build();
 
         Action redFarAuto = drive.actionBuilderRed(Pos.initialFarBluePose)
 
                 .afterTime(0.2, bot.enableShooter())
                 .strafeToConstantHeading(Pos.edgeShoot)
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .stopAndAdd(new InstantAction(()-> bot.disableShooter()))
 
@@ -108,7 +108,7 @@ public class OldFarAuto extends LinearOpMode {
                 .afterTime(0.1, bot.enableShooter())
                 .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0)) //might be +150? idk will have to test
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45,65))
@@ -120,7 +120,7 @@ public class OldFarAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
@@ -131,7 +131,7 @@ public class OldFarAuto extends LinearOpMode {
                 .stopAndAdd(bot.enableShooter())
                 .setReversed(true)
                 .splineTo(Pos.closeShoot, Math.toRadians(-60))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
@@ -139,7 +139,7 @@ public class OldFarAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
                 .setReversed(true)
                 .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50,70))
-                .stopAndAdd(bot.shootThree())
+                .stopAndAdd(bot.shootThreeAutoClose())
                 .build();
 
 
