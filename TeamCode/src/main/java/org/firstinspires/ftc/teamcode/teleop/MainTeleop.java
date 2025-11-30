@@ -144,10 +144,6 @@ public class MainTeleop extends LinearOpMode {
                 bot.lift.liftUp();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
-                bot.lift.balance();
-            }
-
             // TURRET
 
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
