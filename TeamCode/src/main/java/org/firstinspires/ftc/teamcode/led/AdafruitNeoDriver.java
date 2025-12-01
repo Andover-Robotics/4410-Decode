@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cWaitControl;
+import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
+import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 
 /**
  * Minimal I2C driver for the Adafruit NeoDriver / Seesaw NeoPixel bridge.
@@ -24,9 +26,11 @@ import com.qualcomm.robotcore.hardware.I2cWaitControl;
  *   - NEO_BUF      (0x04): write the raw pixel buffer
  *   - NEO_SHOW     (0x05): latch/display the latest buffer
  */
+@I2cDeviceType
+@DeviceProperties(name = "Adafruit NeoPixel Driver", description = "Adafruit LED Driver", xmlTag = "AdafruitNeoPixel")
 public class AdafruitNeoDriver extends I2cDeviceSynchDevice<I2cDeviceSynch> {
     // Default I2C address for Seesaw NeoDriver boards
-    public static final I2cAddr DEFAULT_ADDRESS = I2cAddr.create7bit(0x49);
+    public static final I2cAddr DEFAULT_ADDRESS = I2cAddr.create7bit(0x60);
 
     private static final byte MODULE_NEOPIXEL = 0x0E;
     private static final byte REG_PIN = 0x01;
@@ -100,7 +104,7 @@ public class AdafruitNeoDriver extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
     @Override
     public Manufacturer getManufacturer() {
-        return null;
+        return Manufacturer.Adafruit;
     }
 
     @Override
