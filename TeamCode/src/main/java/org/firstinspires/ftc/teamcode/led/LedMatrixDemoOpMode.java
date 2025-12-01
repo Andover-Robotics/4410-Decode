@@ -1,10 +1,7 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.led;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.teamcode.led.LedMatrixController;
-import org.firstinspires.ftc.teamcode.led.LedMatrixBuffer;
 
 @TeleOp(name = "LED Matrix Demo", group = "Examples")
 public class LedMatrixDemoOpMode extends LinearOpMode {
