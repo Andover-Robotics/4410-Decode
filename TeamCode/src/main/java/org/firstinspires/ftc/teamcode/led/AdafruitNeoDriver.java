@@ -43,6 +43,14 @@ public class AdafruitNeoDriver extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
     private final int pixelCount;
 
+    public AdafruitNeoDriver(I2cDeviceSynch i2cDeviceSynch, boolean deviceClientIsOwned) {
+        super(i2cDeviceSynch, deviceClientIsOwned);
+        this.deviceClient.setI2cAddress(DEFAULT_ADDRESS);
+        registerArmingStateCallback(true);
+        this.deviceClient.engage();
+        pixelCount = 192;
+    }
+
     public AdafruitNeoDriver(@NonNull HardwareMap hardwareMap,
                              @NonNull String deviceName,
                              int pixelCount) {

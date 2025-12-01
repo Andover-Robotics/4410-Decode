@@ -23,7 +23,8 @@ public class LedMatrixController {
                                @NonNull String i2cDeviceName,
                                @NonNull I2cAddr address) {
         int pixelCount = LedMatrixBuffer.ROWS * LedMatrixBuffer.COLS;
-        driver = new AdafruitNeoDriver(hardwareMap, i2cDeviceName, pixelCount, address);
+//        driver = new AdafruitNeoDriver(hardwareMap, i2cDeviceName, pixelCount, address);
+        driver = hardwareMap.get(AdafruitNeoDriver.class, "screen");
         driver.initialize();
     }
 
