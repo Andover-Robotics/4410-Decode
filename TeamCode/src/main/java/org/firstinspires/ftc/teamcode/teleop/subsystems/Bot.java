@@ -28,7 +28,7 @@ public class Bot {
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90));
     public static Vector2d goalPose = new Vector2d(65, 60); //initializes with blue, switches based on alliance
-//    public static Vector2d farAutoGoalPose = new Vector2d(61, 64);
+    public static Vector2d farAutoGoalPose = new Vector2d(61, 64);
     public static Vector2d targetPose = goalPose;
     public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.02, shootDelayDihThreshold = 100;
     public boolean shooting = false;
@@ -90,22 +90,22 @@ public class Bot {
     public static void updatePoses() {
         if (isRed()) {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
-//            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, -1 * Math.abs(farAutoGoalPose.y));
+            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, -1 * Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
             Turret.llyRLOffset = Math.abs(Turret.llyRLOffset) * -1;
 
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
-//            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, Math.abs(farAutoGoalPose.y));
+            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
             Turret.llyRLOffset = Math.abs(Turret.llyRLOffset);
         }
         targetPose = goalPose;
     }
 //
-//    public void setTargetFarAutoGoal() {
-//        targetPose = farAutoGoalPose;
-//    }
+    public void setTargetFarAutoGoal() {
+        targetPose = farAutoGoalPose;
+    }
 
     public void setTargetGoalPose() {
         targetPose = goalPose;

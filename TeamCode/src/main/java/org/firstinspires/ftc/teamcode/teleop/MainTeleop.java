@@ -52,7 +52,7 @@ public class MainTeleop extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
-        bot.setTargetGoalPose();
+        bot.setTargetFarAutoGoal();
 
         // Initialize bot
 //        bot.stopMotors();
