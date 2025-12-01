@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.led;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.HardwareDevice;
-import com.qualcomm.robotcore.hardware.HardwareDeviceManufacturer;
+//import com.qualcomm.robotcore.hardware.HardwareDeviceManufacturer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
@@ -100,7 +100,7 @@ public class AdafruitNeoDriver extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
     @Override
     public Manufacturer getManufacturer() {
-        return HardwareDeviceManufacturer.Other;
+        return null;
     }
 
     @Override

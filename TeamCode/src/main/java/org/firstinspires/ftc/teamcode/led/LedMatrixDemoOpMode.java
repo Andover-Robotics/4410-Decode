@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class LedMatrixDemoOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
-        LedMatrixController matrix = new LedMatrixController(hardwareMap, "i2cMatrix");
+        LedMatrixController matrix = new LedMatrixController(hardwareMap, "screen");
         LedMatrixBuffer buffer = matrix.getBuffer();
 
         // Prepare a startup pattern
