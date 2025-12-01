@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
-@Autonomous(name = "Adaptive Far Auto", group = "Competition")
+@Autonomous(name = "Preload HP Far Auto", group = "Competition")
 public class Preload_FarFarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
