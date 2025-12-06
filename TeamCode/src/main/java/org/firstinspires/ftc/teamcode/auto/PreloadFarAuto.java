@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
-@Autonomous(name = "Adaptive Far Auto", group = "Competition")
-public class Preload_FarFarAuto extends LinearOpMode {
+@Autonomous(name = "Preload Far Auto", group = "Competition")
+public class PreloadFarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
     public void runOpMode() throws InterruptedException {
