@@ -22,6 +22,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
+    private long lastConfigEditTime = System.currentTimeMillis();
+    private boolean buildUpToDate = true;
+
     // ---------------- CONFIG STRUCT ----------------
     public static class AutoConfig {
         // which segments to run
@@ -76,7 +79,17 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
         while (!isStarted() && !isStopRequested()) {
-            handleConfigInput();
+            boolean configChanged = handleConfigInput();
+
+            if (configChanged) {
+                lastConfigEditTime = System.currentTimeMillis();
+                buildUpToDate = false;
+            }
+
+            if (!buildUpToDate && System.currentTimeMillis() - lastConfigEditTime >= 8000) {
+                builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+                buildUpToDate = true;
+            }
 
             // keep pose synced to chosen alliance
             if (Bot.isBlue()) {
@@ -103,6 +116,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
+            if (!buildUpToDate) {
+                telemetry.addData("BUILD NOT UPDATED", "Waiting to auto-build");
+            }
             if (builtAuto != null) {
                 telemetry.addData("build", builtAuto);
             }
@@ -113,8 +129,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        if (builtAuto == null) {
+        if (builtAuto == null || !buildUpToDate) {
             builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            buildUpToDate = true;
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
@@ -149,12 +166,15 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
     // ---------------- CONFIG INPUT HANDLING ----------------
 
-    private void handleConfigInput() {
+    private boolean handleConfigInput() {
         gp1.readButtons();
+
+        boolean configChanged = false;
 
         // Alliance toggle (you already had A for this)
         if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
             bot.switchAlliance();
+            configChanged = true;
         }
 
         // Move selected segment up/down
@@ -173,21 +193,27 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     break;
                 case 1:
                     cfg.runPreload = !cfg.runPreload;
+                    configChanged = true;
                     break;
                 case 2:
                     cfg.runHp = !cfg.runHp;
+                    configChanged = true;
                     break;
                 case 3:
                     cfg.runClose = !cfg.runClose;
+                    configChanged = true;
                     break;
                 case 4:
                     cfg.pushFieldGate = !cfg.pushFieldGate;
+                    configChanged = true;
                     break;
                 case 5:
                     cfg.runMid = !cfg.runMid;
+                    configChanged = true;
                     break;
                 case 6:
                     cfg.runFar = !cfg.runFar;
+                    configChanged = true;
                     break;
             }
         }
@@ -205,29 +231,36 @@ public class AdaptiveFarAuto extends LinearOpMode {
             switch (selectedSegment) {
                 case 0:
                     cfg.startDelay = clampDelay(cfg.startDelay + delta);
+                    configChanged = true;
                     break;
                 case 1:
                     cfg.delayAfterPreload =
                             clampDelay(cfg.delayAfterPreload + delta);
+                    configChanged = true;
                     break;
                 case 2:
                     cfg.delayAfterHp =
                             clampDelay(cfg.delayAfterHp + delta);
+                    configChanged = true;
                     break;
                 case 3:
                     cfg.delayAfterClose =
                             clampDelay(cfg.delayAfterClose + delta);
+                    configChanged = true;
                     break;
                 case 4:
                     cfg.delayAfterGate = clampDelay(cfg.delayAfterGate + delta);
+                    configChanged = true;
                     break;
                 case 5:
                     cfg.delayAfterMid =
                             clampDelay(cfg.delayAfterMid + delta);
+                    configChanged = true;
                     break;
                 case 6:
                     cfg.delayAfterFar =
                             clampDelay(cfg.delayAfterFar + delta);
+                    configChanged = true;
                     break;
             }
         }
@@ -241,12 +274,16 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
             builtAuto = builder.build();
+            buildUpToDate = true;
         }
 
         // Y: build the auto with current config
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
             builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            buildUpToDate = true;
         }
+
+        return configChanged;
     }
 
     private int clampDelay(int d) {
