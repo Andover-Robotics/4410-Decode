@@ -129,8 +129,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        if (builtAuto == null) {
+        if (builtAuto == null || !buildUpToDate) {
             builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            buildUpToDate = true;
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
