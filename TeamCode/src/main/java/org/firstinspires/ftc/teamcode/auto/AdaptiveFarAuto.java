@@ -15,6 +15,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
 @Autonomous(name = "Adaptive Far Auto", group = "Competition")
@@ -56,6 +57,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
     // built auto we will run after start
     private Action builtAuto = null;
     private TrajectoryActionBuilder builder;
+    private final ElapsedTime configEditTimer = new ElapsedTime();
+    private boolean configDirty = false;
+    private static final double AUTO_BUILD_DELAY_SECONDS = 8.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -63,6 +67,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         bot = Bot.getInstance(this);
 
         gp1 = new GamepadEx(gamepad1);
+        configEditTimer.reset();
 
         MecanumDrive drive = Bot.drive;
 
@@ -77,6 +82,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
         while (!isStarted() && !isStopRequested()) {
             handleConfigInput();
+
+            if (configDirty && configEditTimer.seconds() >= AUTO_BUILD_DELAY_SECONDS) {
+                builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+                configDirty = false;
+            }
 
             // keep pose synced to chosen alliance
             if (Bot.isBlue()) {
@@ -103,6 +113,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
+            if (configDirty) {
+                telemetry.addData("BUILD NOT UPDATED", "Changes pending build");
+            }
             if (builtAuto != null) {
                 telemetry.addData("build", builtAuto);
             }
@@ -115,6 +128,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (isStopRequested()) return;
         if (builtAuto == null) {
             builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            configDirty = false;
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
@@ -155,6 +169,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         // Alliance toggle (you already had A for this)
         if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
             bot.switchAlliance();
+            markConfigEdited();
         }
 
         // Move selected segment up/down
@@ -173,21 +188,27 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     break;
                 case 1:
                     cfg.runPreload = !cfg.runPreload;
+                    markConfigEdited();
                     break;
                 case 2:
                     cfg.runHp = !cfg.runHp;
+                    markConfigEdited();
                     break;
                 case 3:
                     cfg.runClose = !cfg.runClose;
+                    markConfigEdited();
                     break;
                 case 4:
                     cfg.pushFieldGate = !cfg.pushFieldGate;
+                    markConfigEdited();
                     break;
                 case 5:
                     cfg.runMid = !cfg.runMid;
+                    markConfigEdited();
                     break;
                 case 6:
                     cfg.runFar = !cfg.runFar;
+                    markConfigEdited();
                     break;
             }
         }
@@ -205,29 +226,36 @@ public class AdaptiveFarAuto extends LinearOpMode {
             switch (selectedSegment) {
                 case 0:
                     cfg.startDelay = clampDelay(cfg.startDelay + delta);
+                    markConfigEdited();
                     break;
                 case 1:
                     cfg.delayAfterPreload =
                             clampDelay(cfg.delayAfterPreload + delta);
+                    markConfigEdited();
                     break;
                 case 2:
                     cfg.delayAfterHp =
                             clampDelay(cfg.delayAfterHp + delta);
+                    markConfigEdited();
                     break;
                 case 3:
                     cfg.delayAfterClose =
                             clampDelay(cfg.delayAfterClose + delta);
+                    markConfigEdited();
                     break;
                 case 4:
                     cfg.delayAfterGate = clampDelay(cfg.delayAfterGate + delta);
+                    markConfigEdited();
                     break;
                 case 5:
                     cfg.delayAfterMid =
                             clampDelay(cfg.delayAfterMid + delta);
+                    markConfigEdited();
                     break;
                 case 6:
                     cfg.delayAfterFar =
                             clampDelay(cfg.delayAfterFar + delta);
+                    markConfigEdited();
                     break;
             }
         }
@@ -237,16 +265,25 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(new SleepAction(6.7));
             tester = tester.stopAndAdd(bot.shootThreeAutoClose());
             builtAuto = tester.build();
+            configDirty = false;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
             builtAuto = builder.build();
+            configDirty = false;
         }
 
         // Y: build the auto with current config
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
             builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+            configDirty = false;
         }
+    }
+
+    private void markConfigEdited() {
+        configDirty = true;
+        configEditTimer.reset();
+        builtAuto = null;
     }
 
     private int clampDelay(int d) {
