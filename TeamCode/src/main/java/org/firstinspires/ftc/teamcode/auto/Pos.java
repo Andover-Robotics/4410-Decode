@@ -24,11 +24,12 @@ public class Pos {
     public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
     public static Vector2d blueHpIntakeInter = new Vector2d(-58, 24);
 
+    public static Pose2d blueSecretTunnel = new Pose2d(-40, 59, Math.toRadians(135));
+
     // SHOOTING (Vectors, as we do not care about robot orientation here)
     public static Vector2d closeShoot = new Vector2d(6, 17);
     public static Vector2d closeFirstShoot = new Vector2d(13, 15);
     public static Vector2d farShoot = new Vector2d(-61, 9);
-    public static Vector2d edgeShoot = new Vector2d(6,15);
 
     public static Pose2d gate = new Pose2d(5, 57, Math.toRadians(0));
 

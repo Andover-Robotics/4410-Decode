@@ -52,7 +52,7 @@ public class MainTeleop extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
-        bot.setTargetFarAutoGoal();
+        bot.setTargetGoalPose();
 
         // Initialize bot
 //        bot.stopMotors();
@@ -281,15 +281,15 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 
-//            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
-//            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
-//            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-//            telemetry.addData("Left Power", bot.lift.leftPower);
-//            telemetry.addData("Right Power", bot.lift.rightPower);
-////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
-////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
-//            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
-//            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
+            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
+            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
+            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
+            telemetry.addData("Left Power", bot.lift.leftPower);
+            telemetry.addData("Right Power", bot.lift.rightPower);
+//            telemetry.addData("Left PID out", bot.lift.leftPidOut);
+//            telemetry.addData("Right PID out", bot.lift.rightPidOut);
+            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
+            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
 //            telemetry.addData("Offset", bot.lift.offset);
 //            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.addData("Velocity", Bot.drive.localizer.update());
