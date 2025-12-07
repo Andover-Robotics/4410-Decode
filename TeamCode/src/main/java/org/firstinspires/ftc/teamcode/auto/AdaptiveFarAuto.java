@@ -31,6 +31,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         public boolean runClose   = true;
         public boolean runMid     = true;
         public boolean runFar     = true;
+        public boolean runCycles  = true;
 
         // delay before starting preload actions (seconds, 0-20)
         public int startDelay = 0;
@@ -46,6 +47,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         public int delayAfterClose   = 0;
         public int delayAfterMid     = 0;
         public int delayAfterFar     = 0;
+        public int delayAfterCycles  = 0;
     }
 
     private AutoConfig cfg = new AutoConfig();
@@ -113,7 +115,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Cycles:     run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runFar, cfg.delayAfterFar);
+                    cfg.runCycles, cfg.delayAfterCycles);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
             if (configDirty) {
                 telemetry.addData("BUILD NOT UPDATED", "Changes pending build");
@@ -135,7 +137,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
         telemetry.addData("Segments", "preload:%b hp:%b close:%b mid:%b far:%b",
-                cfg.runPreload, cfg.runHp, cfg.runClose, cfg.runMid, cfg.runFar);
+                cfg.runPreload, cfg.runHp, cfg.runClose, cfg.runMid, cfg.runFar, cfg.runCycles);
         telemetry.update();
 
         // Set starting pose again at start
