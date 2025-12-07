@@ -39,7 +39,7 @@ public class OldFarAuto extends LinearOpMode {
         Action blueFarAuto = drive.actionBuilderBlue(Pos.initialFarBluePose)
 
                 .afterTime(0.2, bot.enableShooter())
-                .strafeToConstantHeading(Pos.edgeShoot)
+                .strafeToConstantHeading(Pos.closeShoot)
                 .stopAndAdd(bot.shootThreeAutoClose())
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .stopAndAdd(new InstantAction(()-> bot.disableShooter()))
@@ -92,7 +92,7 @@ public class OldFarAuto extends LinearOpMode {
         Action redFarAuto = drive.actionBuilderRed(Pos.initialFarBluePose)
 
                 .afterTime(0.2, bot.enableShooter())
-                .strafeToConstantHeading(Pos.edgeShoot)
+                .strafeToConstantHeading(Pos.closeShoot)
                 .stopAndAdd(bot.shootThreeAutoClose())
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .stopAndAdd(new InstantAction(()-> bot.disableShooter()))

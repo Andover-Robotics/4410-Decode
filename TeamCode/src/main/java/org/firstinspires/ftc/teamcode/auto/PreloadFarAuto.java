@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -31,39 +32,29 @@ public class PreloadFarAuto extends LinearOpMode {
 
         Action blueFarAutoOnlyHpPreFar = drive.actionBuilderBlue(Pos.initialFarBluePose)
 
-                .afterTime(0.1, bot.enableShooter())
-                .strafeToConstantHeading(Pos.edgeShoot)
-                .stopAndAdd(bot.shootThreeAutoClose())
+                .stopAndAdd(new SequentialAction(
+                        new InstantAction(() -> bot.enableShooter(true)),
+                        new SleepAction(0.7),
+                        bot.shootThreeAutoFar()
+                ))
                 .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                 .stopAndAdd(new InstantAction(() -> bot.disableShooter()))
-                .setTangent(Math.toRadians(160))
-                .splineTo(Pos.blueHpIntakeInter, Math.toRadians(180))
-                .setTangent(Math.toRadians(93))
+                .setTangent(Math.toRadians(90))
                 .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(80))
                 .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y - 2))
                 .setTangent(Math.toRadians(-90))
                 .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 5, Pos.blueHpIntake.position.y - 7), Math.toRadians(90))
                 .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
-                .setReversed(true)
-                .setTangent(Math.toRadians(-90))
                 .afterTime(0.1, bot.enableShooter())
-                .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0))
-                .stopAndAdd(bot.shootThreeAutoClose())
-                .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
-                .setReversed(true)
-                .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 70))
-                .stopAndAdd(bot.shootThreeAutoClose())
-                .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                .stopAndAdd(new InstantAction(() -> bot.disableShooter()))
+                .strafeToLinearHeading(Pos.initialFarBluePose.component1(), Pos.initialFarBluePose.component2())
+                .stopAndAdd(bot.shootThreeAutoFar())
                 .build();
 
 
         Action redFarAutoOnlyHpPreFar = drive.actionBuilderRed(Pos.initialFarBluePose)
 
                 .afterTime(0.1, bot.enableShooter())
-                .strafeToConstantHeading(Pos.edgeShoot)
+                .strafeToConstantHeading(Pos.closeShoot)
                 .stopAndAdd(bot.shootThreeAutoClose())
                 .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                 .stopAndAdd(new InstantAction(() -> bot.disableShooter()))

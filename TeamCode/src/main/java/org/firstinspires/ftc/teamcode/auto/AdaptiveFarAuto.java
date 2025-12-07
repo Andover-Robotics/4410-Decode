@@ -112,6 +112,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     cfg.runMid, cfg.delayAfterMid);
             telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
+            telemetry.addData("Cycles:     run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runFar, cfg.delayAfterFar);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
             if (configDirty) {
                 telemetry.addData("BUILD NOT UPDATED", "Changes pending build");
@@ -210,6 +212,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     cfg.runFar = !cfg.runFar;
                     markConfigEdited();
                     break;
+                case 7:
+                    cfg.runCycles = !cfg.runCycles;
+                    markConfigEdited();
+                    break;
             }
         }
 
@@ -257,6 +263,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
                             clampDelay(cfg.delayAfterFar + delta);
                     markConfigEdited();
                     break;
+                case 7:
+                    cfg.delayAfterCycles =
+                            clampDelay(cfg.delayAfterCycles + delta);
+                    markConfigEdited();
+                    break;
             }
         }
 //
@@ -301,6 +312,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             case 4: return "Push Gate";
             case 5: return "Mid";
             case 6: return "Far";
+            case 7: return "Cycles";
             default: return "?";
         }
     }
@@ -324,7 +336,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (cfg.runPreload) {
             builder = builder
                     .afterTime(0.1, bot.enableShooter())
-                    .strafeToConstantHeading(Pos.edgeShoot)
+                    .strafeToConstantHeading(Pos.closeShoot)
                     .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -348,10 +360,18 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
 
                     .setReversed(true)
-                    .setTangent(Math.toRadians(-90))
-                    .afterTime(0.1, bot.enableShooter())
-                    .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0))
-                    .stopAndAdd(bot.shootThreeAutoClose());
+                    .setTangent(Math.toRadians(-90));
+            if (cfg.runClose) {
+                builder = builder
+                        .afterTime(0.1, bot.enableShooter())
+                        .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0))
+                        .stopAndAdd(bot.shootThreeAutoClose());
+            } else {
+                builder = builder
+                        .afterTime(0.1, bot.enableShooter())
+                        .splineToSplineHeading(new Pose2d(Pos.closeShoot, Math.toRadians(90)), Math.toRadians(0))
+                        .stopAndAdd(bot.shootThreeAutoClose());
+            }
 
             if (cfg.delayAfterHp > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
@@ -421,6 +441,30 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
             if (cfg.delayAfterFar > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
+            }
+            addedAction = true;
+        }
+
+        if (cfg.runCycles) {
+            builder = builder
+                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
+                    .setTangent(Math.toRadians(125))
+                    .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
+                    .setTangent(Math.toRadians(179))
+                    .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
+                    .stopAndAdd(bot.shootThreeAutoClose())
+                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
+
+                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
+                    .setTangent(Math.toRadians(125))
+                    .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
+                    .setTangent(Math.toRadians(179))
+                    .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
+                    .stopAndAdd(bot.shootThreeAutoClose())
+                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()));
+
+            if (cfg.delayAfterCycles > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterCycles));
             }
             addedAction = true;
         }

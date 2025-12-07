@@ -67,6 +67,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         bot.setClose();
         bot.intake.closeGate();
         bot.intake.storage();
+        bot.setTargetGoalPose();
 
         builtAuto = buildCloseAuto(Bot.drive, Bot.isBlue(), cfg);
 
@@ -268,7 +269,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                                 .stopAndAdd(bot.shootThreeAutoClose());
                     } else {
                         builder = builder
-                                .strafeToLinearHeading(Pos.edgeShoot, Math.toRadians(90))
+                                .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(90))
                                 .stopAndAdd(bot.shootThreeAutoClose());
                     }
                     builder = builder
@@ -305,7 +306,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         if (cfg.runClose || cfg.runGate) {
             builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.edgeShoot, Math.toRadians(135))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -324,7 +325,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                             Pos.blueMidIntake.position.y + 18))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.edgeShoot, Math.toRadians(135))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -343,7 +344,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
                             Pos.blueFarIntake.position.y + 18))
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.edgeShoot, Math.toRadians(155))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -370,7 +371,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .setReversed(true)
                     .setTangent(Math.toRadians(-90))
                     .afterTime(0.1, bot.enableShooter())
-                    .splineToSplineHeading(new Pose2d(Pos.edgeShoot, Math.toRadians(90)), Math.toRadians(0))
+                    .splineToSplineHeading(new Pose2d(Pos.closeShoot, Math.toRadians(90)), Math.toRadians(0))
                     .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterHp > 0) {

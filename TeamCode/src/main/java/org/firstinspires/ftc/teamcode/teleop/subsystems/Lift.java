@@ -49,8 +49,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Lift {
 
 
-    public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.0025, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 1, spoolRad = 14, liftWidth = 178;
-    public static int up = -720, lower = -(up)-30, down = 0, balancing = -500;
+    public static double WRAP_TOLERANCE_DEG = 90.0, MAX_ANALOG_VOLT = 3.3, kP = 0.004, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 1, spoolRad = 14, liftWidth = 178;
+    public static int up = -2600, lower = 1800, down = 0, balancing = -500;
 
     public static boolean LEFT_INVERTED = false, RIGHT_INVERTED = false, offsetLeftSide = false;
 
