@@ -31,7 +31,7 @@ public class Turret {
 
     private IMU imu;
 
-    private Limelight3A limelight;
+    Limelight3A limelight;
     public LLResult llResult;
     public static Pose3D llBotPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0));
 

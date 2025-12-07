@@ -1,4 +1,26 @@
-package org.firstinspires.ftc.teamcode.teleop.subsystems.Prism;
+/*   MIT License
+ *   Copyright (c) [2025] [Base 10 Assets, LLC]
+ *
+ *   Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the "Software"), to deal
+ *   in the Software without restriction, including without limitation the rights
+ *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *   copies of the Software, and to permit persons to whom the Software is
+ *   furnished to do so, subject to the following conditions:
+
+ *   The above copyright notice and this permission notice shall be included in all
+ *   copies or substantial portions of the Software.
+
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *   SOFTWARE.
+ */
+
+package org.firstinspires.ftc.teamcode.Prism;
 
 import static com.qualcomm.robotcore.util.TypeConversion.byteArrayToInt;
 import static com.qualcomm.robotcore.util.TypeConversion.unsignedByteToInt;
@@ -9,7 +31,6 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
-
 import com.qualcomm.robotcore.util.TypeConversion;
 
 import java.nio.ByteOrder;
@@ -242,8 +263,8 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
      * @return total LEDs in strip
      */
     public int getNumberOfLEDs(){
-        byte[] packet = deviceClient.read(Register.STATUS.address,Register.STATUS.registerType.lengthBytes);
-        return unsignedByteToInt(packet[0]);
+       byte[] packet = deviceClient.read(Register.STATUS.address,Register.STATUS.registerType.lengthBytes);
+       return unsignedByteToInt(packet[0]);
     }
 
     /**
@@ -278,10 +299,10 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
 
     /**
      * Inserts an animation into the specified slot in the animations array.
-     *
+     * 
      * @param height the height where the animation should be inserted (0-9)
      * @param animation the AnimationBase object to insert into the array
-     * @return true if the animation was successfully inserted, false if the index
+     * @return true if the animation was successfully inserted, false if the index 
      *         is out of bounds or the animation is null
      */
     public boolean insertAnimation(LayerHeight height, PrismAnimations.AnimationBase animation)
@@ -296,10 +317,10 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
 
     /**
      * Inserts an animation at the specified index and immediately updates it over I2C.
-     *
+     * 
      * @param height the height where the animation should be inserted and updated (0-9)
      * @param animation the AnimationBase object to insert and update
-     * @return true if both insertion and update operations were successful,
+     * @return true if both insertion and update operations were successful, 
      *         false if either operation failed
      */
     public boolean insertAndUpdateAnimation(LayerHeight height, PrismAnimations.AnimationBase animation)
@@ -312,7 +333,7 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
     /**
      * Updates all animations in the manager by sending their data over I2C.
      * Iterates through all animation slots and updates any non-null animations.
-     *
+     * 
      * @return true if the update process completed (currently always returns true)
      */
     public boolean updateAllAnimations()
@@ -321,14 +342,14 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
             if(animations[i] != null && animations[i].layerHeight != LayerHeight.DISABLED)
                 animations[i].updateAnimationOverI2C(this.deviceClient, false);
         }
-        return true;
+        return true;    
     }
-
+    
     /**
      * Updates a specific animation at the given Layer Height by sending its data over I2C.
-     *
+     * 
      * @param height the height of the animation to update (0-9)
-     * @return true if the animation was successfully updated, false if the index
+     * @return true if the animation was successfully updated, false if the index 
      *         is out of bounds or if no animation exists at the specified index
      */
     public boolean updateAnimationFromIndex(LayerHeight height)
@@ -365,10 +386,10 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
     public void saveCurrentAnimationsToArtboard(Artboard artboard)
     {
         byte[] data = {
-                artboard.bitmask,
-                0,
-                0,
-                0
+            artboard.bitmask,
+            0,
+            0,
+            0
         };
         deviceClient.write(Register.ARTBOARD_CONTROL.address, data);
     }
@@ -376,10 +397,10 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
     public void loadAnimationsFromArtboard(Artboard artboard)
     {
         byte[] data = {
-                0,
-                artboard.bitmask,
-                0,
-                0
+            0,
+            artboard.bitmask,
+            0,
+            0
         };
         deviceClient.write(Register.ARTBOARD_CONTROL.address, data);
     }
@@ -387,10 +408,10 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
     public void setDefaultBootArtboard(Artboard artboard)
     {
         byte[] data = {
-                0,
-                0,
-                artboard.bitmask,
-                0
+            0,
+            0,
+            artboard.bitmask,
+            0
         };
         deviceClient.write(Register.ARTBOARD_CONTROL.address, data);
     }

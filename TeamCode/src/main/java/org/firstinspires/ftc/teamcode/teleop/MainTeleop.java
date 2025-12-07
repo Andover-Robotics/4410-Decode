@@ -18,18 +18,25 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Prism.GoBildaPrismDriver;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.LightsAnimation;
+import org.firstinspires.ftc.teamcode.Prism.PrismAnimations;
+
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Config
 @TeleOp(name = "MainTeleop", group = "Competition")
 public class MainTeleop extends LinearOpMode {
 
     private Bot bot;
+    private LightsAnimation lights;
+    private GoBildaPrismDriver prism;
     private double driveSpeed = 1, driveMultiplier = 1 ;
     private GamepadEx gp1, gp2;
     private Thread thread;
@@ -54,12 +61,20 @@ public class MainTeleop extends LinearOpMode {
         bot.enableFullAuto(true);
         bot.setTargetFarAutoGoal();
 
+        prism = hardwareMap.get(GoBildaPrismDriver.class, "prism");
+        lights = new LightsAnimation(prism);
+
+
+
         // Initialize bot
 //        bot.stopMotors();
 
-//        waitForStart();
+        waitForStart();
+
+        lights.startTeleopTimer();
 
         while (!isStarted()) {
+            lights.periodic(bot);
 
             gp1.readButtons();
             gp2.readButtons();
