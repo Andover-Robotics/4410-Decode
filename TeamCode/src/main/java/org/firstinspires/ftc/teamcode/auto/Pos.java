@@ -29,7 +29,7 @@ public class Pos {
     // SHOOTING (Vectors, as we do not care about robot orientation here)
     public static Vector2d closeShoot = new Vector2d(6, 17);
     public static Vector2d closeFirstShoot = new Vector2d(13, 15);
-    public static Vector2d farShoot = new Vector2d(-61, 9);
+    public static Vector2d farShoot = new Vector2d(-59, 9);
 
     public static Pose2d gate = new Pose2d(5, 57, Math.toRadians(0));
 
