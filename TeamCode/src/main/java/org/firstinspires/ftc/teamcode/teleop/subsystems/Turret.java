@@ -299,15 +299,19 @@ public class Turret {
                 controller.setPID(p2, i2, d2);
                 runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
 //                runToAngle(aimAtGlobalPoint(goalX, goalY));
+
+                controller.setSetPoint(setPoint);
+            } else
+                {
+                    if (isManual || manualPower != 0) {
+                    power = manualPower;
+                } else {
+                    controller.setSetPoint(pos);
+                    power = controller.calculate(pos);
+                }
             }
 
-            controller.setSetPoint(setPoint);
 
-            if (isManual || manualPower != 0) {
-                power = manualPower;
-            } else {
-                power = controller.calculate(pos);
-            }
 
             double maxPower = 1;
             power = Math.max(-maxPower, Math.min(maxPower, power));
