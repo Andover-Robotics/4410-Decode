@@ -167,6 +167,11 @@ public final class TankDrive {
             return pose;
         }
 
+
+        @Override
+        public void recalibrateIMU() {
+        }
+
         @Override
         public PoseVelocity2d update() {
             Twist2dDual<Time> delta;

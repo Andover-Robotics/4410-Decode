@@ -156,6 +156,10 @@ public final class MecanumDrive {
         }
 
         @Override
+        public void recalibrateIMU() {
+        }
+
+        @Override
         public PoseVelocity2d update() {
             PositionVelocityPair leftFrontPosVel = leftFront.getPositionAndVelocity();
             PositionVelocityPair leftBackPosVel = leftBack.getPositionAndVelocity();

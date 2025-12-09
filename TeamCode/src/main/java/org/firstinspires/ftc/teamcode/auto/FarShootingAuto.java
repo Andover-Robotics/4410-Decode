@@ -27,6 +27,7 @@ public class FarShootingAuto extends LinearOpMode {
         MecanumDrive drive = Bot.drive;
 
         bot.setTargetGoalPose();
+        Bot.drive.localizer.recalibrateIMU();
 
         Action blueFarAutoOnlyHpPreFar = drive.actionBuilderBlue(Pos.initialFarBluePose)
 

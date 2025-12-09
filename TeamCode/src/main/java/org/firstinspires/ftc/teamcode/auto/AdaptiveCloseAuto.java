@@ -68,6 +68,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         bot.intake.closeGate();
         bot.intake.storage();
         bot.setTargetGoalPose();
+        Bot.drive.localizer.recalibrateIMU();
 
         builtAuto = buildCloseAuto(Bot.drive, Bot.isBlue(), cfg);
 

@@ -23,4 +23,5 @@ public interface Localizer {
      */
     PoseVelocity2d update();
 
+    void recalibrateIMU();
 }

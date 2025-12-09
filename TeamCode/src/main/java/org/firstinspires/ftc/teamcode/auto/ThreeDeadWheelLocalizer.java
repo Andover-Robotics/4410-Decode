@@ -60,6 +60,10 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
     }
 
     @Override
+    public void recalibrateIMU() {
+    }
+
+    @Override
     public Pose2d getPose() {
         return pose;
     }

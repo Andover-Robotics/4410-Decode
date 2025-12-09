@@ -47,6 +47,11 @@ public class OTOSLocalizer implements Localizer {
         return currentPose;
     }
 
+
+    @Override
+    public void recalibrateIMU() {
+    }
+
     @Override
     public void setPose(Pose2d pose) {
         currentPose = pose;

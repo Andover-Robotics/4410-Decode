@@ -74,6 +74,10 @@ public class LowerClimb extends LinearOpMode {
                     newActions.add(action);
                 }
             }
+
+            if (Math.abs(gp1.getLeftY()) > 0) {
+                bot.lift.joystickLower(gp1.getLeftY());
+            }
             runningActions = newActions;
 
             // TELEMETRY

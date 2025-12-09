@@ -74,6 +74,11 @@ public final class TwoDeadWheelLocalizer implements Localizer {
         return pose;
     }
 
+
+    @Override
+    public void recalibrateIMU() {
+    }
+
     @Override
     public PoseVelocity2d update() {
         PositionVelocityPair parPosVel = par.getPositionAndVelocity();

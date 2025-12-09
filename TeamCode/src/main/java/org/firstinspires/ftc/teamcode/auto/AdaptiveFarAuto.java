@@ -80,15 +80,16 @@ public class AdaptiveFarAuto extends LinearOpMode {
         bot.intake.closeGate();
         bot.intake.storage();
         bot.setTargetGoalPose();
+        Bot.drive.localizer.recalibrateIMU();
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
         while (!isStarted() && !isStopRequested()) {
             handleConfigInput();
 
-            if (configDirty && configEditTimer.seconds() >= AUTO_BUILD_DELAY_SECONDS) {
-                builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
-                configDirty = false;
-            }
+//            if (configDirty && configEditTimer.seconds() >= AUTO_BUILD_DELAY_SECONDS) {
+//                builtAuto = buildFarAuto(Bot.drive, Bot.isBlue(), cfg);
+//                configDirty = false;
+//            }
 
             // keep pose synced to chosen alliance
             if (Bot.isBlue()) {
