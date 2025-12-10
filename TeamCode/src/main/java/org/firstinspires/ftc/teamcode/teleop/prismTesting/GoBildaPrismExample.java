@@ -80,7 +80,7 @@ public class GoBildaPrismExample extends LinearOpMode {
          * Set the number of LEDs (starting at 0) that are in your strip. This can be longer
          * than the actual length of the strip, but some animations won't look quite right.
          */
-        prism.setStripLength(192);
+        prism.setStripLength(GoBildaPrismDriver.MATRIX_LED_COUNT);
 
         /*
          * Here you can customize the specifics of different animations. Each animation has it's
@@ -89,8 +89,7 @@ public class GoBildaPrismExample extends LinearOpMode {
          * for every animation!
          */
         solid.setBrightness(0);
-        solid.setStartIndex(0);
-        solid.setStopIndex(12);
+        solid.setIndexesByCoordinates(0, 0, GoBildaPrismDriver.PANEL_WIDTH - 1, 1);
 
         rainbowSnakes.setNumberOfSnakes(1);
         rainbowSnakes.setSnakeLength(64);
@@ -98,6 +97,7 @@ public class GoBildaPrismExample extends LinearOpMode {
         rainbowSnakes.setRepeatAfter(128);
         rainbowSnakes.setSpeed(0.12f);
         rainbowSnakes.setBrightness(20);
+        rainbowSnakes.setIndexesByCoordinates(0, 0, GoBildaPrismDriver.MATRIX_WIDTH - 1, GoBildaPrismDriver.MATRIX_HEIGHT - 1);
 
         telemetry.addData("Device ID: ", prism.getDeviceID());
         telemetry.addData("Firmware Version: ", prism.getFirmwareVersionString());
