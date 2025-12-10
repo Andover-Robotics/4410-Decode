@@ -56,7 +56,7 @@ public class PrismAnimations {
         protected final AnimationType animationType;
         protected int brightness = 100;
         protected int startIndex = 0;
-        protected int stopIndex  = 255;
+        protected int stopIndex  = GoBildaPrismDriver.MATRIX_LED_COUNT - 1;
         protected LayerHeight layerHeight;
 
         //region Constructors
@@ -67,37 +67,35 @@ public class PrismAnimations {
         /**
          * @param brightness from 0 to 100.
          */
-        protected AnimationBase(AnimationType type, int brightness) { 
+        protected AnimationBase(AnimationType type, int brightness) {
             this(type);
             this.brightness = Math.min(brightness, 100);
         }
 
         /**
          * Set both the first, and last LED in a string that you'd like this animation to show on.
-         * @param startIndex from 0 to 255.
-         * @param stopIndex from 0 to 255.
+         * @param startIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
+         * @param stopIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
          */
         protected AnimationBase(AnimationType type, int startIndex, int stopIndex) {
             this(type);
-            this.startIndex = Math.min(startIndex, 255);
-            this.stopIndex  = Math.min(stopIndex, 255);
+            setIndexes(startIndex, stopIndex);
         }
 
         /**
          * @param brightness from 0 to 100.
-         * @param startIndex from 0 to 255.
-         * @param stopIndex from 0 to 255.
+         * @param startIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
+         * @param stopIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
          */
         protected AnimationBase(AnimationType type, int brightness, int startIndex, int stopIndex){
             this(type, brightness);
-            this.startIndex = Math.min(startIndex, 255);
-            this.stopIndex  = Math.min(stopIndex, 255);
+            setIndexes(startIndex, stopIndex);
         }
 
         /**
          * @param brightness from 0 to 100.
-         * @param startIndex from 0 to 255.
-         * @param stopIndex from 0 to 255.
+         * @param startIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
+         * @param stopIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
          * @param layerHeight the height that this animation should sit at from 0 to 9.
          */
         protected AnimationBase(AnimationType type, int brightness, int startIndex, int stopIndex, LayerHeight layerHeight){
@@ -119,24 +117,44 @@ public class PrismAnimations {
 
         /**
          * The first LED in the string that you'd like this animation to display on.
-         * @param startIndex from 0 to 255.
+         * @param startIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
          */
-        public void setStartIndex(int startIndex) { this.startIndex = Math.min(startIndex, 255); }
+        public void setStartIndex(int startIndex) { this.startIndex = clampToMatrix(startIndex); }
 
         /**
          * The last LED in the string that you'd like this animation to display on.
-         * @param stopIndex from 0 to 255.
+         * @param stopIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
          */
-        public void setStopIndex(int stopIndex)   { this.stopIndex  = Math.min(stopIndex, 255);   }
+        public void setStopIndex(int stopIndex)   { this.stopIndex  = clampToMatrix(stopIndex);   }
 
         /**
          * Set both the first, and last LED in a string that you'd like this animation to show on.
-         * @param startIndex from 0 to 255.
-         * @param stopIndex from 0 to 255.
+         * @param startIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
+         * @param stopIndex from 0 to {@link GoBildaPrismDriver#MATRIX_LED_COUNT} - 1.
          */
         public void setIndexes(int startIndex, int stopIndex){
-            this.startIndex = (byte)startIndex;
-            this.stopIndex = (byte)stopIndex;
+            this.startIndex = clampToMatrix(startIndex);
+            this.stopIndex = clampToMatrix(stopIndex);
+        }
+
+        /**
+         * Configure the animation bounds using a coordinate grid for the full 24x8 matrix.
+         */
+        public void setIndexesByCoordinates(int startX, int startY, int stopX, int stopY){
+            setStartCoordinate(startX, startY);
+            setStopCoordinate(stopX, stopY);
+        }
+
+        public void setStartCoordinate(int x, int y){
+            this.startIndex = GoBildaPrismDriver.matrixIndexFromCoordinate(x, y);
+        }
+
+        public void setStopCoordinate(int x, int y){
+            this.stopIndex = GoBildaPrismDriver.matrixIndexFromCoordinate(x, y);
+        }
+
+        private int clampToMatrix(int index){
+            return Math.max(0, Math.min(index, GoBildaPrismDriver.MATRIX_LED_COUNT - 1));
         }
         //endregion
 
@@ -147,8 +165,8 @@ public class PrismAnimations {
             if(isInsertingAnimation)
                 deviceClient.write(layerHeight.register.address, GetByteArray(0, animationType.AnimationTypeIndex));
             deviceClient.write(layerHeight.register.address, GetByteArray(1, brightness));
-            deviceClient.write(layerHeight.register.address, GetByteArray(2, startIndex));
-            deviceClient.write(layerHeight.register.address, GetByteArray(3, stopIndex));
+            deviceClient.write(layerHeight.register.address, GetByteArray(2, clampToMatrix(startIndex)));
+            deviceClient.write(layerHeight.register.address, GetByteArray(3, clampToMatrix(stopIndex)));
             updateAnimationSpecificValuesOverI2C(deviceClient);
         }
 

@@ -50,6 +50,16 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
     private final int MAXIMUM_NUMBER_OF_ANIMATION_GROUPS = 8;
     private PrismAnimations.AnimationBase[] animations = new PrismAnimations.AnimationBase[MAXIMUM_NUMBER_OF_ANIMATIONS];
 
+    /**
+     * The prism is wired as three 8x8 matrices chained together to form a single 24x8 surface.
+     */
+    public static final int PANEL_WIDTH = 8;
+    public static final int PANEL_HEIGHT = 8;
+    public static final int MATRIX_WIDTH = PANEL_WIDTH * 3;
+    public static final int MATRIX_HEIGHT = PANEL_HEIGHT;
+    public static final int LEDS_PER_PANEL = PANEL_WIDTH * PANEL_HEIGHT;
+    public static final int MATRIX_LED_COUNT = MATRIX_WIDTH * MATRIX_HEIGHT;
+
     //#region Public Types
     public enum LayerHeight
     {
@@ -186,6 +196,28 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
     {
         ((LynxI2cDeviceSynch)(deviceClient)).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
         return true;
+    }
+
+    /**
+     * Convert a two-dimensional coordinate on the 24x8 matrix into the LED strip index
+     * used by the Prism. Each 8x8 section is wired in a serpentine pattern starting at
+     * (0,0) -> (7,0) -> (7,1) -> (0,1) before continuing to the next 8x8 panel.
+     */
+    public static int matrixIndexFromCoordinate(int x, int y)
+    {
+        int clampedX = clamp(x, 0, MATRIX_WIDTH - 1);
+        int clampedY = clamp(y, 0, MATRIX_HEIGHT - 1);
+
+        int panel = clampedX / PANEL_WIDTH;
+        int localX = clampedX % PANEL_WIDTH;
+        int serpentineX = (clampedY % 2 == 0) ? localX : (PANEL_WIDTH - 1 - localX);
+
+        return panel * LEDS_PER_PANEL + (clampedY * PANEL_WIDTH) + serpentineX;
+    }
+
+    private static int clamp(int value, int min, int max)
+    {
+        return Math.max(min, Math.min(value, max));
     }
 
     @Override
