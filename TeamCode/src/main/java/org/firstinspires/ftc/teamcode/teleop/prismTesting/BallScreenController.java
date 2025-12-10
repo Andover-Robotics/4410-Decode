@@ -99,6 +99,8 @@ public class BallScreenController extends LinearOpMode {
                     }
                 }
             }
+//
+//            prism.updateAllAnimations();
 
             telemetry.addLine("D-Pad: left/up/right change balls, down changes background");
             telemetry.addLine("LB: save current composition to next artboard slot");
