@@ -478,7 +478,9 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
                     (byte) color.green,
                     (byte) color.blue
             };
-            deviceClient.write(Register.ANIMATION_SLOT_0.address, packet);
+            // Use the control register for direct LED writes; animation slots expect encoded
+            // animation data and will ignore raw RGB packets.
+            deviceClient.write(Register.CONTROL.address, packet);
         }
     }
 
