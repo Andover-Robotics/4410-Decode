@@ -31,7 +31,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         public boolean runClose   = true;
         public boolean runMid     = true;
         public boolean runFar     = true;
-        public boolean runCycles  = true;
+        public boolean runCycles  = false;
 
         // delay before starting preload actions (seconds, 0-20)
         public int startDelay = 0;
