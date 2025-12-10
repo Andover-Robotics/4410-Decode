@@ -460,6 +460,30 @@ public class GoBildaPrismDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSimpl
         deviceClient.write(Register.ARTBOARD_CONTROL.address, data);
     }
 
+    /**
+     * Send a raw 24x8 frame directly to the Prism. Colors that are null are treated as transparent.
+     * This method is designed for simple, full-frame updates such as the BallScreen helper.
+     */
+    public void displayFrame(Color[] colors)
+    {
+        if (colors == null)
+            return;
+
+        int boundedLength = Math.min(colors.length, MATRIX_LED_COUNT);
+        for (int i = 0; i < boundedLength; i++) {
+            Color color = colors[i] == null ? Color.TRANSPARENT : colors[i];
+            byte[] packet = new byte[] {
+                    (byte) i,
+                    (byte) color.red,
+                    (byte) color.green,
+                    (byte) color.blue
+            };
+            // Use the control register for direct LED writes; animation slots expect encoded
+            // animation data and will ignore raw RGB packets.
+            deviceClient.write(Register.CONTROL.address, packet);
+        }
+    }
+
     private boolean updateAnimationFromIndex(LayerHeight height, boolean isBeingInserted)
     {
         if(height == LayerHeight.DISABLED || animations[height.index] == null)
