@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.teleop.screen;
 
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Intake;
+
 
 import team.techtigers.core.display.Color;
 import team.techtigers.core.display.DisplayRegion;
@@ -14,6 +16,8 @@ public class BallRegion extends DisplayRegion {
     private final Sprite[] sprites;
     public boolean teleop = false;
     public Bot bot;
+
+    Intake.SlotColor[] statuses;
 
     public BallRegion(int x, int y) {
         super(x, y, 24, 8);
@@ -35,29 +39,42 @@ public class BallRegion extends DisplayRegion {
         outline3 = new CircleOutlineSprite(16, 0, 8);
         outline3.setColor(Color.WHITE);
         outline3.disable();
-        sprites = new Sprite[]{circle1, circle2, circle3, outline1, outline2, outline3};
+        sprites = new Sprite[]{circle1, circle2, circle3};
     }
 
     @Override
     public void update() {
         if (teleop) {
-            if (bot.intake.holdingTop()) {
-                circle1.setColor(Color.GREEN);
-            } else {
-                circle1.setColor(Color.BLACK);
+            statuses = bot.intake.getStatuses();
+            for (int i = 0; i < 3; i++) {
+                Sprite circle = sprites[i];
+                if (statuses[i].equals(Intake.SlotColor.GREEN)) {
+                    circle.setColor(Color.GREEN);
+                } else if (statuses[i].equals(Intake.SlotColor.PURPLE)) {
+                    circle.setColor(Color.PURPLE);
+                } else if (statuses[i].equals(Intake.SlotColor.UNKNOWN)) {
+                    circle.setColor(Color.ORANGE);
+                } else {
+                    circle.setColor(Color.BLACK);
+                }
             }
-
-            if (bot.intake.holdingMiddle()) {
-                circle2.setColor(Color.GREEN);
-            } else {
-                circle2.setColor(Color.BLACK);
-            }
-
-            if (bot.intake.holdingBottom()) {
-                circle3.setColor(Color.GREEN);
-            } else {
-                circle3.setColor(Color.BLACK);
-            }
+//            if (bot.intake.holdingTop()) {
+//                circle1.setColor(Color.GREEN);
+//            } else {
+//                circle1.setColor(Color.BLACK);
+//            }
+//
+//            if (bot.intake.holdingMiddle()) {
+//                circle2.setColor(Color.GREEN);
+//            } else {
+//                circle2.setColor(Color.BLACK);
+//            }
+//
+//            if (bot.intake.holdingBottom()) {
+//                circle3.setColor(Color.GREEN);
+//            } else {
+//                circle3.setColor(Color.BLACK);
+//            }
 
         } else if (ScreenTester.changed) {
             for (int i = 0; i < 3; i++) {

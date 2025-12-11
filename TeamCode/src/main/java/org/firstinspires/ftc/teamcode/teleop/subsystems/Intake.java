@@ -17,7 +17,7 @@ public class Intake {
 
     public static double intakePower = -1, storagePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
     public static int filterWindowSize = 10;
-    public static double beamThreshold = 0.6, colorThreshold = 0.55;
+    public static double beamThreshold = 0.2, colorThreshold = 0.30;
 
     private final MotorEx motor;
     public Servo gate;
@@ -176,6 +176,10 @@ public class Intake {
         return filteredTop;
     }
 
+    public SlotColor[] getStatuses() {
+        return new SlotColor[]{filteredTop, filteredMiddle, filteredBottom};
+    }
+
     public boolean rawBottomBreakBeam() {
         return rawBottomBeam;
     }
@@ -275,7 +279,7 @@ public class Intake {
         filteredTop = SlotColor.NOTHING;
     }
 
-    private enum SlotColor {
+    public enum SlotColor {
         NOTHING,
         PURPLE,
         GREEN,
@@ -404,3 +408,4 @@ public class Intake {
     }
 
 }
+
