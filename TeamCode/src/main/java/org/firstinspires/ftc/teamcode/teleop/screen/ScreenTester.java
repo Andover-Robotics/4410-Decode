@@ -19,7 +19,7 @@ public class ScreenTester extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         AdafruitNeoPixel driver = hardwareMap.get(AdafruitNeoPixel.class, "screen");
         driver.initialize(192, 3);
-        BallTestView ballTestView = new BallTestView(ball1);
+        BallView ballTestView = new BallView(ball1);
         VisualDisplay screen = new VisualDisplay(driver, ballTestView);
         gp1 = new GamepadEx(gamepad1);
 

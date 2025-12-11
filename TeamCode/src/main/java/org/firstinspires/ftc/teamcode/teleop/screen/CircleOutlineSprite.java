@@ -6,17 +6,31 @@ import team.techtigers.core.display.sprites.RectangleSprite;
 import team.techtigers.core.display.sprites.Sprite;
 import team.techtigers.core.display.sprites.XSprite;
 
-
 /**
- * A class which displays a ring ("halo") that is larger
- * than the inner 6-LED circle on an 8x8 matrix.
+ * A "donut" sprite: a ring that is larger than the inner 6-LED circle
+ * on an 8x8 matrix, without touching the inner circle.
+ *
+ * Intended to pair with the Manhattan radius-3 circle:
+ *
+ * Inner circle pattern (radius 3, what you showed):
+ *
+ *  0 0 0 0 0 0 0 0
+ *  0 0 0 1 1 0 0 0
+ *  0 0 1 1 1 1 0 0
+ *  0 1 1 1 1 1 1 0
+ *  0 1 1 1 1 1 1 0
+ *  0 0 1 1 1 1 0 0
+ *  0 0 0 1 1 0 0 0
+ *  0 0 0 0 0 0 0 0
+ *
+ * This sprite draws the outer ring (radius 4) around that.
  */
 public class CircleOutlineSprite extends Sprite {
 
     /**
-     * @param x    bottom-left x of the 8x8 region
-     * @param y    bottom-left y of the 8x8 region
-     * @param size size of the region (use 8)
+     * @param x    bottom-left x of the sprite region within the LED matrix
+     * @param y    bottom-left y of the sprite region within the LED matrix
+     * @param size size of the sprite region (use 8 for an 8x8 matrix)
      */
     public CircleOutlineSprite(int x, int y, int size) {
         super(x, y, size, size);
@@ -24,25 +38,31 @@ public class CircleOutlineSprite extends Sprite {
 
     @Override
     protected void showSprite(Color[][] leds) {
-        int size = getWidth();          // 8
+        int size = getWidth();          // == getHeight()
         int baseX = getX();
         int baseY = getY();
         Color color = getColor();
 
-        int diameter = size - 2;        // 6
-        int innerRadius = diameter / 2; // 3
-        int outerRadius = innerRadius + 1; // 4 (bigger than circle)
+        // For an 8x8 region with a 6-LED diameter, we leave
+        // a 1-pixel border around the shape:
+        // diameter = size - 2; radius = diameter / 2;
+        int diameter = size - 2;        // 6 when size == 8=
+        int innerRadius = diameter / 2; // 3 when size == 8
+        int outerRadius = innerRadius + 1; // 4
 
-        double center = (size / 2.0) - 0.5; // 3.5
+        // Center at half-integer for even size: 3.5 on 0..7
+        double center = (size / 2.0) - 0.5;
 
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
+
                 double dx = col - center;
                 double dy = row - center;
+
                 double manhattan = Math.abs(dx) + Math.abs(dy);
 
-                // Ring at radius 4, 1-pixel thick
-                if (Math.abs(manhattan - outerRadius) < 1e-9) {
+                if (manhattan > innerRadius + 1e-9 &&
+                        manhattan <= outerRadius + 1e-9) {
                     leds[baseX + col][baseY + row] = color;
                 }
             }
