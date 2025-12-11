@@ -24,6 +24,7 @@ public class Bot {
     public Turret turret;
     public Intake intake;
     public Lift lift;
+    public Screen screen;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90));
@@ -56,6 +57,7 @@ public class Bot {
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
+        screen = new Screen(opMode, this);
         updatePoses();
     }
 
@@ -250,6 +252,7 @@ public class Bot {
         turret.periodic();
         intake.periodic();
         lift.periodic();
+        screen.periodic();
     }
 
     public Action actionPeriodic() {

@@ -112,8 +112,6 @@ public class Intake {
 
     }
 
-
-
     public void intake() {
         motor.set(intakePower);
         clearStallHold();
