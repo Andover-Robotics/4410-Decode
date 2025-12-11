@@ -15,7 +15,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class Intake {
 
-    public static double intakePower = -1, storagePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
+    public static double intakePower = -1, storagePower = -0.32, teleopStoragePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
+    public static int filterWindowSize = 10;
+    public static double beamThreshold = 0.2, colorThreshold = 0.30;
+
     private final MotorEx motor;
     public Servo gate;
 
@@ -23,8 +26,8 @@ public class Intake {
     private final DigitalChannel middleBB;
     private final DigitalChannel topBB;
 
-    //pin0 = green
-    //pin1 = purple
+    // pin0 = purple
+    // pin1 = green
 
     public final DigitalChannel blt0;
     public final DigitalChannel blt1;
@@ -36,6 +39,42 @@ public class Intake {
     public final DigitalChannel blb1;
 
     public RevColorSensorV3 color;
+
+    private final SlotFilter bottomSlotFilter;
+    private final SlotFilter middleSlotFilter;
+    private final SlotFilter topSlotFilter;
+
+    private boolean rawBottomBeam;
+    private boolean rawMiddleBeam;
+    private boolean rawTopBeam;
+
+    private boolean rawBlt0;
+    private boolean rawBlt1;
+    private boolean rawBlm0;
+    private boolean rawBlm1;
+    private boolean rawBlb0;
+    private boolean rawBlb1;
+
+    private SlotColor rawBottomColor = SlotColor.NOTHING;
+    private SlotColor rawMiddleColor = SlotColor.NOTHING;
+    private SlotColor rawTopColor = SlotColor.NOTHING;
+
+    private SlotColor filteredBottom = SlotColor.NOTHING;
+    private SlotColor filteredMiddle = SlotColor.NOTHING;
+    private SlotColor filteredTop = SlotColor.NOTHING;
+
+    private boolean stalledMiddleTopHold = false;
+    private SlotColor latchedMiddleColor = SlotColor.NOTHING;
+    private SlotColor latchedTopColor = SlotColor.NOTHING;
+
+    private IntakeMode currentMode = IntakeMode.STOPPED;
+
+    private enum IntakeMode {
+        STOPPED,
+        INTAKING,
+        STORAGE,
+        REVERSING
+    }
 
     public Intake(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "intake", Motor.GoBILDA.RPM_1150);
@@ -67,24 +106,40 @@ public class Intake {
         blb0.setMode(DigitalChannel.Mode.INPUT);
         blb1.setMode(DigitalChannel.Mode.INPUT);
 
+        bottomSlotFilter = new SlotFilter(filterWindowSize);
+        middleSlotFilter = new SlotFilter(filterWindowSize);
+        topSlotFilter = new SlotFilter(filterWindowSize);
+
     }
 
 
 
     public void intake() {
         motor.set(intakePower);
+        clearStallHold();
+        currentMode = IntakeMode.INTAKING;
+    }
+
+    public void teleopStorage() {
+        motor.set(teleopStoragePower);
+        currentMode = IntakeMode.STORAGE;
     }
 
     public void storage() {
         motor.set(storagePower);
+        currentMode = IntakeMode.STORAGE;
     }
 
     public void reverse() {
         motor.set(reversePower);
+        clearStallHold();
+        currentMode = IntakeMode.REVERSING;
     }
 
     public void stop() {
         motor.set(0);
+        clearStallHold();
+        currentMode = IntakeMode.STOPPED;
     }
 
     public void setPower(double power) {
@@ -99,49 +154,235 @@ public class Intake {
         gate.setPosition(gateClosed);
     }
 
+    public void periodic() {
+        readRawSensors();
+        updateSlotFilters();
+    }
+
     public boolean holdingBottom() {
-        return !bottomBB.getState();
+        return hasBall(filteredBottom);
     }
 
     public boolean holdingMiddle() {
-        return !middleBB.getState();
+        return hasBall(filteredMiddle);
     }
 
     public boolean holdingTop() {
-        return !topBB.getState();
+        return hasBall(filteredTop);
     }
 
     public int storageCount() {
         return (holdingBottom()? 1 : 0) + (holdingMiddle()? 1 : 0) + (holdingTop()? 1 : 0);
     }
 
-    public String blbColor() {
-        if (blb0.getState()) {
-            return "Purple";
-        } else if (blb1.getState()) {
-            return "Green";
-        } else {
-            return "Nothing";
+    public SlotColor bottomStatus() {
+        return filteredBottom;
+    }
+
+    public SlotColor middleStatus() {
+        return filteredMiddle;
+    }
+
+    public SlotColor topStatus() {
+        return filteredTop;
+    }
+
+    public boolean rawBottomBreakBeam() {
+        return rawBottomBeam;
+    }
+
+    public boolean rawMiddleBreakBeam() {
+        return rawMiddleBeam;
+    }
+
+    public boolean rawTopBreakBeam() {
+        return rawTopBeam;
+    }
+
+    public SlotColor rawBottomColor() {
+        return rawBottomColor;
+    }
+
+    public SlotColor rawMiddleColor() {
+        return rawMiddleColor;
+    }
+
+    public SlotColor rawTopColor() {
+        return rawTopColor;
+    }
+
+    public boolean rawBlt0() {
+        return rawBlt0;
+    }
+
+    public boolean rawBlt1() {
+        return rawBlt1;
+    }
+
+    public boolean rawBlm0() {
+        return rawBlm0;
+    }
+
+    public boolean rawBlm1() {
+        return rawBlm1;
+    }
+
+    public boolean rawBlb0() {
+        return rawBlb0;
+    }
+
+    public boolean rawBlb1() {
+        return rawBlb1;
+    }
+
+    private void readRawSensors() {
+        rawBottomBeam = !bottomBB.getState();
+        rawMiddleBeam = !middleBB.getState();
+        rawTopBeam = !topBB.getState();
+
+        rawBlt0 = blt0.getState();
+        rawBlt1 = blt1.getState();
+        rawBlm0 = blm0.getState();
+        rawBlm1 = blm1.getState();
+        rawBlb0 = blb0.getState();
+        rawBlb1 = blb1.getState();
+
+        rawTopColor = decodeColor(rawBlt0, rawBlt1);
+        rawMiddleColor = decodeColor(rawBlm0, rawBlm1);
+        rawBottomColor = decodeColor(rawBlb0, rawBlb1);
+    }
+
+    private void updateSlotFilters() {
+        filteredBottom = bottomSlotFilter.addSample(rawBottomBeam, rawBottomColor);
+        filteredMiddle = middleSlotFilter.addSample(rawMiddleBeam, rawMiddleColor);
+        filteredTop = topSlotFilter.addSample(rawTopBeam, rawTopColor);
+
+        if (currentMode != IntakeMode.STORAGE) {
+            clearStallHold();
+        }
+
+        if (currentMode == IntakeMode.STORAGE && hasBall(filteredMiddle) && hasBall(filteredTop)) {
+            stalledMiddleTopHold = true;
+            latchedMiddleColor = filteredMiddle;
+            latchedTopColor = filteredTop;
+        }
+
+        if (stalledMiddleTopHold) {
+            filteredMiddle = latchedMiddleColor;
+            filteredTop = latchedTopColor;
         }
     }
 
-    public String blmColor() {
-        if (blm0.getState()) {
-            return "Purple";
-        } else if (blm1.getState()) {
-            return "Green";
-        } else {
-            return "Nothing";
+    private boolean hasBall(SlotColor color) {
+        return color != SlotColor.NOTHING;
+    }
+
+    private SlotColor decodeColor(boolean pin0, boolean pin1) {
+        if (pin0 && !pin1) {
+            return SlotColor.PURPLE;
+        }
+        if (pin1 && !pin0) {
+            return SlotColor.GREEN;
+        }
+        if (pin0 && pin1) {
+            // conflicting signals; preserve the last known filtered color through rolling average logic
+            return SlotColor.UNKNOWN;
+        }
+        return SlotColor.NOTHING;
+    }
+
+    private void clearStallHold() {
+        stalledMiddleTopHold = false;
+        latchedMiddleColor = SlotColor.NOTHING;
+        latchedTopColor = SlotColor.NOTHING;
+    }
+
+    private enum SlotColor {
+        NOTHING,
+        PURPLE,
+        GREEN,
+        UNKNOWN
+    }
+
+    private static class RollingAverage {
+        private final int windowSize;
+        private final java.util.ArrayDeque<Integer> samples = new java.util.ArrayDeque<>();
+        private int sum = 0;
+
+        RollingAverage(int windowSize) {
+            this.windowSize = windowSize;
+        }
+
+        public double addSample(boolean active) {
+            int value = active ? 1 : 0;
+            samples.addLast(value);
+            sum += value;
+            if (samples.size() > windowSize) {
+                sum -= samples.removeFirst();
+            }
+            return getAverage();
+        }
+
+        public double getAverage() {
+            if (samples.isEmpty()) {
+                return 0;
+            }
+            return (double) sum / samples.size();
         }
     }
 
-    public String bltColor() {
-        if (blt0.getState()) {
-            return "Purple";
-        } else if (blt1.getState()) {
-            return "Green";
-        } else {
-            return "Nothing";
+    private static class SlotFilter {
+        private final RollingAverage presenceAverage;
+        private final RollingAverage purpleAverage;
+        private final RollingAverage greenAverage;
+        private SlotColor filteredColor = SlotColor.NOTHING;
+
+        SlotFilter(int windowSize) {
+            presenceAverage = new RollingAverage(windowSize);
+            purpleAverage = new RollingAverage(windowSize);
+            greenAverage = new RollingAverage(windowSize);
+        }
+
+        public SlotColor addSample(boolean beamPresent, SlotColor colorReading) {
+            boolean seesSomething = beamPresent || colorReading != SlotColor.NOTHING;
+
+            presenceAverage.addSample(seesSomething);
+            purpleAverage.addSample(colorReading == SlotColor.PURPLE);
+            greenAverage.addSample(colorReading == SlotColor.GREEN);
+
+
+            double presenceLevel = presenceAverage.getAverage();
+            if (beamPresent) {
+                presenceLevel = 1;
+            }
+            double purpleLevel = purpleAverage.getAverage();
+            double greenLevel = greenAverage.getAverage();
+
+            if (presenceLevel < beamThreshold) {
+                filteredColor = SlotColor.NOTHING;
+                return filteredColor;
+            }
+
+            if (purpleLevel >= greenLevel && purpleLevel >= colorThreshold) {
+                filteredColor = SlotColor.PURPLE;
+                return filteredColor;
+            }
+            if (greenLevel > purpleLevel && greenLevel >= colorThreshold) {
+                filteredColor = SlotColor.GREEN;
+                return filteredColor;
+            }
+
+            if (presenceLevel >= beamThreshold) {
+                filteredColor = SlotColor.UNKNOWN;
+                return filteredColor;
+            }
+
+            if (purpleLevel == 0 && greenLevel == 0) {
+                return filteredColor;
+            }
+
+            filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+            return filteredColor;
         }
     }
 

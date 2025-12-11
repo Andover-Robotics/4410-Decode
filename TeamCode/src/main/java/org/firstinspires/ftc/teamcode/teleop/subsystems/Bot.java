@@ -248,6 +248,7 @@ public class Bot {
 
     public void periodic() {
         turret.periodic();
+        intake.periodic();
         lift.periodic();
     }
 
@@ -258,6 +259,7 @@ public class Bot {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
             turret.periodic();
+            intake.periodic();
             lift.periodic();
             return true;
         }
