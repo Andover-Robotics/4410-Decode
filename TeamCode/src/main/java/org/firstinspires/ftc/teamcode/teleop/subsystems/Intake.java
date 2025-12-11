@@ -128,6 +128,7 @@ public class Intake {
     public void reverse() {
         motor.set(reversePower);
         clearStallHold();
+        resetFilters();
         currentMode = IntakeMode.REVERSING;
     }
 
@@ -292,6 +293,16 @@ public class Intake {
         latchedTopColor = SlotColor.NOTHING;
     }
 
+    private void resetFilters() {
+        bottomSlotFilter.clear();
+        middleSlotFilter.clear();
+        topSlotFilter.clear();
+
+        filteredBottom = SlotColor.NOTHING;
+        filteredMiddle = SlotColor.NOTHING;
+        filteredTop = SlotColor.NOTHING;
+    }
+
     private enum SlotColor {
         NOTHING,
         PURPLE,
@@ -324,6 +335,11 @@ public class Intake {
             }
             return (double) sum / samples.size();
         }
+
+        public void clear() {
+            samples.clear();
+            sum = 0;
+        }
     }
 
     private static class SlotFilter {
@@ -339,11 +355,11 @@ public class Intake {
         }
 
         public SlotColor addSample(boolean beamPresent, SlotColor colorReading) {
-            beamAverage.addSample(beamPresent);
+            double beamLevel = beamAverage.addSample(beamPresent);
             purpleAverage.addSample(colorReading == SlotColor.PURPLE);
             greenAverage.addSample(colorReading == SlotColor.GREEN);
 
-            double beamLevel = beamAverage.getAverage();
+            boolean anyBeamEvidence = beamLevel > 0;
             double purpleLevel = purpleAverage.getAverage();
             double greenLevel = greenAverage.getAverage();
 
@@ -351,6 +367,21 @@ public class Intake {
             boolean hasRecentColor = purpleLevel > 0 || greenLevel > 0;
 
             if (beamLevel >= beamThreshold) {
+                if (hasConfidentColor) {
+                    filteredColor = selectDominantColor(purpleLevel, greenLevel);
+                    return filteredColor;
+                }
+
+                if (hasRecentColor) {
+                    filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+                    return filteredColor;
+                }
+
+                filteredColor = SlotColor.UNKNOWN;
+                return filteredColor;
+            }
+
+            if (anyBeamEvidence) {
                 if (hasConfidentColor) {
                     filteredColor = selectDominantColor(purpleLevel, greenLevel);
                     return filteredColor;
@@ -377,6 +408,13 @@ public class Intake {
 
             filteredColor = SlotColor.NOTHING;
             return filteredColor;
+        }
+
+        public void clear() {
+            beamAverage.clear();
+            purpleAverage.clear();
+            greenAverage.clear();
+            filteredColor = SlotColor.NOTHING;
         }
 
         private SlotColor selectDominantColor(double purpleLevel, double greenLevel) {
