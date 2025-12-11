@@ -15,9 +15,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class Intake {
 
-    public static double intakePower = -1, storagePower = -0.32, teleopStoragePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
+    public static double intakePower = -1, storagePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
     public static int filterWindowSize = 10;
-    public static double beamThreshold = 0.2, colorThreshold = 0.30;
+    public static double beamThreshold = 0.6, colorThreshold = 0.55;
 
     private final MotorEx motor;
     public Servo gate;
@@ -62,10 +62,6 @@ public class Intake {
     private SlotColor filteredBottom = SlotColor.NOTHING;
     private SlotColor filteredMiddle = SlotColor.NOTHING;
     private SlotColor filteredTop = SlotColor.NOTHING;
-
-    private boolean stalledMiddleTopHold = false;
-    private SlotColor latchedMiddleColor = SlotColor.NOTHING;
-    private SlotColor latchedTopColor = SlotColor.NOTHING;
 
     private IntakeMode currentMode = IntakeMode.STOPPED;
 
@@ -112,15 +108,11 @@ public class Intake {
 
     }
 
+
+
     public void intake() {
         motor.set(intakePower);
-        clearStallHold();
         currentMode = IntakeMode.INTAKING;
-    }
-
-    public void teleopStorage() {
-        motor.set(teleopStoragePower);
-        currentMode = IntakeMode.STORAGE;
     }
 
     public void storage() {
@@ -130,13 +122,12 @@ public class Intake {
 
     public void reverse() {
         motor.set(reversePower);
-        clearStallHold();
+        resetFilters();
         currentMode = IntakeMode.REVERSING;
     }
 
     public void stop() {
         motor.set(0);
-        clearStallHold();
         currentMode = IntakeMode.STOPPED;
     }
 
@@ -254,21 +245,6 @@ public class Intake {
         filteredBottom = bottomSlotFilter.addSample(rawBottomBeam, rawBottomColor);
         filteredMiddle = middleSlotFilter.addSample(rawMiddleBeam, rawMiddleColor);
         filteredTop = topSlotFilter.addSample(rawTopBeam, rawTopColor);
-
-        if (currentMode != IntakeMode.STORAGE) {
-            clearStallHold();
-        }
-
-        if (currentMode == IntakeMode.STORAGE && hasBall(filteredMiddle) && hasBall(filteredTop)) {
-            stalledMiddleTopHold = true;
-            latchedMiddleColor = filteredMiddle;
-            latchedTopColor = filteredTop;
-        }
-
-        if (stalledMiddleTopHold) {
-            filteredMiddle = latchedMiddleColor;
-            filteredTop = latchedTopColor;
-        }
     }
 
     private boolean hasBall(SlotColor color) {
@@ -289,10 +265,14 @@ public class Intake {
         return SlotColor.NOTHING;
     }
 
-    private void clearStallHold() {
-        stalledMiddleTopHold = false;
-        latchedMiddleColor = SlotColor.NOTHING;
-        latchedTopColor = SlotColor.NOTHING;
+    private void resetFilters() {
+        bottomSlotFilter.clear();
+        middleSlotFilter.clear();
+        topSlotFilter.clear();
+
+        filteredBottom = SlotColor.NOTHING;
+        filteredMiddle = SlotColor.NOTHING;
+        filteredTop = SlotColor.NOTHING;
     }
 
     private enum SlotColor {
@@ -327,60 +307,99 @@ public class Intake {
             }
             return (double) sum / samples.size();
         }
+
+        public void clear() {
+            samples.clear();
+            sum = 0;
+        }
     }
 
     private static class SlotFilter {
-        private final RollingAverage presenceAverage;
+        private final RollingAverage beamAverage;
         private final RollingAverage purpleAverage;
         private final RollingAverage greenAverage;
         private SlotColor filteredColor = SlotColor.NOTHING;
 
         SlotFilter(int windowSize) {
-            presenceAverage = new RollingAverage(windowSize);
+            beamAverage = new RollingAverage(windowSize);
             purpleAverage = new RollingAverage(windowSize);
             greenAverage = new RollingAverage(windowSize);
         }
 
         public SlotColor addSample(boolean beamPresent, SlotColor colorReading) {
-            boolean seesSomething = beamPresent || colorReading != SlotColor.NOTHING;
-
-            presenceAverage.addSample(seesSomething);
+            double beamLevel = beamAverage.addSample(beamPresent);
             purpleAverage.addSample(colorReading == SlotColor.PURPLE);
             greenAverage.addSample(colorReading == SlotColor.GREEN);
 
-
-            double presenceLevel = presenceAverage.getAverage();
-            if (beamPresent) {
-                presenceLevel = 1;
-            }
+            boolean anyBeamEvidence = beamLevel > 0;
             double purpleLevel = purpleAverage.getAverage();
             double greenLevel = greenAverage.getAverage();
 
-            if (presenceLevel < beamThreshold) {
-                filteredColor = SlotColor.NOTHING;
-                return filteredColor;
-            }
+            boolean hasConfidentColor = purpleLevel >= colorThreshold || greenLevel >= colorThreshold;
+            boolean hasRecentColor = purpleLevel > 0 || greenLevel > 0;
 
-            if (purpleLevel >= greenLevel && purpleLevel >= colorThreshold) {
-                filteredColor = SlotColor.PURPLE;
-                return filteredColor;
-            }
-            if (greenLevel > purpleLevel && greenLevel >= colorThreshold) {
-                filteredColor = SlotColor.GREEN;
-                return filteredColor;
-            }
+            if (beamLevel >= beamThreshold) {
+                if (hasConfidentColor) {
+                    filteredColor = selectDominantColor(purpleLevel, greenLevel);
+                    return filteredColor;
+                }
 
-            if (presenceLevel >= beamThreshold) {
+                if (hasRecentColor) {
+                    filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+                    return filteredColor;
+                }
+
                 filteredColor = SlotColor.UNKNOWN;
                 return filteredColor;
             }
 
-            if (purpleLevel == 0 && greenLevel == 0) {
+            if (anyBeamEvidence) {
+                if (hasConfidentColor) {
+                    filteredColor = selectDominantColor(purpleLevel, greenLevel);
+                    return filteredColor;
+                }
+
+                if (hasRecentColor) {
+                    filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+                    return filteredColor;
+                }
+
+                filteredColor = SlotColor.UNKNOWN;
                 return filteredColor;
             }
 
-            filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+            if (hasConfidentColor) {
+                filteredColor = selectDominantColor(purpleLevel, greenLevel);
+                return filteredColor;
+            }
+
+            if (hasRecentColor) {
+                filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+                return filteredColor;
+            }
+
+            filteredColor = SlotColor.NOTHING;
             return filteredColor;
+        }
+
+        public void clear() {
+            beamAverage.clear();
+            purpleAverage.clear();
+            greenAverage.clear();
+            filteredColor = SlotColor.NOTHING;
+        }
+
+        private SlotColor selectDominantColor(double purpleLevel, double greenLevel) {
+            if (purpleLevel > greenLevel) {
+                return SlotColor.PURPLE;
+            }
+            if (greenLevel > purpleLevel) {
+                return SlotColor.GREEN;
+            }
+            if (filteredColor == SlotColor.PURPLE || filteredColor == SlotColor.GREEN) {
+                return filteredColor;
+            }
+            return SlotColor.PURPLE;
         }
     }
 
