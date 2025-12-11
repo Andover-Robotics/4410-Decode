@@ -20,7 +20,7 @@ public class Pos {
     public static Pose2d blueHpIntake = new Pose2d(-49, 61.5, WALL_INTAKE_ANGLE);
     public static Pose2d blueStraightHpIntake = new Pose2d(-50, 61.5, Math.toRadians(128));
     public static Pose2d blueFarIntake = new Pose2d(-35, 29, Math.toRadians(90));
-    public static Pose2d blueMidIntake = new Pose2d(-11, 29, Math.toRadians(90));
+    public static Pose2d blueMidIntake = new Pose2d(-13, 29, Math.toRadians(90));
     public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
     public static Vector2d blueHpIntakeInter = new Vector2d(-58, 24);
 

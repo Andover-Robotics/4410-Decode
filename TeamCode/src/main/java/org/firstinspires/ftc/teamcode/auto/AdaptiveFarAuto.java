@@ -453,6 +453,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(125))
                     .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
+                    .setTangent(Math.toRadians(180))
+                    .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(180))
                     .setTangent(Math.toRadians(179))
                     .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
                     .stopAndAdd(bot.shootThreeAutoClose())
