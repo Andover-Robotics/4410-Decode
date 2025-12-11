@@ -327,48 +327,69 @@ public class Intake {
     }
 
     private static class SlotFilter {
-        private final RollingAverage presenceAverage;
+        private final RollingAverage beamAverage;
         private final RollingAverage purpleAverage;
         private final RollingAverage greenAverage;
         private SlotColor filteredColor = SlotColor.NOTHING;
 
         SlotFilter(int windowSize) {
-            presenceAverage = new RollingAverage(windowSize);
+            beamAverage = new RollingAverage(windowSize);
             purpleAverage = new RollingAverage(windowSize);
             greenAverage = new RollingAverage(windowSize);
         }
 
         public SlotColor addSample(boolean beamPresent, SlotColor colorReading) {
-            boolean seesSomething = beamPresent || colorReading != SlotColor.NOTHING;
-
-            presenceAverage.addSample(seesSomething);
+            beamAverage.addSample(beamPresent);
             purpleAverage.addSample(colorReading == SlotColor.PURPLE);
             greenAverage.addSample(colorReading == SlotColor.GREEN);
 
-            double presenceLevel = presenceAverage.getAverage();
+            double beamLevel = beamAverage.getAverage();
             double purpleLevel = purpleAverage.getAverage();
             double greenLevel = greenAverage.getAverage();
 
-            if (presenceLevel < beamThreshold) {
-                filteredColor = SlotColor.NOTHING;
+            boolean hasConfidentColor = purpleLevel >= colorThreshold || greenLevel >= colorThreshold;
+            boolean hasRecentColor = purpleLevel > 0 || greenLevel > 0;
+
+            if (beamLevel >= beamThreshold) {
+                if (hasConfidentColor) {
+                    filteredColor = selectDominantColor(purpleLevel, greenLevel);
+                    return filteredColor;
+                }
+
+                if (hasRecentColor) {
+                    filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+                    return filteredColor;
+                }
+
+                filteredColor = SlotColor.UNKNOWN;
                 return filteredColor;
             }
 
-            if (purpleLevel >= greenLevel && purpleLevel >= colorThreshold) {
-                filteredColor = SlotColor.PURPLE;
-                return filteredColor;
-            }
-            if (greenLevel > purpleLevel && greenLevel >= colorThreshold) {
-                filteredColor = SlotColor.GREEN;
+            if (hasConfidentColor) {
+                filteredColor = selectDominantColor(purpleLevel, greenLevel);
                 return filteredColor;
             }
 
-            if (purpleLevel == 0 && greenLevel == 0) {
+            if (hasRecentColor) {
+                filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
                 return filteredColor;
             }
 
-            filteredColor = purpleLevel >= greenLevel ? SlotColor.PURPLE : SlotColor.GREEN;
+            filteredColor = SlotColor.NOTHING;
             return filteredColor;
+        }
+
+        private SlotColor selectDominantColor(double purpleLevel, double greenLevel) {
+            if (purpleLevel > greenLevel) {
+                return SlotColor.PURPLE;
+            }
+            if (greenLevel > purpleLevel) {
+                return SlotColor.GREEN;
+            }
+            if (filteredColor == SlotColor.PURPLE || filteredColor == SlotColor.GREEN) {
+                return filteredColor;
+            }
+            return SlotColor.PURPLE;
         }
     }
 
