@@ -53,7 +53,7 @@ public class BallRegion extends DisplayRegion {
                 } else if (statuses[i].equals(Intake.SlotColor.PURPLE)) {
                     circle.setColor(Color.PURPLE);
                 } else if (statuses[i].equals(Intake.SlotColor.UNKNOWN)) {
-                    circle.setColor(Color.ORANGE);
+                    circle.setColor(Color.WHITE);
                 } else {
                     circle.setColor(Color.BLACK);
                 }

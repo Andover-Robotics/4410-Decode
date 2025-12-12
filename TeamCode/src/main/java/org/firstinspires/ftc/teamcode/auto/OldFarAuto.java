@@ -71,8 +71,8 @@ public class OldFarAuto extends LinearOpMode {
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
-                .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.component1().x, Pos.blueMidIntake.component1().y + 18))
+                .splineTo(Pos.blueMidIntakeFar.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.component1().x, Pos.blueMidIntakeFar.component1().y + 18))
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
 
                 .stopAndAdd(bot.enableShooter())
@@ -124,8 +124,8 @@ public class OldFarAuto extends LinearOpMode {
 
                 .stopAndAdd(new InstantAction(()-> bot.intake.intake()))
                 .setTangent(Math.toRadians(135))
-                .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.component1().x, Pos.blueMidIntake.component1().y + 18))
+                .splineTo(Pos.blueMidIntakeFar.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.component1().x, Pos.blueMidIntakeFar.component1().y + 18))
                 .stopAndAdd(new InstantAction(()-> bot.intake.storage()))
 
                 .stopAndAdd(bot.enableShooter())

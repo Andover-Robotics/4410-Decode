@@ -179,10 +179,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         // Move selected segment up/down
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 7 - 1) % 7;
+            selectedSegment = (selectedSegment + 7 - 1) % 8;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 7;
+            selectedSegment = (selectedSegment + 1) % 8;
         }
 
         // Toggle run/skip for selected segment
@@ -416,8 +416,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(135))
-                    .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,Pos.blueMidIntake.position.y + 18))
+                    .splineToSplineHeading(Pos.blueMidIntakeFar, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.position.x,Pos.blueMidIntakeFar.position.y + 18))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-60))
@@ -457,22 +457,25 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(180))
                     .setTangent(Math.toRadians(179))
                     .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
-                    .stopAndAdd(bot.shootThreeAutoClose())
-                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-
-                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .setTangent(Math.toRadians(125))
-                    .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
-                    .setTangent(Math.toRadians(179))
-                    .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
-                    .stopAndAdd(bot.shootThreeAutoClose())
-                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()));
+                    .stopAndAdd(bot.shootThreeAutoClose());
+//            if (!cfg.runClose || !cfg.runFar || !cfg.)
+//                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
+//
+//                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
+//                    .setTangent(Math.toRadians(125))
+//                    .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
+//                    .setTangent(Math.toRadians(179))
+//                    .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
+//                    .stopAndAdd(bot.shootThreeAutoClose())
+//                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()));
 
             if (cfg.delayAfterCycles > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterCycles));
             }
             addedAction = true;
         }
+
+        builder.strafeToConstantHeading(Pos.park);
 
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));

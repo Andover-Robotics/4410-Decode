@@ -57,8 +57,8 @@ public class FarShootingAuto extends LinearOpMode {
                 .splineTo(Pos.farShoot, Math.toRadians(-160))
                 .stopAndAdd(bot.shootThreeAutoFar())
 
-                .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,Pos.blueMidIntake.position.y + 18))
+                .splineTo(Pos.blueMidIntakeFar.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.position.x,Pos.blueMidIntakeFar.position.y + 18))
                 .strafeToLinearHeading(Pos.farShoot, Math.toRadians(0))
                 .stopAndAdd(bot.shootThreeAutoFar())
 
@@ -92,8 +92,8 @@ public class FarShootingAuto extends LinearOpMode {
                 .splineTo(Pos.farShoot, Math.toRadians(-160))
                 .stopAndAdd(bot.shootThreeAutoFar())
 
-                .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,Pos.blueMidIntake.position.y + 18))
+                .splineTo(Pos.blueMidIntakeFar.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.position.x,Pos.blueMidIntakeFar.position.y + 18))
                 .strafeToLinearHeading(Pos.farShoot, Math.toRadians(0))
                 .stopAndAdd(bot.shootThreeAutoFar())
                 .build();

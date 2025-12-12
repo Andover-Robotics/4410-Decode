@@ -49,7 +49,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Lift {
 
 
-    public static double WRAP_TOLERANCE_DEG = 40.0, MAX_ANALOG_VOLT = 3.3, kP = 0.004, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 1, spoolRad = 14, liftWidth = 178;
+    public static double WRAP_TOLERANCE_DEG = 20.0, MAX_ANALOG_VOLT = 3.3, kP = 0.004, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 1, spoolRad = 14, liftWidth = 178;
     public static int up = -2600, lower = 2200, down = 0, balancing = -500;
     public static int joystickSpeed = 20;
 

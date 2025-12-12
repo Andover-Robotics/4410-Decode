@@ -261,9 +261,7 @@ public class Bot {
     public class actionPeriodic implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            turret.periodic();
-            intake.periodic();
-            lift.periodic();
+            periodic();
             return true;
         }
     }

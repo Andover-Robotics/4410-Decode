@@ -321,9 +321,9 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(135))
-                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + 18))
+                    .splineTo(Pos.blueMidIntakeClose.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeClose.position.x,
+                            Pos.blueMidIntakeClose.position.y + 18))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
@@ -372,7 +372,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .setReversed(true)
                     .setTangent(Math.toRadians(-90))
                     .afterTime(0.1, bot.enableShooter())
-                    .splineToSplineHeading(new Pose2d(Pos.closeShoot, Math.toRadians(90)), Math.toRadians(0))
+                    .splineToSplineHeading(new Pose2d(Pos.closeAutoLastShoot, Math.toRadians(90)), Math.toRadians(0))
                     .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterHp > 0) {
@@ -380,6 +380,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             }
             addedAction = true;
         }
+        builder.strafeToConstantHeading(Pos.park);
 
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
