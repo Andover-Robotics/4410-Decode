@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop.screen;
 
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Lift;
 
 
 import team.techtigers.core.display.Color;
@@ -12,7 +13,8 @@ import team.techtigers.core.display.sprites.XSprite;
 
 public class BallRegion extends DisplayRegion {
     private final CircleSprite circle1, circle2, circle3;
-    private final CircleOutlineSprite outline1, outline2, outline3;
+//    private final CircleOutlineSprite outline1, outline2, outline3;
+    private final RectangleOutlineSprite outline;
     private final Sprite[] sprites;
     public boolean teleop = false;
     public Bot bot;
@@ -30,16 +32,20 @@ public class BallRegion extends DisplayRegion {
         circle3 = new CircleSprite(16, 0, 8);
         circle3.setColor(Color.GREEN);
         circle3.enable();
-        outline1 = new CircleOutlineSprite(0, 0, 8);
-        outline1.setColor(Color.WHITE);
-        outline1.disable();
-        outline2 = new CircleOutlineSprite(8, 0, 8);
-        outline2.setColor(Color.WHITE);
-        outline2.disable();
-        outline3 = new CircleOutlineSprite(16, 0, 8);
-        outline3.setColor(Color.WHITE);
-        outline3.disable();
-        sprites = new Sprite[]{circle1, circle2, circle3};
+        outline = new RectangleOutlineSprite(0, 0, 24, 8);
+        outline.setColor(Color.BLACK);
+        outline.disable();
+//        outline1 = new CircleOutlineSprite(0, 0, 8);
+//        outline1.setColor(Color.WHITE);
+//        outline1.disable();
+//        outline2 = new CircleOutlineSprite(8, 0, 8);
+//        outline2.setColor(Color.WHITE);
+//        outline2.disable();
+//        outline3 = new CircleOutlineSprite(16, 0, 8);
+//        outline3.setColor(Color.WHITE);
+//        outline3.disable();
+
+        sprites = new Sprite[]{circle1, circle2, circle3, outline};
     }
 
     @Override
@@ -48,7 +54,9 @@ public class BallRegion extends DisplayRegion {
             statuses = bot.intake.getStatuses();
             for (int i = 0; i < 3; i++) {
                 Sprite circle = sprites[i];
-                if (statuses[i].equals(Intake.SlotColor.GREEN)) {
+                if (Lift.closedLoopEnabled) {
+                    circle.setColor(Color.RED);
+                } else if (statuses[i].equals(Intake.SlotColor.GREEN)) {
                     circle.setColor(Color.GREEN);
                 } else if (statuses[i].equals(Intake.SlotColor.PURPLE)) {
                     circle.setColor(Color.PURPLE);
@@ -58,6 +66,11 @@ public class BallRegion extends DisplayRegion {
                     circle.setColor(Color.BLACK);
                 }
             }
+//            if (Lift.closedLoopEnabled) {
+//                outline.setColor(Color.PINK);
+//            } else {
+//                outline.setColor(Color.BLACK);
+//            }
 //            if (bot.intake.holdingTop()) {
 //                circle1.setColor(Color.GREEN);
 //            } else {

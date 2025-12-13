@@ -57,7 +57,7 @@ public class Bot {
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
-        screen = new Screen(opMode, this);
+        //screen = new Screen(opMode, this);
         updatePoses();
     }
 
@@ -252,7 +252,7 @@ public class Bot {
         turret.periodic();
         intake.periodic();
         lift.periodic();
-        screen.periodic();
+        //screen.periodic();
     }
 
     public Action actionPeriodic() {

@@ -52,6 +52,7 @@ public class MainTeleop extends LinearOpMode {
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
         bot.setTargetFarAutoGoal();
+        stallIntake = true;
 
         // Initialize bot
 //        bot.stopMotors();
@@ -144,6 +145,10 @@ public class MainTeleop extends LinearOpMode {
                 bot.lift.liftUp();
             }
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
+                bot.lift.balance();
+            }
+
             // TURRET
 
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
@@ -172,7 +177,7 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.shootOne());
             }
 
-            if (gp2.getButton(GamepadKeys.Button.B) && !bot.shooting) {
+            if (gp2.getButton(GamepadKeys.Button.B) && !bot.shooting && !gp2.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.shootThree());
             }
 
@@ -249,6 +254,7 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("Shoot Delay", Bot.shootDelay);
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 
 //
 //            telemetry.addData("\ntx", Turret.tx);
@@ -259,23 +265,25 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("correct distance", Turret.distance);
 //            telemetry.addData( "tag angle", Turret.tAngle);
 //            telemetry.addData("tOffset", Turret.tOffset);
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 
             telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
             telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
-            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncAbsDeg());
-            telemetry.addData("Right Climb Position", bot.lift.getRightEncAbsDeg());
+            telemetry.addData("\nLeft Climb Abs Position", bot.lift.getLeftEncAbsDeg());
+            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
 
 //            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-//            telemetry.addData("Left Power", bot.lift.leftPower);
-//            telemetry.addData("Right Power", bot.lift.rightPower);
+            telemetry.addData("Left Power", bot.lift.leftPower);
+            telemetry.addData("Right Power", bot.lift.rightPower);
+            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
+            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
 ////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
 ////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
-//            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
-//            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
+            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
+            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
 //            telemetry.addData("Offset", bot.lift.offset);
 //            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.addData("Velocity", Bot.drive.localizer.update());

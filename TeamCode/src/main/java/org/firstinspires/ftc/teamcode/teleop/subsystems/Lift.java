@@ -49,15 +49,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Lift {
 
 
-    public static double WRAP_TOLERANCE_DEG = 20.0, MAX_ANALOG_VOLT = 3.3, kP = 0.004, kI = 0.0, kD = 0.0, kF = -0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 1, spoolRad = 14, liftWidth = 178;
-    public static int up = -2600, lower = 2200, down = 0, balancing = -500;
+    public static double WRAP_TOLERANCE_DEG = 40.0, MAX_ANALOG_VOLT = 3.3, kP = 0.0065, kI = 0.0, kD = 0.0, kF = 0.2, POSITION_TOLERANCE_DEG = 10.0, maxPower = 1, spoolRad = 14 * 0.75, liftWidth = 178;
+    public static int up = -2900, lower = 2200, down = 0, balancing = -500;
     public static int joystickSpeed = 20;
 
     public static boolean LEFT_INVERTED = false, RIGHT_INVERTED = false, offsetLeftSide = false;
 
     public double leftPower, rightPower, offset;
 
-    private final CRServo climbLeft, climbRight;
+    public final CRServo climbLeft, climbRight;
     private final AnalogInput leftEnc, rightEnc;
 
     private final ContinuousAngleTracker leftTracker, rightTracker;
@@ -66,8 +66,7 @@ public class Lift {
 
     public double leftTargetDeg, rightTargetDeg, leftPidOut, rightPidOut;     // continuous degrees
     private double leftZeroDeg = 0.0, rightZeroDeg = 0.0;
-
-    private boolean closedLoopEnabled = false;         // toggle
+    public static boolean closedLoopEnabled = false;// toggle
 
     public static enum liftStates {
         LIFTING,
@@ -82,16 +81,20 @@ public class Lift {
         climbRight = new CRServo(opMode.hardwareMap, "climbRight");
         leftEnc    = opMode.hardwareMap.get(AnalogInput.class, "leftEnc");
         rightEnc   = opMode.hardwareMap.get(AnalogInput.class, "rightEnc");
+        climbLeft.set(0);
+        climbRight.set(0);
 
         leftTracker  = new ContinuousAngleTracker(readAbsDeg(leftEnc), WRAP_TOLERANCE_DEG);
         rightTracker = new ContinuousAngleTracker(readAbsDeg(rightEnc), WRAP_TOLERANCE_DEG);
 
         leftPID.setTolerance(POSITION_TOLERANCE_DEG);
         rightPID.setTolerance(POSITION_TOLERANCE_DEG);
+        closedLoopEnabled = false;
         zeroBoth();
     }
 
     public void liftUp() {
+        zeroBoth();
         setBothTargetDeg(up);
     }
 
@@ -103,25 +106,18 @@ public class Lift {
         setBothTargetDeg(lower);
     }
 
-//    public void balance() {
-//        offset =-360 * liftWidth * Math.toRadians(Turret.orientation.getRoll(AngleUnit.DEGREES)) / (2 * Math.PI * spoolRad);
-//        if (offset > 0) {
-//            if (offsetLeftSide) {
-//                setLeftTargetDeg(leftTargetDeg + offset);
-//            } else {
-//                setRightTargetDeg(rightTargetDeg + offset);
-//            }
-//        } else {
-//            if (offsetLeftSide) {
-//                setRightTargetDeg(rightTargetDeg + offset);
-//            } else {
-//                setLeftTargetDeg(leftTargetDeg + offset);
-//            }
-//        }
-//    }
+    public void balance() {
+        offset = -360 * liftWidth * Math.toRadians(Turret.orientation.getRoll(AngleUnit.DEGREES)) / (2 * Math.PI * spoolRad);
+        if (offset > 0) {
+                setLeftTargetDeg(leftTargetDeg + offset);
+        } else {
+                setRightTargetDeg(rightTargetDeg - offset);
+        }
+    }
 
     /** Call this from your parent loop. Runs PIDF only when enabled. */
     public void periodic() {
+
         // Keep tunables synced
         leftTracker.setTolerance(WRAP_TOLERANCE_DEG);
         rightTracker.setTolerance(WRAP_TOLERANCE_DEG);
@@ -134,7 +130,6 @@ public class Lift {
         leftTracker.update(readAbsDeg(leftEnc));
         rightTracker.update(readAbsDeg(rightEnc));
 
-        if (!closedLoopEnabled) return; // allow driving servos manually when disabled
 
         // Positions in same frame as targets (continuous, zeroed)
         double leftPos  = getLeftEncContinuousDeg();
@@ -156,11 +151,24 @@ public class Lift {
         if (LEFT_INVERTED)  leftPower  = -leftPower;
         if (RIGHT_INVERTED) rightPower = -rightPower;
 
+        if (!closedLoopEnabled) {
+            climbLeft.set(0);
+            climbRight.set(0);
+            return;
+        }; // allow driving servos manually when disabled
+
         climbLeft.set(leftPower);
         climbRight.set(rightPower);
+
+
+//        climbLeft.set(clamp(leftPower, -0.8, 0.8));
+//        climbRight.set(clamp(rightPower, -0.8, 0.8));
     }
 
-    public void enableClosedLoop(boolean enabled) { this.closedLoopEnabled = enabled; }
+    public void enableClosedLoop(boolean enabled) {
+        if (enabled) zeroBoth();
+        this.closedLoopEnabled = enabled;
+    }
     public boolean isClosedLoopEnabled() { return closedLoopEnabled; }
 
     public void zeroBoth() {
@@ -197,12 +205,14 @@ public class Lift {
 
     /** 0–360 abs → continuous tracking with wrap detection. */
     private static class ContinuousAngleTracker {
-        private double lastAbsDeg;
+        private double lastAbsDeg = 0;
         private int rotationCount;
         private double toleranceDeg;
+        private double initalOffset;
 
         ContinuousAngleTracker(double initialAbsDeg, double toleranceDeg) {
             this.lastAbsDeg = clamp360(initialAbsDeg);
+//            initalOffset = initialAbsDeg;
             this.rotationCount = 0;
             this.toleranceDeg = toleranceDeg;
         }
@@ -216,6 +226,12 @@ public class Lift {
             else if (delta < -toleranceDeg) rotationCount++;
             lastAbsDeg = newAbsDeg;
         }
+
+        void reset(double initialAbsDeg) {
+            this.lastAbsDeg = clamp360(initialAbsDeg);
+            this.rotationCount = 0;
+        }
+
 
         double getContinuousDeg() { return lastAbsDeg + 360.0 * rotationCount; }
         int getRotationCount()    { return rotationCount; }

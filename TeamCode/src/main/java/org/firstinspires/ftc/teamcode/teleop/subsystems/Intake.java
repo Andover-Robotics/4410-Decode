@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Intake {
 
     public static double intakePower = -1, storagePower = -0.32, reversePower = 0.8, gateOpen = 0.1, gateClosed = 0.24;
-    public static int filterWindowSize = 10;
+    public static int filterWindowSize = 7;
     public static double beamThreshold = 0.2, colorThreshold = 0.30;
 
     private final MotorEx motor;

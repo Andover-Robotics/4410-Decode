@@ -82,6 +82,20 @@ public class LowerClimb extends LinearOpMode {
 
             // TELEMETRY
 
+            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
+            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
+            telemetry.addData("\nLeft Climb Abs Position", bot.lift.getLeftEncAbsDeg());
+            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
+
+            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
+            telemetry.addData("\nLeft Power", bot.lift.leftPower);
+            telemetry.addData("Right Power", bot.lift.rightPower);
+            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
+            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+            telemetry.addData("\nLeft PID out", bot.lift.leftPidOut);
+            telemetry.addData("Right PID out", bot.lift.rightPidOut);
+            telemetry.addData("\nLeft Climb Target", bot.lift.leftTargetDeg);
+            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
             telemetry.update();
 
 
