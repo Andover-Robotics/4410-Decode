@@ -29,7 +29,7 @@ public class Bot {
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90));
     public static Vector2d goalPose = new Vector2d(65, 60); //initializes with blue, switches based on alliance
-    public static Vector2d blueFarAutoGoalPose = new Vector2d(59, 66); //AHHHHH DIH BEHIND MEEEE
+    public static Vector2d blueFarAutoGoalPose = new Vector2d(61.5, 63); //AHHHHH DIH BEHIND MEEEE
     public static Vector2d redFarAutoGoalPose = new Vector2d(65, -55); //DIH
     public static Vector2d farAutoGoalPose = new Vector2d(61, 64); //TODO DO NOT USE
     public static Vector2d targetPose = goalPose;

@@ -343,7 +343,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + 18))
+                            Pos.blueFarIntake.position.y + 20))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.shootThreeAutoClose())
