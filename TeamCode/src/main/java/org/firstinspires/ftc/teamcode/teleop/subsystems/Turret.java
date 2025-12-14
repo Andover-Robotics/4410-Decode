@@ -58,7 +58,7 @@ public class Turret {
     public ArrayList<Double> txArr, tyArr;
 
     private boolean isManual = false, wraparound = false;
-    private boolean velComp = false;
+    private boolean velComp = true;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
