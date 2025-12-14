@@ -380,7 +380,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             }
             addedAction = true;
         }
-//        builder = builder.strafeToConstantHeading(Pos.park);
+        builder = builder.strafeToConstantHeading(Pos.park);
 
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));

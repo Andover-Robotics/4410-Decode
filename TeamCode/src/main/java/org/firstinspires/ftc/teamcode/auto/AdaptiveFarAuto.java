@@ -94,8 +94,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
             // keep pose synced to chosen alliance
             if (Bot.isBlue()) {
                 drive.localizer.setPose(Pos.initialFarBluePose);
+                bot.setTargetGoalBlueFarAuto();
             } else {
                 drive.localizer.setPose(Pos.initialFarRedPose);
+
+                bot.setTargetGoalRedFarAuto();
             }
 
             // Telemetry for configuration
@@ -475,7 +478,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             addedAction = true;
         }
 
-//        builder = builder.strafeToConstantHeading(Pos.park);
+        builder = builder.strafeToConstantHeading(Pos.park);
 
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
