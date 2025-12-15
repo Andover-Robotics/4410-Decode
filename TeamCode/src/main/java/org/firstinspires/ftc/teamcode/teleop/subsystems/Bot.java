@@ -30,7 +30,7 @@ public class Bot {
     public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90));
     public static Vector2d goalPose = new Vector2d(65, 60); //initializes with blue, switches based on alliance
     public static Vector2d blueFarAutoGoalPose = new Vector2d(61.5, 63); //AHHHHH DIH BEHIND MEEEE
-    public static Vector2d redFarAutoGoalPose = new Vector2d(65, -55); //DIH
+    public static Vector2d redFarAutoGoalPose = new Vector2d(64, -58); //DIH
     public static Vector2d farAutoGoalPose = new Vector2d(61, 64); //TODO DO NOT USE
     public static Vector2d targetPose = goalPose;
     public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.02, shootDelayDihThreshold = 100;
@@ -240,6 +240,10 @@ public class Bot {
                 new InstantAction(() -> shooting = true),
                 new InstantAction(() -> intake.intake()),
                 new SleepAction(0.1),
+                new InstantAction(() -> intake.openGate()),
+                new SleepAction(shootTime),
+                new InstantAction(() -> intake.closeGate()),
+                new SleepAction(autoFarShootDeley),
                 new InstantAction(() -> intake.openGate()),
                 new SleepAction(shootTime),
                 new InstantAction(() -> intake.closeGate()),
