@@ -223,7 +223,9 @@ public class Turret {
 
         // Turret is CW-positive and zero is backwards, so:
         // 0° turret = 180° robot-relative CCW
-        double turretTargetCW = normDeg(-relToRobotCCW + 180);
+//        double turretTargetCW = normDeg(-relToRobotCCW + 180);
+
+        double turretTargetCW = normDeg(-relToRobotCCW);
 
         pureDistance = Math.sqrt(dx*dx + dy*dy);
 
