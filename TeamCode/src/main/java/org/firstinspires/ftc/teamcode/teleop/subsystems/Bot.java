@@ -24,7 +24,8 @@ public class Bot {
     public Turret turret;
     public Intake intake;
     public Lift lift;
-    public Screen screen;
+    public Indexer indexer;
+//    public Screen screen;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -63, Math.toRadians(-90));
@@ -59,7 +60,7 @@ public class Bot {
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
-        screen = new Screen(opMode, this);
+//        screen = new Screen(opMode, this);
         updatePoses();
     }
 
@@ -178,90 +179,67 @@ public class Bot {
         return new InstantAction(() -> enableShooter(false));
     }
 
-    public Action shootOne() {
+    public Action shootLRB() {
         return new SequentialAction(
                 new InstantAction(() -> shooting = true),
-                new InstantAction(() -> intake.intake()),
+                new InstantAction(() -> indexer.leftUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.leftDown()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.rightUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.rightDown()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.backUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.backDown()),
                 new SleepAction(0.1),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new InstantAction(() -> intake.storage()),
                 new InstantAction(() -> shooting = false)
         );
     }
-
+    public Action shootBack() {
+        return new SequentialAction(
+                new InstantAction(() -> shooting = true),
+                new InstantAction(() -> indexer.backUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.backDown()),
+                new SleepAction(0.1),
+                new InstantAction(() -> shooting = false)
+        );
+    }
+    public Action shootRight() {
+        return new SequentialAction(
+                new InstantAction(() -> shooting = true),
+                new InstantAction(() -> indexer.rightUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.rightDown()),
+                new SleepAction(0.1),
+                new InstantAction(() -> shooting = false)
+        );
+    }
+    public Action shootLeft() {
+        return new SequentialAction(
+                new InstantAction(() -> shooting = true),
+                new InstantAction(() -> indexer.leftUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> indexer.leftDown()),
+                new SleepAction(0.1),
+                new InstantAction(() -> shooting = false)
+        );
+    }
     public void updateShootingTime() {
         shootDelay = Math.max((Turret.pureDistance - shootDelayDihThreshold), 0) * shootDelayCF;
     }
 
-    public Action shootThree() {
-        updateShootingTime();
-        return new SequentialAction(
-                new InstantAction(() -> shooting = true),
-                new InstantAction(() -> intake.intake()),
-                new SleepAction(0.1),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new SleepAction(shootDelay),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new SleepAction(shootDelay),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new InstantAction(() -> intake.storage()),
-                new InstantAction(() -> shooting = false)
-        );
-    }
 
-    public Action shootThreeAutoClose() {
-        updateShootingTime();
-        return new SequentialAction(
-                new InstantAction(() -> shooting = true),
-                new InstantAction(() -> intake.intake()),
-                new SleepAction(0.1),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new SleepAction(shootTime),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new InstantAction(() -> intake.storage()),
-                new InstantAction(() -> shooting = false)
-        );
-    }
 
-    public Action shootThreeAutoFar() {
-        updateShootingTime();
-//        setTargetFarAutoGoal();
-        return new SequentialAction(
-                new InstantAction(() -> shooting = true),
-                new InstantAction(() -> intake.intake()),
-                new SleepAction(0.1),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new SleepAction(autoFarShootDeley),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime),
-                new InstantAction(() -> intake.closeGate()),
-                new SleepAction(autoFarShootDeley),
-                new InstantAction(() -> intake.openGate()),
-                new SleepAction(shootTime + 0.1),
-                new InstantAction(() -> intake.closeGate()),
-                new InstantAction(() -> intake.storage()),
-                new InstantAction(this::setTargetGoalPose),
-                new InstantAction(() -> shooting = false)
-        );
-    }
+
 
     public void periodic() {
         turret.periodic();
-        intake.periodic();
+//        intake.periodic();
         lift.periodic();
-        screen.periodic();
+//        screen.periodic();
     }
 
     public Action actionPeriodic() {

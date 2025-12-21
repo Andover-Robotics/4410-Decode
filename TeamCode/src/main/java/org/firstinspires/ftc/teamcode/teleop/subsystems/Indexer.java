@@ -14,6 +14,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class Indexer {
+    public Indexer indexer;
+
 
     public static double kickerLeftDown = 0.5;
     public static double kickerLeftUp = 0.7;
@@ -47,6 +49,29 @@ public class Indexer {
         colorBR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorBR");
         colorBL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorBL");
 
+    }
+    public void rightDown() {
+        rightKicker.setPosition(kickerRightDown);
+    }
+    public void rightUp() {
+        rightKicker.setPosition(kickerRightUp);
+    }
+    public void leftDown() {
+        leftKicker.setPosition(kickerLeftDown);
+    }
+    public void leftUp() {
+        leftKicker.setPosition(kickerLeftUp);
+    }
+    public void backDown() {
+        backKicker.setPosition(kickerBackDown);
+    }
+    public void backUp() {
+        rightKicker.setPosition(kickerBackUp);
+    }
+    public void resetIndexer() {
+        rightKicker.setPosition(kickerRightDown);
+        leftKicker.setPosition(kickerLeftDown);
+        backKicker.setPosition(kickerBackDown);
     }
 
 }

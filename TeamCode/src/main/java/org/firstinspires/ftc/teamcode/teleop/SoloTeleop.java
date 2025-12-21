@@ -106,7 +106,6 @@ public class SoloTeleop extends LinearOpMode {
             Bot.useStoredPose();
         }
 
-        bot.intake.closeGate();
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -149,13 +148,7 @@ public class SoloTeleop extends LinearOpMode {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp1.getButton(GamepadKeys.Button.A) && !bot.shooting) {
-                runningActions.add(bot.shootOne());
-            }
 
-            if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
-                runningActions.add(bot.shootThree());
-            }
 
             // FAILSAFES
 
@@ -211,16 +204,16 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
-            telemetry.addData("\n", bot.intake.storageCount());
-            telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
-//            telemetry.addData("Color Bottom", bot.intake.blbColor());
-//            telemetry.addData("Bottom Purple State", bot.intake.blb0.getState());
-//            telemetry.addData("Bottom Green State", bot.intake.blb1.getState());
-            telemetry.addData("\nHolding Middle", bot.intake.holdingMiddle());
-//            telemetry.addData("Color Middle", bot.intake.blmColor());
-//            telemetry.addData("Middle Purple State", bot.intake.blm0.getState());
-//            telemetry.addData("CMiddle Green State", bot.intake.blm1.getState());
-            telemetry.addData("\nHolding Top", bot.intake.holdingTop());
+//            telemetry.addData("\n", bot.intake.storageCount());
+//            telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
+////            telemetry.addData("Color Bottom", bot.intake.blbColor());
+////            telemetry.addData("Bottom Purple State", bot.intake.blb0.getState());
+////            telemetry.addData("Bottom Green State", bot.intake.blb1.getState());
+//            telemetry.addData("\nHolding Middle", bot.intake.holdingMiddle());
+////            telemetry.addData("Color Middle", bot.intake.blmColor());
+////            telemetry.addData("Middle Purple State", bot.intake.blm0.getState());
+////            telemetry.addData("CMiddle Green State", bot.intake.blm1.getState());
+//            telemetry.addData("\nHolding Top", bot.intake.holdingTop());
 //            telemetry.addData("Color Top", bot.intake.bltColor());
 //            telemetry.addData("Top Purple State", bot.intake.blt0.getState());
 //            telemetry.addData("Top Green State", bot.intake.blt1.getState());
