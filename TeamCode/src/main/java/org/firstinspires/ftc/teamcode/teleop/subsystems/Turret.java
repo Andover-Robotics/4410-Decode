@@ -30,11 +30,11 @@ public class Turret {
     private final ElapsedTime timer = new ElapsedTime();
 
     private IMU imu;
-
+/*
     private Limelight3A limelight;
     public LLResult llResult;
     public static Pose3D llBotPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0));
-
+*/
     public Shooter shooter;
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
@@ -89,12 +89,12 @@ public class Turret {
         );
         imu.initialize(parameters);
         imu.resetYaw();
-
+/*
         // initialize limelight
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         limelight.start();
-
+*/
         shooter = new Shooter(opMode);
 
         timer.reset();
@@ -104,15 +104,15 @@ public class Turret {
         tyArr = new ArrayList<>(0);
     }
 
-    public void setPipeline(int i) {
-        limelight.pipelineSwitch(i);
+    //public void setPipeline(int i) {
+        //limelight.pipelineSwitch(i);
         /*
             0 is blue alliance
             1 is red alliance
             2 is obelisk tracking
          */
-    }
-
+    //}
+/*
     public void trackRedAlliance() {
         setPipeline(1);
 //        POS_TRACK_X = Math.abs(POS_TRACK_X) * -1;
@@ -129,7 +129,7 @@ public class Turret {
         setPipeline(2);
         obelisk = true;
     }
-
+*/
     public void enableFullAuto(boolean on) {
         enableAutoAim(on);
         enableShooter(on);
@@ -353,10 +353,11 @@ public class Turret {
 
         motor.set(power);
     }
-
+/*
     public void relocalizeBotPose() {
         Bot.drive.localizer.setPose(new Pose2d(llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset, llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset, Math.toRadians(llBotPose.getOrientation().getYaw())));
     }
+*/
 
     public void resetEncoder() {
         motor.resetEncoder();
