@@ -5,9 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import com.arcrobotics.ftclib.geometry.Vector2d;
@@ -15,11 +13,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -38,6 +35,8 @@ public class NewBotTester extends LinearOpMode {
 
     NormalizedRGBA colors;
 
+
+
     public static boolean stallIntake = true, manualTurret = false;
 
     @Override
@@ -50,9 +49,9 @@ public class NewBotTester extends LinearOpMode {
 
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
-        bot.enableFullAuto(true);
-        bot.setTargetGoalPose();
-        stallIntake = true;
+//        bot.enableFullAuto(true);
+//        bot.setTargetGoalPose();
+//        stallIntake = true;
 
 
         // Initialize bot
@@ -62,21 +61,15 @@ public class NewBotTester extends LinearOpMode {
 
         while (!isStarted()) {
 
-            bot.indexer.resetIndexer();
-
 
             gp1.readButtons();
             gp2.readButtons();
 
             TelemetryPacket packet = new TelemetryPacket();
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetEncoder();
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                bot.shootLRB();
-            }
+//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+//                bot.turret.resetEncoder();
+//            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
                 bot.switchStartingPos();
@@ -117,6 +110,9 @@ public class NewBotTester extends LinearOpMode {
 
             gp1.readButtons();
             gp2.readButtons();
+            bot.shooting = false;
+            bot.turret.enableFullAuto(false);
+            bot.turret.enablePositionTracking(false);
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
@@ -138,28 +134,36 @@ public class NewBotTester extends LinearOpMode {
 
             // TURRET
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
-                bot.enableFullAuto(true);
-                manualTurret = false;
-            }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
-                bot.enableFullAuto(false);
-                bot.turret.enablePositionTracking(true);
-                manualTurret = false;
-            }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
-                bot.enableFullAuto(false);
-                manualTurret = true;
-            }
+//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
+//                bot.enableFullAuto(true);
+//                manualTurret = false;
+//            }
+//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
+//                bot.enableFullAuto(false);
+//                bot.turret.enablePositionTracking(true);
+//                manualTurret = false;
+//            }
+//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
+//                bot.enableFullAuto(false);
+//                manualTurret = true;
+//            }
 
             // SHOOTING
 
-            if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+            if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+                bot.turret.shooter.setManualPower(2500);
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
             }
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                bot.indexer.resetIndexer();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                runningActions.add(bot.shootLRB());
+            }
             if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
                 runningActions.add(bot.shootLeft());
             }
@@ -170,32 +174,57 @@ public class NewBotTester extends LinearOpMode {
                 runningActions.add(bot.shootBack());
             }
 
-            if (gp1.getButton(GamepadKeys.Button.A) && !bot.shooting && !gp1.isDown(GamepadKeys.Button.START)) {
-                runningActions.add(bot.shootLRB());
+
+            if (gp1.getButton(GamepadKeys.Button.DPAD_LEFT)) {
+                bot.indexer.isGreen(bot.indexer.colorBL);
+                bot.indexer.isGreen(bot.indexer.colorBR);
+                bot.indexer.isPurple(bot.indexer.colorRR);
+                bot.indexer.isPurple(bot.indexer.colorRL);
+                bot.indexer.isNone(bot.indexer.colorLL);
+                bot.indexer.isNone((bot.indexer.colorLR));
             }
+
+//            if (gp1.getButton(GamepadKeys.Button.Y) && !bot.shooting) {
+//                if (bot.indexer.isGreenRight(bot.indexer.colorRR)){
+//                    runningActions.add(bot.shootRight());
+//
+//                } else if (bot.indexer.isGreenRight(bot.indexer.colorLL)){
+//                    runningActions.add(bot.shootLeft());
+//
+//                } else if (bot.indexer.isGreenRight(bot.indexer.colorBR)){
+//                    runningActions.add(bot.shootBack());
+//                }
+//
+//          }
+
+
+
+//            if (gp1.getButton(GamepadKeys.Button.A) && !bot.shooting && !gp1.isDown(GamepadKeys.Button.START)) {
+//                runningActions.add(bot.shootLRB());
+//            }
 
             // FAILSAFES
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                bot.switchAlliance();
-            }
+//            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+//                bot.switchAlliance();
+//            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+//                bot.turret.relocalizeBotPose();
+//            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+//                bot.resetPose();
+//            }
+//
+//
+//            if (manualTurret) {
+//                bot.turret.runManual(gp2.getLeftX());
+//            }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.relocalizeBotPose();
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.resetPose();
-            }
-
-
-            if (manualTurret) {
-                bot.turret.runManual(gp2.getLeftX());
-            }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetEncoder();
-            }
+//            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
+//                bot.turret.resetEncoder();
+//            }
 
 
 
@@ -212,10 +241,26 @@ public class NewBotTester extends LinearOpMode {
             }
             runningActions = newActions;
 
-            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
-            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
-            telemetry.addData("\nalliance", Bot.getAlliance());
-            telemetry.addData("starting pos", Bot.getStartingPos());
+
+            telemetry.addData("Back(Green)", bot.indexer.isGreen(bot.indexer.colorBR));
+            telemetry.addData("Right(Purple)", bot.indexer.isPurple(bot.indexer.colorRR));
+            telemetry.addData("Left(None)", bot.indexer.isNone(bot.indexer.colorLL));
+            telemetry.addData("Left-Left Hue", bot.indexer.getHue(bot.indexer.colorLL));
+            telemetry.addData("Left-Right Hue", bot.indexer.getHue(bot.indexer.colorLR));
+            telemetry.addData("Right-Left Hue", bot.indexer.getHue(bot.indexer.colorRL));
+            telemetry.addData("Right-Right Hue", bot.indexer.getHue(bot.indexer.colorRR));
+            telemetry.addData("Back-Left Hue", bot.indexer.getHue(bot.indexer.colorBL));
+            telemetry.addData("Back-Right Hue", bot.indexer.getHue(bot.indexer.colorBR));
+
+            telemetry.addData("Left-Left Gain", bot.indexer.colorLL.getGain());
+            telemetry.addData("Left-Right Gain", bot.indexer.colorLR.getGain());
+
+
+
+//            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+//            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+//            telemetry.addData("\nalliance", Bot.getAlliance());
+//            telemetry.addData("starting pos", Bot.getStartingPos());
 //            telemetry.addData("\n", bot.intake.storageCount());
 //            telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
 //            telemetry.addData("Status Bottom", bot.intake.bottomStatus());
@@ -238,10 +283,10 @@ public class NewBotTester extends LinearOpMode {
 //
 //            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
 //            telemetry.addData("Velocity", Bot.drive.localizer.update());
-            telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-            telemetry.addData("Shoot Delay", Bot.shootDelay);
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-
+//            telemetry.addData("\nGoal Distance", Turret.trackingDistance);
+//            telemetry.addData("Shoot Delay", Bot.shootDelay);
+//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+////
 //
 //            telemetry.addData("\ntx", Turret.tx);
 //            telemetry.addData("ty", Turret.ty);
@@ -273,6 +318,7 @@ public class NewBotTester extends LinearOpMode {
 //            telemetry.addData("Offset", bot.lift.offset);
 //            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.addData("Velocity", Bot.drive.localizer.update());
+
             telemetry.update();
 
 

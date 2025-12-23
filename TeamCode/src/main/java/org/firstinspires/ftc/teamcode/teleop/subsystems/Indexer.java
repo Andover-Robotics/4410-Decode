@@ -2,27 +2,34 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
+
 @Config
 public class Indexer {
-    public Indexer indexer;
 
 
-    public static double kickerLeftDown = 0.5;
-    public static double kickerLeftUp = 0.7;
-    public static double kickerRightDown = 0.5;
-    public static double kickerRightUp = 0.7;
-    public static double kickerBackDown = 0.5;
-    public static double kickerBackUp = 0.7;
+
+
+    public static double kickerLeftDown = 0.7;
+    public static double kickerLeftUp = 0.45;
+    public static double kickerRightDown = 0.63; //0.62
+    public static double kickerRightUp = 0.37;
+    public static double kickerBackDown = 0.60; //0.6
+    public static double kickerBackUp = 0.34;
+
+
+    public float hueGreen;
+    public float huePurple;
+    public float hueNone;
+
+
+
+
 
     public Servo leftKicker;
     public Servo rightKicker;
@@ -37,7 +44,7 @@ public class Indexer {
 
 
 
-    public Indexer (OpMode opmode) {
+    public Indexer (OpMode opMode) {
         leftKicker= opMode.hardwareMap.servo.get("leftKicker");
         rightKicker= opMode.hardwareMap.servo.get("rightKicker");
         backKicker= opMode.hardwareMap.servo.get("backKicker");
@@ -66,13 +73,95 @@ public class Indexer {
         backKicker.setPosition(kickerBackDown);
     }
     public void backUp() {
-        rightKicker.setPosition(kickerBackUp);
+        backKicker.setPosition(kickerBackUp);
     }
     public void resetIndexer() {
         rightKicker.setPosition(kickerRightDown);
         leftKicker.setPosition(kickerLeftDown);
         backKicker.setPosition(kickerBackDown);
     }
+
+
+    public boolean isGreen(RevColorSensorV3 cs){
+        NormalizedRGBA colorSensor =cs.getNormalizedColors();
+
+        hueGreen = JavaUtil.colorToHue(colorSensor.toColor());
+
+        return hueGreen < 200 && hueGreen > 100;
+    }
+
+    public boolean isPurple(RevColorSensorV3 cs) {
+        NormalizedRGBA colorSensor = cs.getNormalizedColors();
+
+        huePurple = JavaUtil.colorToHue(colorSensor.toColor());
+
+        return (huePurple > 250) && (huePurple < 310);
+    }
+    public float getHue(RevColorSensorV3 cs) {
+        NormalizedRGBA colorSensor = cs.getNormalizedColors();
+        return JavaUtil.colorToHue(colorSensor.toColor());
+    }
+
+    public boolean isNone(RevColorSensorV3 cs) {
+        NormalizedRGBA colorSensor = cs.getNormalizedColors();
+
+        hueNone = JavaUtil.colorToHue(colorSensor.toColor());
+
+        return !((hueGreen >250) && (hueGreen <310)) && !((hueGreen < 200) && (hueGreen > 100));
+    }
+//    public boolean isGreenLeft(RevColorSensorV3 cs){
+//        NormalizedRGBA leftColor1 =cs.getNormalizedColors();
+//        NormalizedRGBA leftColor2 =cs.getNormalizedColors();
+//
+//        hueLeft = JavaUtil.colorToHue(leftColor1.toColor());
+//
+//        return hueLeft < 200 && hueLeft > 100;
+//    }
+//
+//    public boolean isPurpleLeft(RevColorSensorV3 cs) {
+//        NormalizedRGBA leftColor1 = cs.getNormalizedColors();
+//        NormalizedRGBA leftColor2 =cs.getNormalizedColors();
+//
+//        hueRight = JavaUtil.colorToHue(leftColor1.toColor());
+//
+//        return (hueLeft > 250) && (hueLeft < 310);
+//    }
+//
+//    public boolean isNoneLeft(RevColorSensorV3 cs) {
+//        NormalizedRGBA leftColor1 = cs.getNormalizedColors();
+//        NormalizedRGBA leftColor2 =cs.getNormalizedColors();
+//
+//        hueRight = JavaUtil.colorToHue(leftColor1.toColor());
+//
+//        return !((hueLeft>250) && (hueLeft<310)) && !((hueLeft < 200) && (hueLeft > 100));
+//    }
+//    public boolean isGreenBack(RevColorSensorV3 cs){
+//        NormalizedRGBA backColor1 =cs.getNormalizedColors();
+//        NormalizedRGBA backColor2 =cs.getNormalizedColors();
+//
+//        hueRight = JavaUtil.colorToHue(backColor1.toColor());
+//
+//        return hueBack < 200 && hueBack > 100;
+//    }
+//
+//    public boolean isPurpleBack(RevColorSensorV3 cs) {
+//        NormalizedRGBA backColor1 = cs.getNormalizedColors();
+//        NormalizedRGBA backColor2 =cs.getNormalizedColors();
+//
+//        hueRight = JavaUtil.colorToHue(backColor1.toColor());
+//
+//        return (hueBack > 250) && (hueBack < 310);
+//    }
+//
+//    public boolean isNoneBack(RevColorSensorV3 cs) {
+//        NormalizedRGBA backColor1 = cs.getNormalizedColors();
+//        NormalizedRGBA backColor2 =cs.getNormalizedColors();
+//
+//        hueRight = JavaUtil.colorToHue(backColor1.toColor());
+//
+//        return !((hueBack>250) && (hueBack<310)) && !((hueBack < 200) && (hueBack > 100));
+//    }
+
 
 }
 

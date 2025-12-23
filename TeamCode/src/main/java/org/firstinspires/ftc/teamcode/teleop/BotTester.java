@@ -145,21 +145,21 @@ public class BotTester extends LinearOpMode {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.intake.openGate();
-            }
-
-            if (gp1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                bot.intake.closeGate();
-            }
-
-            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                runningActions.add(bot.shootOne());
-            }
-
-            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                runningActions.add(bot.shootThree());
-            }
+//            if (gp1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+//                bot.intake.openGate();
+//            }
+//
+//            if (gp1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+//                bot.intake.closeGate();
+//            }
+//
+//            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+//                runningActions.add(bot.shootOne());
+//            }
+//
+//            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+//                runningActions.add(bot.shootThree());
+//            }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
@@ -190,18 +190,18 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("Velocity", Bot.drive.localizer.update());
             telemetry.addData("Goal Distance", Turret.trackingDistance);
 
-            telemetry.addData("\ntx", Turret.tx);
-            telemetry.addData("ty", Turret.ty);
+//            telemetry.addData("\ntx", Turret.tx);
+//            telemetry.addData("ty", Turret.ty);
 
-            telemetry.addData("\ntx", Turret.tx);
-            telemetry.addData("ty", Turret.ty);
-            telemetry.addData( "tag angle", Turret.tAngle);
-            telemetry.addData("tOffset", Turret.tOffset);
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-            telemetry.addData("\nPower", bot.turret.shooter.getPower());
-            telemetry.addData("correct distance", Turret.distance);
-            telemetry.addData("regression distance", Turret.distance - Turret.tOffset);
-            telemetry.addData("manual target rpm", rpm);
+//            telemetry.addData("\ntx", Turret.tx);
+//            telemetry.addData("ty", Turret.ty);
+//            telemetry.addData( "tag angle", Turret.tAngle);
+//            telemetry.addData("tOffset", Turret.tOffset);
+//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+//            telemetry.addData("\nPower", bot.turret.shooter.getPower());
+//            telemetry.addData("correct distance", Turret.distance);
+//            telemetry.addData("regression distance", Turret.distance - Turret.tOffset);
+//            telemetry.addData("manual target rpm", rpm);
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
 

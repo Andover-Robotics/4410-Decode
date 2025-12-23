@@ -73,7 +73,7 @@ public class Intake {
 
     public Intake(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "intake", Motor.GoBILDA.RPM_1150);
-        motor.setInverted(false);
+        motor.setInverted(true);
         motor.setRunMode(Motor.RunMode.RawPower);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 //        color = opMode.hardwareMap.get(RevColorSensorV3.class, "Color");

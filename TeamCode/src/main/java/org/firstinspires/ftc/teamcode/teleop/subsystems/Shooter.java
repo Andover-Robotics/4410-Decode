@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
-import static org.firstinspires.ftc.teamcode.teleop.subsystems.Intake.gateClosed;
-import static org.firstinspires.ftc.teamcode.teleop.subsystems.Intake.gateOpen;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;

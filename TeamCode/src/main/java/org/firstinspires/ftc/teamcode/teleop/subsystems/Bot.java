@@ -60,6 +60,7 @@ public class Bot {
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
+        indexer = new Indexer(opMode);
 //        screen = new Screen(opMode, this);
         updatePoses();
     }
@@ -81,13 +82,13 @@ public class Bot {
 
     public void setAllianceBlue() {
         alliance = allianceOptions.BLUE_ALLIANCE;
-        turret.trackBlueAlliance();
+//        turret.trackBlueAlliance();
         updatePoses();
     }
 
     public void setAllianceRed() {
         alliance = allianceOptions.RED_ALLIANCE;
-        turret.trackRedAlliance();
+//        turret.trackRedAlliance();
         updatePoses();
     }
 
@@ -104,13 +105,13 @@ public class Bot {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
             farAutoGoalPose = new Vector2d(farAutoGoalPose.x, -1 * Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
-            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset) * -1;
+//            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset) * -1;
 
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
             farAutoGoalPose = new Vector2d(farAutoGoalPose.x, Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
-            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset);
+//            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset);
         }
         targetPose = goalPose;
     }
@@ -181,7 +182,7 @@ public class Bot {
 
     public Action shootLRB() {
         return new SequentialAction(
-                new InstantAction(() -> shooting = true),
+//                new InstantAction(() -> shooting = true),
                 new InstantAction(() -> indexer.leftUp()),
                 new SleepAction(0.5),
                 new InstantAction(() -> indexer.leftDown()),
@@ -199,7 +200,7 @@ public class Bot {
     }
     public Action shootBack() {
         return new SequentialAction(
-                new InstantAction(() -> shooting = true),
+//                new InstantAction(() -> shooting = true),
                 new InstantAction(() -> indexer.backUp()),
                 new SleepAction(0.5),
                 new InstantAction(() -> indexer.backDown()),
@@ -209,7 +210,7 @@ public class Bot {
     }
     public Action shootRight() {
         return new SequentialAction(
-                new InstantAction(() -> shooting = true),
+//                new InstantAction(() -> shooting = true),
                 new InstantAction(() -> indexer.rightUp()),
                 new SleepAction(0.5),
                 new InstantAction(() -> indexer.rightDown()),
@@ -219,7 +220,7 @@ public class Bot {
     }
     public Action shootLeft() {
         return new SequentialAction(
-                new InstantAction(() -> shooting = true),
+//                new InstantAction(() -> shooting = true),
                 new InstantAction(() -> indexer.leftUp()),
                 new SleepAction(0.5),
                 new InstantAction(() -> indexer.leftDown()),
