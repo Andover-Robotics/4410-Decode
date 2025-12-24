@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -12,29 +16,28 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 @Config
 public class Indexer {
 
+    public enum Motif {
+        PPG,
+        GPP,
+        PGP
+    }
+    String currentMotif=Motif.PPG.name();
 
-
-
-    public static double kickerLeftDown = 0.7;
-    public static double kickerLeftUp = 0.45;
-    public static double kickerRightDown = 0.63; //0.62
-    public static double kickerRightUp = 0.37;
-    public static double kickerBackDown = 0.60; //0.6
-    public static double kickerBackUp = 0.34;
-
-
-    public float hueGreen;
-    public float huePurple;
-    public float hueNone;
-
-
-
-
-
+    //kicker servos
     public Servo leftKicker;
     public Servo rightKicker;
     public Servo backKicker;
 
+    //kicker values
+    public static double kickerLeftDown = 0.7;
+    public static double kickerLeftUp = 0.45;
+    public static double kickerRightDown = 0.63;
+    public static double kickerRightUp = 0.37;
+    public static double kickerBackDown = 0.60;
+    public static double kickerBackUp = 0.34;
+
+
+    //color sensors
     public RevColorSensorV3 colorRR;
     public RevColorSensorV3 colorRL;
     public RevColorSensorV3 colorLL;
@@ -42,21 +45,41 @@ public class Indexer {
     public RevColorSensorV3 colorBL;
     public RevColorSensorV3 colorBR;
 
+    //sensing variables
+    public float hueGreen;
+    public float huePurple;
+    public float hueNone;
+
+    int gain=20;
 
 
+    //hardware
     public Indexer (OpMode opMode) {
         leftKicker= opMode.hardwareMap.servo.get("leftKicker");
         rightKicker= opMode.hardwareMap.servo.get("rightKicker");
         backKicker= opMode.hardwareMap.servo.get("backKicker");
 
         colorRR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorRR");
+        colorRR.setGain(gain);
+
         colorRL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorRL");
+        colorRL.setGain(gain);
+
         colorLL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorLL");
+        colorLL.setGain(gain);
+
         colorLR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorLR");
+        colorLR.setGain(gain);
+
         colorBR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorBR");
+        colorBR.setGain(gain);
+
         colorBL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorBL");
+        colorBL.setGain(gain);
 
     }
+
+    // kicker methods
     public void rightDown() {
         rightKicker.setPosition(kickerRightDown);
     }
@@ -75,6 +98,41 @@ public class Indexer {
     public void backUp() {
         backKicker.setPosition(kickerBackUp);
     }
+
+    public Action shootBack() {
+        return new SequentialAction(
+                new InstantAction(() -> backUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> backDown()),
+                new SleepAction(0.1)
+        );
+    }
+    public Action shootRight() {
+        return new SequentialAction(
+                new InstantAction(() -> rightUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> rightDown()),
+                new SleepAction(0.1)
+        );
+    }
+    public Action shootLeft() {
+        return new SequentialAction(
+                new InstantAction(() -> leftUp()),
+                new SleepAction(0.5),
+                new InstantAction(() -> leftDown()),
+                new SleepAction(0.1)
+        );
+    }
+
+
+
+
+
+
+
+
+
+
     public void resetIndexer() {
         rightKicker.setPosition(kickerRightDown);
         leftKicker.setPosition(kickerLeftDown);
@@ -82,6 +140,7 @@ public class Indexer {
     }
 
 
+    //color sensing methods
     public boolean isGreen(RevColorSensorV3 cs){
         NormalizedRGBA colorSensor =cs.getNormalizedColors();
 
@@ -97,10 +156,7 @@ public class Indexer {
 
         return (huePurple > 250) && (huePurple < 310);
     }
-    public float getHue(RevColorSensorV3 cs) {
-        NormalizedRGBA colorSensor = cs.getNormalizedColors();
-        return JavaUtil.colorToHue(colorSensor.toColor());
-    }
+
 
     public boolean isNone(RevColorSensorV3 cs) {
         NormalizedRGBA colorSensor = cs.getNormalizedColors();
@@ -109,6 +165,12 @@ public class Indexer {
 
         return !((hueGreen >250) && (hueGreen <310)) && !((hueGreen < 200) && (hueGreen > 100));
     }
+
+    public float getHue(RevColorSensorV3 cs) {
+        NormalizedRGBA colorSensor = cs.getNormalizedColors();
+        return JavaUtil.colorToHue(colorSensor.toColor());
+    }
+
 //    public boolean isGreenLeft(RevColorSensorV3 cs){
 //        NormalizedRGBA leftColor1 =cs.getNormalizedColors();
 //        NormalizedRGBA leftColor2 =cs.getNormalizedColors();

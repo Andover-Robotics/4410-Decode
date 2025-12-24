@@ -242,9 +242,9 @@ public class NewBotTester extends LinearOpMode {
             runningActions = newActions;
 
 
-            telemetry.addData("Back(Green)", bot.indexer.isGreen(bot.indexer.colorBR));
-            telemetry.addData("Right(Purple)", bot.indexer.isPurple(bot.indexer.colorRR));
-            telemetry.addData("Left(None)", bot.indexer.isNone(bot.indexer.colorLL));
+//            telemetry.addData("Back(Green)", bot.indexer.isGreen(bot.indexer.colorBR));
+//            telemetry.addData("Right(Purple)", bot.indexer.isPurple(bot.indexer.colorRR));
+//            telemetry.addData("Left(None)", bot.indexer.isNone(bot.indexer.colorLL));
             telemetry.addData("Left-Left Hue", bot.indexer.getHue(bot.indexer.colorLL));
             telemetry.addData("Left-Right Hue", bot.indexer.getHue(bot.indexer.colorLR));
             telemetry.addData("Right-Left Hue", bot.indexer.getHue(bot.indexer.colorRL));
@@ -253,50 +253,6 @@ public class NewBotTester extends LinearOpMode {
             telemetry.addData("Back-Right Hue", bot.indexer.getHue(bot.indexer.colorBR));
 
             telemetry.addData("Left-Left Gain", bot.indexer.colorLL.getGain());
-            telemetry.addData("Left-Right Gain", bot.indexer.colorLR.getGain());
-
-
-
-//            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
-//            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
-//            telemetry.addData("\nalliance", Bot.getAlliance());
-//            telemetry.addData("starting pos", Bot.getStartingPos());
-//            telemetry.addData("\n", bot.intake.storageCount());
-//            telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
-//            telemetry.addData("Status Bottom", bot.intake.bottomStatus());
-//            telemetry.addData("Color Bottom", bot.intake.rawBottomColor());
-//            telemetry.addData("Break Beam Bottom", bot.intake.rawBottomBreakBeam());
-//            telemetry.addData("Bottom Purple State", bot.intake.blb0.getState());
-//            telemetry.addData("Bottom Green State", bot.intake.blb1.getState());
-//            telemetry.addData("\nHolding Middle", bot.intake.holdingMiddle());
-//            telemetry.addData("Status Middle", bot.intake.middleStatus());
-//            telemetry.addData("Color Middle", bot.intake.rawMiddleColor());
-//            telemetry.addData("Break Beam Middle", bot.intake.rawMiddleBreakBeam());
-//            telemetry.addData("Middle Purple State", bot.intake.blm0.getState());
-//            telemetry.addData("CMiddle Green State", bot.intake.blm1.getState());
-//            telemetry.addData("\nHolding Top", bot.intake.holdingTop());
-//            telemetry.addData("Status Top", bot.intake.topStatus());
-//            telemetry.addData("Color Top", bot.intake.rawTopColor());
-//            telemetry.addData("Break Beam Top", bot.intake.rawTopBreakBeam());
-//            telemetry.addData("Top Purple State", bot.intake.blt0.getState());
-//            telemetry.addData("Top Green State", bot.intake.blt1.getState());
-//
-//            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
-//            telemetry.addData("Velocity", Bot.drive.localizer.update());
-//            telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-//            telemetry.addData("Shoot Delay", Bot.shootDelay);
-//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-////
-//
-//            telemetry.addData("\ntx", Turret.tx);
-//            telemetry.addData("ty", Turret.ty);
-//
-//            telemetry.addData("txAvg", bot.turret.txAvg);
-//
-//            telemetry.addData("correct distance", Turret.distance);
-//            telemetry.addData( "tag angle", Turret.tAngle);
-//            telemetry.addData("tOffset", Turret.tOffset);
-//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
 
             telemetry.addData("auto target rpm", Turret.shooterRpm);
             telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
