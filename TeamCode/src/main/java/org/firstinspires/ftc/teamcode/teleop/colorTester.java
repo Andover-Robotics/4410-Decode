@@ -8,59 +8,72 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-
-@TeleOp(name = "Ball Detection DEBUG MAX")
+@TeleOp(name = "colorTester")
 public class colorTester extends LinearOpMode {
 
-    RevColorSensorV3 colorRR, colorRL;
-    RevColorSensorV3 colorLR, colorLL;
-    RevColorSensorV3 colorBR, colorBL;
+    // Logic sensors
+    RevColorSensorV3 colorRR; // RIGHT A
+    RevColorSensorV3 colorLR; // LEFT A
+    RevColorSensorV3 colorBR; // BACK A (hue only)
 
-    float[] hsvA = new float[3];
-    float[] hsvB = new float[3];
+    // Distance sensors
+    RevColorSensorV3 distRR;  // RIGHT A (same as colorRR)
+    RevColorSensorV3 distLR;  // LEFT A (same as colorLR)
+    RevColorSensorV3 distBR;  // BACK B (use for distance)
 
-    static final double DISTANCE_THRESHOLD_MM = 50.0; // tune this
+    float[] hsv = new float[3];
+
+    // ===== TUNABLES =====
+    static final int gain = 20;
+    static final double DISTANCE_THRESHOLD_MM = 25.0;
 
     @Override
     public void runOpMode() {
 
+        // Color sensors
         colorRR = hardwareMap.get(RevColorSensorV3.class, "colorRR");
-        colorRL = hardwareMap.get(RevColorSensorV3.class, "colorRL");
-
         colorLR = hardwareMap.get(RevColorSensorV3.class, "colorLR");
-        colorLL = hardwareMap.get(RevColorSensorV3.class, "colorLL");
-
         colorBR = hardwareMap.get(RevColorSensorV3.class, "colorBR");
-        colorBL = hardwareMap.get(RevColorSensorV3.class, "colorBL");
 
-        telemetry.addLine("DEBUG MODE: DIABOLICAL TELEMETRY ENABLED");
+        // Distance sensors
+        distRR = colorRR;             // RIGHT A
+        distLR = colorLR;             // LEFT A
+        distBR = hardwareMap.get(RevColorSensorV3.class, "colorBL"); // BACK B
+
+        // Apply gain to all sensors
+        colorRR.setGain(gain);
+        colorLR.setGain(gain);
+        colorBR.setGain(gain);
+        distBR.setGain(gain); // B sensor gain
+        // distRR/distLR already applied via color sensors
+
+        telemetry.addLine("=== COLOR TESTER ===");
+        telemetry.addData("Gain", gain);
+        telemetry.addData("Distance threshold (mm)", DISTANCE_THRESHOLD_MM);
+        telemetry.addLine("Hue-only color + distance presence (Back B for distance)");
         telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            debugSpot("RIGHT", colorRR, colorRL);
-            debugSpot("LEFT",  colorLR, colorLL);
-            debugSpot("BACK",  colorBR, colorBL);
+            debugSpot("RIGHT", colorRR, distRR);
+            debugSpot("LEFT",  colorLR, distLR);
+            debugSpot("BACK",  colorBR, distBR);
 
             telemetry.addLine("--------------------------------");
             telemetry.update();
         }
     }
 
-    private void debugSpot(String name, RevColorSensorV3 a, RevColorSensorV3 b) {
+    /** Hue + distance (distance can be different sensor) */
+    private void debugSpot(String name, RevColorSensorV3 colorSensor, RevColorSensorV3 distanceSensor) {
 
-        double distA = a.getDistance(DistanceUnit.MM);
-        double distB = b.getDistance(DistanceUnit.MM);
-        double avgDist = (distA + distB) / 2.0;
-
-        boolean ballPresent = avgDist < DISTANCE_THRESHOLD_MM;
+        double distance = safeDistance(distanceSensor);
+        boolean ballPresent = distance > 0 && distance < DISTANCE_THRESHOLD_MM;
 
         telemetry.addLine("[" + name + "]");
-        telemetry.addData(name + " dist A (mm)", "%.1f", distA);
-        telemetry.addData(name + " dist B (mm)", "%.1f", distB);
-        telemetry.addData(name + " dist AVG (mm)", "%.1f", avgDist);
+        telemetry.addData(name + " distance (mm)", "%.1f", distance);
         telemetry.addData(name + " ball present?", ballPresent);
 
         if (!ballPresent) {
@@ -68,28 +81,17 @@ public class colorTester extends LinearOpMode {
             return;
         }
 
-        // RGB
-        telemetry.addData(name + " A RGB",
-                "%d %d %d", a.red(), a.green(), a.blue());
-        telemetry.addData(name + " B RGB",
-                "%d %d %d", b.red(), b.green(), b.blue());
+        // HSV (colorSensor only)
+        Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+        float h = hsv[0];
 
-        // HSV
-        Color.RGBToHSV(a.red(), a.green(), a.blue(), hsvA);
-        Color.RGBToHSV(b.red(), b.green(), b.blue(), hsvB);
+        telemetry.addData(name + " Hue", "%.1f", h);
 
-        float avgHue = (hsvA[0] + hsvB[0]) / 2;
-        float avgSat = (hsvA[1] + hsvB[1]) / 2;
-        float avgVal = (hsvA[2] + hsvB[2]) / 2;
+        boolean green = isGreen(h, 0, 0);
+        boolean purple = isPurple(h, 0, 0);
 
-        telemetry.addData(name + " AVG HSV",
-                "H %.1f S %.2f V %.2f", avgHue, avgSat, avgVal);
-
-        boolean green = isGreen(avgHue, avgSat, avgVal);
-        boolean purple = isPurple(avgHue, avgSat, avgVal);
-
-        telemetry.addData(name + " green check", green);
-        telemetry.addData(name + " purple check", purple);
+        telemetry.addData(name + " green?", green);
+        telemetry.addData(name + " purple?", purple);
 
         String finalColor = "UNKNOWN";
         if (green) finalColor = "GREEN";
@@ -98,12 +100,21 @@ public class colorTester extends LinearOpMode {
         telemetry.addData(name + " FINAL", finalColor);
     }
 
+    /** Safe distance */
+    private double safeDistance(RevColorSensorV3 sensor) {
+        double d = sensor.getDistance(DistanceUnit.MM);
+        if (Double.isNaN(d) || Double.isInfinite(d)) {
+            return -1;
+        }
+        return d;
+    }
+
+    /** Hue-only logic */
     private boolean isGreen(float h, float s, float v) {
-        return h > 90 && h < 150 && s > 0.4 && v > 0.2;
+        return h > 160 && h < 180;
     }
 
     private boolean isPurple(float h, float s, float v) {
-        return h > 250 && h < 300 && s > 0.4 && v > 0.2;
+        return h > 180 && h < 225;
     }
 }
-

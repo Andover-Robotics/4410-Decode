@@ -1,21 +1,14 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 public class Intake {
 
-    public static double intakePower = -1, storagePower = -0.32, reversePower = 0.8;
+    public static double intakePower = -1, storagePower = 0.32, reversePower = 0.8;
     public static int filterWindowSize = 7;
     public static double beamThreshold = 0.2, colorThreshold = 0.30;
 
@@ -67,8 +60,8 @@ public class Intake {
     private enum IntakeMode {
         STOPPED,
         INTAKING,
-        STORAGE,
-        REVERSING
+        REVERSINGSLOW,
+        REVERSINGFULL
     }
 
     public Intake(OpMode opMode) {
@@ -115,13 +108,13 @@ public class Intake {
 
     public void storage() {
         motor.set(storagePower);
-        currentMode = IntakeMode.STORAGE;
+        currentMode = IntakeMode.REVERSINGSLOW;
     }
 
     public void reverse() {
         motor.set(reversePower);
 //        resetFilters();
-        currentMode = IntakeMode.REVERSING;
+        currentMode = IntakeMode.REVERSINGFULL;
     }
 
     public void stop() {
