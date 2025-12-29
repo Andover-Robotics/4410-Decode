@@ -41,8 +41,8 @@ public class Indexer {
     public static double kickerBackDown = 0.60;
     public static double kickerBackUp = 0.34;
 
-    public double kickerSleep=0.5;
-    public double shootSleep=0.5;
+    public static double kickerSleep=0.5;
+    public static double shootSleep=0.5;
 
     //color sensors
     public RevColorSensorV3 colorRR;//dont use for distance

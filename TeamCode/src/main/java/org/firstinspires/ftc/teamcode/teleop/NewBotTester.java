@@ -136,8 +136,8 @@ public class NewBotTester extends LinearOpMode {
                     bot.intake.intake();
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.intake.reverse();
-                } else if (bot.indexer.countBalls()==3){
-                    bot.intake.reverse();
+//                } else if (bot.indexer.countBalls()==3){
+//                    bot.intake.reverse();
                 } else if (stallIntake){
                     bot.intake.storage();
                 } else {
@@ -180,8 +180,12 @@ public class NewBotTester extends LinearOpMode {
                 bot.indexer.resetIndexer();
             }
 
+//            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+//                bot.indexer.shootMotifDirect();
+//            }
+
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                bot.indexer.shootMotifDirect();
+                runningActions.add(bot.indexer.shootRLB());
             }
 
             if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
