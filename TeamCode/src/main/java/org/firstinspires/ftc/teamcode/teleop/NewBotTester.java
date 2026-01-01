@@ -170,7 +170,7 @@ public class NewBotTester extends LinearOpMode {
             // SHOOTING
 
             if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
-                bot.turret.shooter.setManualPower(2500);
+                bot.turret.shooter.setManualPower(2000);
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
@@ -185,7 +185,7 @@ public class NewBotTester extends LinearOpMode {
 //            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                runningActions.add(bot.indexer.shootRLB());
+                runningActions.add(bot.indexer.shootBLR());
             }
 
             if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
@@ -196,6 +196,13 @@ public class NewBotTester extends LinearOpMode {
             }
             if (gp1.getButton(GamepadKeys.Button.Y) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootBack());
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
+                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.lift.liftUp();
             }
 
 
@@ -283,21 +290,21 @@ public class NewBotTester extends LinearOpMode {
 
 
 
-            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
-            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR));
-            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL));
-            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL));
-            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR));
-            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR));
-            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL));
-
-            telemetry.addLine("=== HUEGE AHHH ===");
-            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR));
-            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL));
-            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL));
-            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR));
-            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR));
-            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL));
+//            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
+//            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR));
+//            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL));
+//            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL));
+//            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR));
+//            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR));
+//            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL));
+//
+//            telemetry.addLine("=== HUEGE AHHH ===");
+//            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR));
+//            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL));
+//            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL));
+//            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR));
+//            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR));
+//            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL));
 
 
 
