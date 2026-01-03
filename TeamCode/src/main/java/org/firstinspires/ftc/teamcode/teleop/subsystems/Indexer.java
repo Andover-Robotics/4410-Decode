@@ -5,363 +5,223 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @Config
 public class Indexer {
 
-    //just for now bc no limelight
-    public String motifPattern="PPG";
-    //to set which motif in future
-//    if (idtag2x) {
-//        motifPattern="PPG";
-//
-//    } else if (idtag2y){
-//        motifPattern="PGP";
-//    }else if (iftag2z){
-//        motifPattern="GPP";
-//    }
+    /* ================= CONFIG ================= */
 
+    public String motifPattern = "PPG";
 
-
-    //kicker servos
-    public Servo leftKicker;
-    public Servo rightKicker;
-    public Servo backKicker;
-
-    //kicker values
-    public static double kickerLeftDown = 0.705;
-    public static double kickerLeftUp = 0.45;
+    public static double kickerLeftDown  = 0.705;
+    public static double kickerLeftUp    = 0.45;
     public static double kickerRightDown = 0.63;
-    public static double kickerRightUp = 0.37;
-    public static double kickerBackDown = 0.60;
-    public static double kickerBackUp = 0.34;
+    public static double kickerRightUp   = 0.37;
+    public static double kickerBackDown  = 0.60;
+    public static double kickerBackUp    = 0.34;
 
-    public static double kickerSleep=0.25;
-    public static double shootSleep=0.03;
+    public static double kickerSleep = 0.25;
+    public static double shootSleep  = 0.03;
 
-    //color sensors
-    public RevColorSensorV3 colorRR;//dont use for distance
-    public RevColorSensorV3 colorRL;//dont use for hue
-    public RevColorSensorV3 colorLL;
-    public RevColorSensorV3 colorLR;
-    public RevColorSensorV3 colorBL;//dont use for distance
-    public RevColorSensorV3 colorBR;
-
-    //sensing variables
-    public float hueGreen;
-    public float huePurple;
-    public float hueNone;
-
-    int gain=20;
-
-    // distance threshold
     static final double DISTANCE_THRESHOLD_MM = 28.0;
-    private float[] hsv = new float[3];
+    public int gain = 20;
 
+    /* ================= HARDWARE ================= */
 
+    public Servo leftKicker, rightKicker, backKicker;
 
-    //hardware
-    public Indexer (OpMode opMode) {
-        leftKicker= opMode.hardwareMap.servo.get("leftKicker");
-        rightKicker= opMode.hardwareMap.servo.get("rightKicker");
-        backKicker= opMode.hardwareMap.servo.get("backKicker");
+    public RevColorSensorV3 colorRR, colorRL;
+    public RevColorSensorV3 colorLL, colorLR;
+    public RevColorSensorV3 colorBR, colorBL;
 
-        colorRR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorRR");
+    private final float[] hsv = new float[3];
+
+    /* ================= INIT ================= */
+
+    public Indexer(OpMode opMode) {
+        leftKicker  = opMode.hardwareMap.servo.get("leftKicker");
+        rightKicker = opMode.hardwareMap.servo.get("rightKicker");
+        backKicker  = opMode.hardwareMap.servo.get("backKicker");
+
+        colorRR = opMode.hardwareMap.get(RevColorSensorV3.class, "colorRR");
+        colorRL = opMode.hardwareMap.get(RevColorSensorV3.class, "colorRL");
+        colorLL = opMode.hardwareMap.get(RevColorSensorV3.class, "colorLL");
+        colorLR = opMode.hardwareMap.get(RevColorSensorV3.class, "colorLR");
+        colorBR = opMode.hardwareMap.get(RevColorSensorV3.class, "colorBR");
+        colorBL = opMode.hardwareMap.get(RevColorSensorV3.class, "colorBL");
+
         colorRR.setGain(gain);
-
-        colorRL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorRL");
         colorRL.setGain(gain);
-
-        colorLL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorLL");
         colorLL.setGain(gain);
-
-        colorLR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorLR");
         colorLR.setGain(gain);
-
-        colorBR= opMode.hardwareMap.get(RevColorSensorV3.class, "colorBR");
         colorBR.setGain(gain);
-
-        colorBL= opMode.hardwareMap.get(RevColorSensorV3.class, "colorBL");
         colorBL.setGain(gain);
-
     }
 
-    // kicker methods
-    public void rightDown() {
-        rightKicker.setPosition(kickerRightDown);
+    /* ================= KICKERS ================= */
+
+    public void rightUp()  { rightKicker.setPosition(kickerRightUp); }
+    public void rightDown(){ rightKicker.setPosition(kickerRightDown); }
+    public void leftUp()   { leftKicker.setPosition(kickerLeftUp); }
+    public void leftDown() { leftKicker.setPosition(kickerLeftDown); }
+    public void backUp()   { backKicker.setPosition(kickerBackUp); }
+    public void backDown() { backKicker.setPosition(kickerBackDown); }
+
+    public void resetIndexer() {
+        rightDown();
+        leftDown();
+        backDown();
     }
-    public void rightUp() {
-        rightKicker.setPosition(kickerRightUp);
+
+    /* ================= ACTIONS ================= */
+
+    public Action shootRight() {
+        return new SequentialAction(
+                new InstantAction(this::rightUp),
+                new SleepAction(kickerSleep),
+                new InstantAction(this::rightDown)
+        );
     }
-    public void leftDown() {
-        leftKicker.setPosition(kickerLeftDown);
-    }
-    public void leftUp() {
-        leftKicker.setPosition(kickerLeftUp);
-    }
-    public void backDown() {
-        backKicker.setPosition(kickerBackDown);
-    }
-    public void backUp() {
-        backKicker.setPosition(kickerBackUp);
+
+    public Action shootLeft() {
+        return new SequentialAction(
+                new InstantAction(this::leftUp),
+                new SleepAction(kickerSleep),
+                new InstantAction(this::leftDown)
+        );
     }
 
     public Action shootBack() {
         return new SequentialAction(
-                new InstantAction(() -> backUp()),
+                new InstantAction(this::backUp),
                 new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(0.1)
-        );
-    }
-    public Action shootRight() {
-        return new SequentialAction(
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(0.1)
-        );
-    }
-    public Action shootLeft() {
-        return new SequentialAction(
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(0.1)
+                new InstantAction(this::backDown)
         );
     }
 
-    public Action shootLRB() {
-        return new SequentialAction(
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> backUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(0.1)
-        );
-    }
-    public Action shootLBR() {
-        return new SequentialAction(
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> backUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(0.1)
-        );
-    }
-    public Action shootBLR() {
-        return new SequentialAction(
-                new InstantAction(() -> backUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(0.1)
-        );
-    }
-    public Action shootBRL() {
-        return new SequentialAction(
-                new InstantAction(() -> backUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(0.1)
-        );
+    /* ================= DISTANCE ================= */
+
+    public double safeDistance(RevColorSensorV3 s) {
+        double d = s.getDistance(DistanceUnit.MM);
+        return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
     }
 
-    public Action shootRBL() {
-        return new SequentialAction(
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> backUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(0.1)
-        );
+    private boolean ballPresent(RevColorSensorV3 a, RevColorSensorV3 b) {
+        double da = safeDistance(a);
+        double db = safeDistance(b);
+        return (da > 0 && da < DISTANCE_THRESHOLD_MM)
+                || (db > 0 && db < DISTANCE_THRESHOLD_MM);
     }
 
-    public Action shootRLB() {
-        return new SequentialAction(
-                new InstantAction(() -> rightUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> rightDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> leftUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> leftDown()),
-                new SleepAction(shootSleep),
-                new InstantAction(() -> backUp()),
-                new SleepAction(kickerSleep),
-                new InstantAction(() -> backDown()),
-                new SleepAction(0.1)
-        );
-    }
+    /* ================= HUE ================= */
 
-    public void resetIndexer() {
-        rightKicker.setPosition(kickerRightDown);
-        leftKicker.setPosition(kickerLeftDown);
-        backKicker.setPosition(kickerBackDown);
-    }
-    // ===== distance helpers =====
-    public double safeDistance(RevColorSensorV3 sensor) {
-        double d = sensor.getDistance(DistanceUnit.MM);
-        if (Double.isNaN(d) || Double.isInfinite(d)) return -1;
-        return d;
-    }
-
-    private boolean isBallPresent(RevColorSensorV3 distanceSensor) {
-        double dist = safeDistance(distanceSensor);
-        return dist > 0 && dist < DISTANCE_THRESHOLD_MM;
-    }
-
-    // ===== hue helpers =====
     public float getHue(RevColorSensorV3 sensor) {
-        android.graphics.Color.RGBToHSV(sensor.red(), sensor.green(), sensor.blue(), hsv);
+        android.graphics.Color.RGBToHSV(
+                sensor.red(), sensor.green(), sensor.blue(), hsv
+        );
         return hsv[0];
     }
 
-    private boolean isGreenHue(float h) { return h > 160 && h < 180; }
+    private boolean isGreenHue(float h)  { return h > 160 && h < 180; }
     private boolean isPurpleHue(float h) { return h > 180 && h < 225; }
 
-    // ===== final color getters =====
-    public String getRightColor() {
-        if (!isBallPresent(colorRL)) return "EMPTY";
-        float h = getHue(colorRR);
-        if (isGreenHue(h)) return "GREEN";
+    private String classifyHue(float h) {
+        if (isGreenHue(h))  return "GREEN";
         if (isPurpleHue(h)) return "PURPLE";
+        return "UNKNOWN";
+    }
+
+    /* ================= FINAL COLOR ================= */
+
+    public String getRightColor() {
+        if (!ballPresent(colorRR, colorRL)) return "EMPTY";
+
+        float h1 = getHue(colorRR);
+        float h2 = getHue(colorRL);
+
+        if (isGreenHue(h1) || isGreenHue(h2))   return "GREEN";
+        if (isPurpleHue(h1) || isPurpleHue(h2)) return "PURPLE";
+
         return "UNKNOWN";
     }
 
     public String getLeftColor() {
-        if (!isBallPresent(colorLR))  return "EMPTY";
-        if (!isBallPresent(colorLL))  return "EMPTY";
-        float h = getHue(colorLR);
-        float hh =getHue(colorLL);
-        if (isBallPresent(colorLL) && isBallPresent(colorLR)) {
-            if (isGreenHue(h)) return "GREEN";
-            if (isPurpleHue(h)) return "PURPLE";
-        } else if (isBallPresent(colorLR)){
-            if (isGreenHue(h)) return "GREEN";
-            if (isPurpleHue(h)) return "PURPLE";
-        } else if (isBallPresent(colorRR)){
-            if (isGreenHue(hh)) return "GREEN";
-            if (isPurpleHue(hh)) return "PURPLE";
-        }
-        return "UNKNOWN";
+        if (!ballPresent(colorLL, colorLR)) return "EMPTY";
+        return classifyHue(getHue(colorLL)); // LL ONLY
     }
 
     public String getBackColor() {
-        if (!isBallPresent(colorBR)) return "EMPTY"; // use Back B for distance
-        float h = getHue(colorBR); // use Back A for hue
-        if (isGreenHue(h)) return "GREEN";
-        if (isPurpleHue(h)) return "PURPLE";
+        if (!ballPresent(colorBR, colorBL)) return "EMPTY";
+
+        float h1 = getHue(colorBR);
+        float h2 = getHue(colorBL);
+
+        if (isGreenHue(h1) || isGreenHue(h2))   return "GREEN";
+        if (isPurpleHue(h1) || isPurpleHue(h2)) return "PURPLE";
+
         return "UNKNOWN";
     }
+
+    /* ================= BALL COUNT ================= */
+
     public int countBalls() {
         int balls = 0;
-
-        // Right spot
-        if (isBallPresent(colorRL)) balls++;
-
-        // Left spot
-        if (isBallPresent(colorLR)) balls++;
-
-        // Back spot (use Back B for distance)
-        if (isBallPresent(colorBR)) balls++;
-
+        if (ballPresent(colorRR, colorRL)) balls++;
+        if (ballPresent(colorLL, colorLR)) balls++;
+        if (ballPresent(colorBR, colorBL)) balls++;
         return balls;
     }
-    // In your Indexer class, add a "blocking" shoot method:
-    public void shootMotifDirect() {
-        // Copy the motif pattern
+
+    /* ================= MOTIF SHOOT ================= */
+
+    public void shootMotif() {
         String motif = motifPattern;
 
-        // Get current colors
-        java.util.Map<String, String> spotColors = new java.util.HashMap<>();
-        spotColors.put("R", getRightColor());
-        spotColors.put("L", getLeftColor());
-        spotColors.put("B", getBackColor());
+        java.util.Map<String, String> colors = new java.util.HashMap<>();
+        colors.put("R", getRightColor());
+        colors.put("L", getLeftColor());
+        colors.put("B", getBackColor());
 
-        // Iterate through motif
         for (int i = 0; i < motif.length(); i++) {
-            char targetColorChar = motif.charAt(i);
-            String targetColor = (targetColorChar == 'P') ? "PURPLE" : "GREEN";
+            String target = motif.charAt(i) == 'P' ? "PURPLE" : "GREEN";
 
-            // Find first spot with that color
-            String spotToShoot = null;
-            for (String spot : spotColors.keySet()) {
-                if (spotColors.get(spot).equalsIgnoreCase(targetColor)) {
-                    spotToShoot = spot;
+            String spot = null;
+            for (String s : colors.keySet()) {
+                if (colors.get(s).equals(target)) {
+                    spot = s;
                     break;
                 }
             }
 
-            // Shoot the chosen spot
-            if (spotToShoot != null) {
-                switch (spotToShoot) {
-                    case "R": rightUp(); sleepMillis((long)(kickerSleep*1000)); rightDown(); break;
-                    case "L": leftUp(); sleepMillis((long)(kickerSleep*1000)); leftDown(); break;
-                    case "B": backUp(); sleepMillis((long)(kickerSleep*1000)); backDown(); break;
+            if (spot != null) {
+                switch (spot) {
+                    case "R": rightUp(); break;
+                    case "L": leftUp();  break;
+                    case "B": backUp();  break;
                 }
 
-                // Mark spot as used
-                spotColors.put(spotToShoot, "USED");
-                // Optional: small pause between balls
-                sleepMillis((long)(shootSleep*1000));
+                sleepMillis((long)(kickerSleep * 1000));
+
+                switch (spot) {
+                    case "R": rightDown(); break;
+                    case "L": leftDown();  break;
+                    case "B": backDown();  break;
+                }
+
+                colors.put(spot, "USED");
+                sleepMillis((long)(shootSleep * 1000));
             }
         }
     }
 
-    // Simple helper for sleeping in LinearOpMode
     private void sleepMillis(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        try { Thread.sleep(ms); }
+        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
     }
-
-
-
 }
-
-
-

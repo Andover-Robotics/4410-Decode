@@ -35,6 +35,8 @@ public class NewBotTester extends LinearOpMode {
 
     NormalizedRGBA colors;
 
+    public static int rpm=2000;
+
 
 
     public static boolean stallIntake = true, manualTurret = false;
@@ -49,9 +51,9 @@ public class NewBotTester extends LinearOpMode {
 
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
-//        bot.enableFullAuto(true);
-//        bot.setTargetGoalPose();
-//        stallIntake = true;
+        bot.enableFullAuto(true);
+        bot.setTargetGoalPose();
+        stallIntake = true;
 
 
         // Initialize bot
@@ -131,19 +133,19 @@ public class NewBotTester extends LinearOpMode {
 
 
 
-            if (!bot.shooting) {
-                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                    bot.intake.intake();
-                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-                    bot.intake.reverse();
-//                } else if (bot.indexer.countBalls()==3){
+//            if (!bot.shooting) {
+//                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+//                    bot.intake.intake();
+//                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
 //                    bot.intake.reverse();
-                } else if (stallIntake){
-                    bot.intake.storage();
-                } else {
-                    bot.intake.stop();
-                }
-            }
+////                } else if (bot.indexer.countBalls()==3){
+////                    bot.intake.reverse();
+//                } else if (stallIntake){
+//                    bot.intake.storage();
+//                } else {
+//                    bot.intake.stop();
+//                }
+//            }
 
 
 
@@ -153,30 +155,37 @@ public class NewBotTester extends LinearOpMode {
 
             // TURRET
 
-//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
-//                bot.enableFullAuto(true);
-//                manualTurret = false;
-//            }
-//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
-//                bot.enableFullAuto(false);
-//                bot.turret.enablePositionTracking(true);
-//                manualTurret = false;
-//            }
-//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
-//                bot.enableFullAuto(false);
-//                manualTurret = true;
-//            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
+                bot.enableFullAuto(true);
+                manualTurret = false;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
+                bot.enableFullAuto(false);
+                bot.turret.enablePositionTracking(true);
+                manualTurret = false;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
+                bot.enableFullAuto(false);
+                manualTurret = true;
+            }
 
             // SHOOTING
 
             if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
-                bot.turret.shooter.setManualPower(2000);
+                bot.turret.shooter.setManualPower(rpm);
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
             }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                rpm+=200;
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+                rpm-=200;
+            }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+
+                if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                 bot.indexer.resetIndexer();
             }
 
@@ -185,7 +194,7 @@ public class NewBotTester extends LinearOpMode {
 //            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                runningActions.add(bot.indexer.shootBLR());
+                bot.indexer.shootMotif();
             }
 
             if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
@@ -204,36 +213,6 @@ public class NewBotTester extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
                 bot.lift.liftUp();
             }
-
-
-//            if (gp1.getButton(GamepadKeys.Button.DPAD_LEFT)) {
-//                bot.indexer.isGreen(bot.indexer.colorBL);
-//                bot.indexer.isGreen(bot.indexer.colorBR);
-//                bot.indexer.isPurple(bot.indexer.colorRR);
-//                bot.indexer.isPurple(bot.indexer.colorRL);
-//                bot.indexer.isNone(bot.indexer.colorLL);
-//                bot.indexer.isNone((bot.indexer.colorLR));
-//            }
-
-//            if (gp1.getButton(GamepadKeys.Button.Y) && !bot.shooting) {
-//                if (bot.indexer.isGreenRight(bot.indexer.colorRR)){
-//                    runningActions.add(bot.shootRight());
-//
-//                } else if (bot.indexer.isGreenRight(bot.indexer.colorLL)){
-//                    runningActions.add(bot.shootLeft());
-//
-//                } else if (bot.indexer.isGreenRight(bot.indexer.colorBR)){
-//                    runningActions.add(bot.shootBack());
-//                }
-//
-//          }
-
-
-
-//            if (gp1.getButton(GamepadKeys.Button.A) && !bot.shooting && !gp1.isDown(GamepadKeys.Button.START)) {
-//                runningActions.add(bot.shootLRB());
-//            }
-
             // FAILSAFES
 
 //            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
@@ -279,6 +258,8 @@ public class NewBotTester extends LinearOpMode {
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
 
+            telemetry.addData("rpm:", rpm);
+
 
             // Back A for hue
             float backHue = bot.indexer.getHue(bot.indexer.colorBR); // Back A sensor
@@ -290,21 +271,21 @@ public class NewBotTester extends LinearOpMode {
 
 
 
-//            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
-//            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR));
-//            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL));
-//            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL));
-//            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR));
-//            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR));
-//            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL));
-//
-//            telemetry.addLine("=== HUEGE AHHH ===");
-//            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR));
-//            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL));
-//            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL));
-//            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR));
-//            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR));
-//            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL));
+            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
+            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR));
+            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL));
+            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL));
+            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR));
+            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR));
+            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL));
+
+            telemetry.addLine("=== HUEGE AHHH ===");
+            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR));
+            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL));
+            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL));
+            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR));
+            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR));
+            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL));
 
 
 
