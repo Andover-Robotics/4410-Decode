@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import java.util.*;
+
 @Config
 public class Indexer {
 
@@ -27,99 +29,135 @@ public class Indexer {
     public static double kickerBackUp    = 0.34;
 
     public static double kickerSleep = 0.25;
-    public static double shootSleep  = 0.03;
+
+    // Rapid fire between shots (normal)
+    public static double rapidShootSleep = 0.03;
+
+    // Motif between shots (slow, to register motifs)
+    public static double motifShootSleep = 0.70;
+
+    // If motifs are scoring in reverse, flip this in Dashboard
+    public static boolean reverseMotifOrder = true;
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
 
-    /* ================= HARDWARE ================= */
+    /* ================= HOLDERS ================= */
 
-    public Servo leftKicker, rightKicker, backKicker;
+    public final Holder rightHolder;
+    public final Holder leftHolder;
+    public final Holder backHolder;
 
-    public RevColorSensorV3 colorRR, colorRL;
-    public RevColorSensorV3 colorLL, colorLR;
-    public RevColorSensorV3 colorBR, colorBL;
-
-    private final float[] hsv = new float[3];
+    public final Holder[] holders;
 
     /* ================= INIT ================= */
 
     public Indexer(OpMode opMode) {
-        leftKicker  = opMode.hardwareMap.servo.get("leftKicker");
-        rightKicker = opMode.hardwareMap.servo.get("rightKicker");
-        backKicker  = opMode.hardwareMap.servo.get("backKicker");
+        rightHolder = new Holder(
+                opMode,
+                "rightKicker",
+                "colorRR", "colorRL",
+                kickerRightUp, kickerRightDown,
+                gain
+        );
 
-        colorRR = opMode.hardwareMap.get(RevColorSensorV3.class, "colorRR");
-        colorRL = opMode.hardwareMap.get(RevColorSensorV3.class, "colorRL");
-        colorLL = opMode.hardwareMap.get(RevColorSensorV3.class, "colorLL");
-        colorLR = opMode.hardwareMap.get(RevColorSensorV3.class, "colorLR");
-        colorBR = opMode.hardwareMap.get(RevColorSensorV3.class, "colorBR");
-        colorBL = opMode.hardwareMap.get(RevColorSensorV3.class, "colorBL");
+        leftHolder = new Holder(
+                opMode,
+                "leftKicker",
+                "colorLL", "colorLR",
+                kickerLeftUp, kickerLeftDown,
+                gain
+        );
 
-        colorRR.setGain(gain);
-        colorRL.setGain(gain);
-        colorLL.setGain(gain);
-        colorLR.setGain(gain);
-        colorBR.setGain(gain);
-        colorBL.setGain(gain);
+        backHolder = new Holder(
+                opMode,
+                "backKicker",
+                "colorBR", "colorBL",
+                kickerBackUp, kickerBackDown,
+                gain
+        );
+
+        holders = new Holder[]{ rightHolder, leftHolder, backHolder };
+
+        resetIndexer();
     }
 
-    /* ================= KICKERS ================= */
+    /* ================= SENSOR GETTERS (TELEMETRY COMPAT) ================= */
 
-    public void rightUp()  { rightKicker.setPosition(kickerRightUp); }
-    public void rightDown(){ rightKicker.setPosition(kickerRightDown); }
-    public void leftUp()   { leftKicker.setPosition(kickerLeftUp); }
-    public void leftDown() { leftKicker.setPosition(kickerLeftDown); }
-    public void backUp()   { backKicker.setPosition(kickerBackUp); }
-    public void backDown() { backKicker.setPosition(kickerBackDown); }
+    public RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
+    public RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
+    public RevColorSensorV3 colorLL() { return leftHolder.sensorA; }
+    public RevColorSensorV3 colorLR() { return leftHolder.sensorB; }
+    public RevColorSensorV3 colorBR() { return backHolder.sensorA; }
+    public RevColorSensorV3 colorBL() { return backHolder.sensorB; }
+
+    /* ================= INDEXER-LEVEL ================= */
 
     public void resetIndexer() {
-        rightDown();
-        leftDown();
-        backDown();
+        for (Holder h : holders) h.down();
+    }
+
+    public int countBalls() {
+        int balls = 0;
+        for (Holder h : holders) if (h.ballPresent()) balls++;
+        return balls;
     }
 
     /* ================= ACTIONS ================= */
 
-    public Action shootRight() {
-        return new SequentialAction(
-                new InstantAction(this::rightUp),
-                new SleepAction(kickerSleep),
-                new InstantAction(this::rightDown)
-        );
+    public Action shootRight() { return rightHolder.kickResetAction(); }
+    public Action shootLeft()  { return leftHolder.kickResetAction(); }
+    public Action shootBack()  { return backHolder.kickResetAction(); }
+
+    /**
+     * Rapid-fire all present holders, using rapidShootSleep between shots.
+     */
+    public Action shootRapidFire() {
+        List<Action> actions = new ArrayList<>();
+        for (Holder h : holders) {
+            actions.add(h.kickResetAction());
+            actions.add(new SleepAction(rapidShootSleep));
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-    public Action shootLeft() {
-        return new SequentialAction(
-                new InstantAction(this::leftUp),
-                new SleepAction(kickerSleep),
-                new InstantAction(this::leftDown)
-        );
+    /**
+     * Shoots ONE green if any holder currently contains GREEN, otherwise no-op.
+     */
+    public Action shootGreen() {
+        Holder h = findFirstHolderWithColor("GREEN");
+        return (h == null) ? new InstantAction(() -> {}) : h.kickResetAction();
     }
 
-    public Action shootBack() {
-        return new SequentialAction(
-                new InstantAction(this::backUp),
-                new SleepAction(kickerSleep),
-                new InstantAction(this::backDown)
-        );
+    /**
+     * Shoots ONE purple if any holder currently contains PURPLE, otherwise no-op.
+     */
+    public Action shootPurple() {
+        Holder h = findFirstHolderWithColor("PURPLE");
+        return (h == null) ? new InstantAction(() -> {}) : h.kickResetAction();
     }
 
-    /* ================= DISTANCE ================= */
+    private Holder findFirstHolderWithColor(String color) {
+        for (Holder h : holders) {
+            if (color.equals(h.getColor())) return h;
+        }
+        return null;
+    }
+
+    /* ================= COLOR METHODS (KEEP SIGNATURES) ================= */
+
+    public String getRightColor() { return rightHolder.getColor(); }
+    public String getLeftColor()  { return leftHolder.getColor(); }
+    public String getBackColor()  { return backHolder.getColor(); }
+
+    /* ================= SENSOR HELPERS (KEEP SIGNATURES) ================= */
+
+    private final float[] hsv = new float[3];
 
     public double safeDistance(RevColorSensorV3 s) {
         double d = s.getDistance(DistanceUnit.MM);
         return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
     }
-
-    private boolean ballPresent(RevColorSensorV3 a, RevColorSensorV3 b) {
-        double da = safeDistance(a);
-        double db = safeDistance(b);
-        return (da > 0 && da < DISTANCE_THRESHOLD_MM)
-                || (db > 0 && db < DISTANCE_THRESHOLD_MM);
-    }
-
-    /* ================= HUE ================= */
 
     public float getHue(RevColorSensorV3 sensor) {
         android.graphics.Color.RGBToHSV(
@@ -128,100 +166,216 @@ public class Indexer {
         return hsv[0];
     }
 
-    private boolean isGreenHue(float h)  { return h > 160 && h < 180; }
-    private boolean isPurpleHue(float h) { return h > 180 && h < 225; }
+    /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
-    private String classifyHue(float h) {
-        if (isGreenHue(h))  return "GREEN";
-        if (isPurpleHue(h)) return "PURPLE";
-        return "UNKNOWN";
+    public Action shootMotif() {
+        List<Integer> order = maybeReverseMotifOrder(planMotifOrder(motifPattern));
+        if (order.isEmpty()) return new InstantAction(() -> {});
+
+        List<Action> actions = new ArrayList<>();
+        for (int idx : order) {
+            Holder h = holders[idx];
+            actions.add(new InstantAction(h::up));
+            actions.add(new SleepAction(kickerSleep));
+            actions.add(new InstantAction(h::down));
+            actions.add(new SleepAction(motifShootSleep));
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-    /* ================= FINAL COLOR ================= */
-
-    public String getRightColor() {
-        if (!ballPresent(colorRR, colorRL)) return "EMPTY";
-
-        float h1 = getHue(colorRR);
-        float h2 = getHue(colorRL);
-
-        if (isGreenHue(h1) || isGreenHue(h2))   return "GREEN";
-        if (isPurpleHue(h1) || isPurpleHue(h2)) return "PURPLE";
-
-        return "UNKNOWN";
+    private List<Integer> maybeReverseMotifOrder(List<Integer> order) {
+        if (!reverseMotifOrder) return order;
+        ArrayList<Integer> rev = new ArrayList<>(order);
+        Collections.reverse(rev);
+        return rev;
     }
 
-    public String getLeftColor() {
-        if (!ballPresent(colorLL, colorLR)) return "EMPTY";
-        return classifyHue(getHue(colorLL)); // LL ONLY
-    }
+    /* ================= MOTIF ORDER (SIMPLE, NO SKIPS) ================= */
 
-    public String getBackColor() {
-        if (!ballPresent(colorBR, colorBL)) return "EMPTY";
+    private List<Integer> planMotifOrder(String motif) {
+        String[] colorByIdx = new String[holders.length];
+        ArrayList<Integer> avail = new ArrayList<>();
 
-        float h1 = getHue(colorBR);
-        float h2 = getHue(colorBL);
+        for (int i = 0; i < holders.length; i++) {
+            String c = holders[i].getColor();
+            colorByIdx[i] = c;
+            if (!"EMPTY".equals(c)) avail.add(i);
+        }
 
-        if (isGreenHue(h1) || isGreenHue(h2))   return "GREEN";
-        if (isPurpleHue(h1) || isPurpleHue(h2)) return "PURPLE";
+        int n = avail.size();
+        if (n == 0) return Collections.emptyList();
+        if (n == 1) return new ArrayList<>(avail);
 
-        return "UNKNOWN";
-    }
+        char[] pat = motif.toCharArray();
+        int[] pi = buildPrefix(pat);
 
-    /* ================= BALL COUNT ================= */
+        List<Integer> best = null;
+        int bestMotifs = -1;
+        int bestProgress = -1;
 
-    public int countBalls() {
-        int balls = 0;
-        if (ballPresent(colorRR, colorRL)) balls++;
-        if (ballPresent(colorLL, colorLR)) balls++;
-        if (ballPresent(colorBR, colorBL)) balls++;
-        return balls;
-    }
+        if (n == 2) {
+            int a = avail.get(0), b = avail.get(1);
 
-    /* ================= MOTIF SHOOT ================= */
+            int[] s1 = scorePermutation(new int[]{a, b}, colorByIdx, pat, pi);
+            best = Arrays.asList(a, b);
+            bestMotifs = s1[0];
+            bestProgress = s1[1];
 
-    public void shootMotif() {
-        String motif = motifPattern;
-
-        java.util.Map<String, String> colors = new java.util.HashMap<>();
-        colors.put("R", getRightColor());
-        colors.put("L", getLeftColor());
-        colors.put("B", getBackColor());
-
-        for (int i = 0; i < motif.length(); i++) {
-            String target = motif.charAt(i) == 'P' ? "PURPLE" : "GREEN";
-
-            String spot = null;
-            for (String s : colors.keySet()) {
-                if (colors.get(s).equals(target)) {
-                    spot = s;
-                    break;
-                }
+            int[] s2 = scorePermutation(new int[]{b, a}, colorByIdx, pat, pi);
+            if (betterScore(s2, bestMotifs, bestProgress)) {
+                best = Arrays.asList(b, a);
+                bestMotifs = s2[0];
+                bestProgress = s2[1];
             }
+            return best;
+        }
 
-            if (spot != null) {
-                switch (spot) {
-                    case "R": rightUp(); break;
-                    case "L": leftUp();  break;
-                    case "B": backUp();  break;
-                }
+        int a = avail.get(0), b = avail.get(1), c = avail.get(2);
 
-                sleepMillis((long)(kickerSleep * 1000));
+        int[][] perms = new int[][]{
+                {a, b, c},
+                {a, c, b},
+                {b, a, c},
+                {b, c, a},
+                {c, a, b},
+                {c, b, a}
+        };
 
-                switch (spot) {
-                    case "R": rightDown(); break;
-                    case "L": leftDown();  break;
-                    case "B": backDown();  break;
-                }
-
-                colors.put(spot, "USED");
-                sleepMillis((long)(shootSleep * 1000));
+        for (int[] p : perms) {
+            int[] sc = scorePermutation(p, colorByIdx, pat, pi);
+            if (best == null || betterScore(sc, bestMotifs, bestProgress)) {
+                best = Arrays.asList(p[0], p[1], p[2]);
+                bestMotifs = sc[0];
+                bestProgress = sc[1];
             }
         }
+
+        return best;
     }
 
-    private void sleepMillis(long ms) {
-        try { Thread.sleep(ms); }
-        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+    private int[] scorePermutation(int[] order, String[] colorByIdx, char[] pat, int[] pi) {
+        int state = 0;
+        int motifs = 0;
+
+        for (int idx : order) {
+            char shot = toMotifChar(colorByIdx[idx]);
+
+            while (state > 0 && pat[state] != shot) state = pi[state - 1];
+            if (pat[state] == shot) state++;
+
+            if (state == pat.length) {
+                motifs++;
+                state = pi[pat.length - 1];
+            }
+        }
+
+        return new int[]{motifs, state};
+    }
+
+    private boolean betterScore(int[] sc, int bestMotifs, int bestProgress) {
+        if (sc[0] != bestMotifs) return sc[0] > bestMotifs;
+        return sc[1] > bestProgress;
+    }
+
+    private int[] buildPrefix(char[] p) {
+        int[] pi = new int[p.length];
+        int j = 0;
+        for (int i = 1; i < p.length; i++) {
+            while (j > 0 && p[i] != p[j]) j = pi[j - 1];
+            if (p[i] == p[j]) j++;
+            pi[i] = j;
+        }
+        return pi;
+    }
+
+    private char toMotifChar(String color) {
+        if ("PURPLE".equals(color)) return 'P';
+        if ("GREEN".equals(color)) return 'G';
+        return 'X';
+    }
+
+    /* =====================================================
+       ======================= HOLDER =======================
+       ===================================================== */
+
+    public static class Holder {
+
+        final Servo kicker;
+        final RevColorSensorV3 sensorA;
+        final RevColorSensorV3 sensorB;
+
+        private final double upPos;
+        private final double downPos;
+
+        private final float[] hsv = new float[3];
+
+        public Holder(
+                OpMode opMode,
+                String kickerServoName,
+                String leftSensorName,
+                String rightSensorName,
+                double upPos,
+                double downPos,
+                int gain
+        ) {
+            kicker = opMode.hardwareMap.servo.get(kickerServoName);
+
+            sensorA = opMode.hardwareMap.get(RevColorSensorV3.class, leftSensorName);
+            sensorB = opMode.hardwareMap.get(RevColorSensorV3.class, rightSensorName);
+
+            this.upPos = upPos;
+            this.downPos = downPos;
+
+            sensorA.setGain(gain);
+            sensorB.setGain(gain);
+        }
+
+        public void up()   { kicker.setPosition(upPos); }
+        public void down() { kicker.setPosition(downPos); }
+
+        private void kick()  { up(); }
+        private void reset() { down(); }
+
+        public Action kickResetAction() {
+            return new SequentialAction(
+                    new InstantAction(this::kick),
+                    new SleepAction(Indexer.kickerSleep),
+                    new InstantAction(this::reset)
+            );
+        }
+
+        private double safeDistance(RevColorSensorV3 s) {
+            double d = s.getDistance(DistanceUnit.MM);
+            return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
+        }
+
+        public boolean ballPresent() {
+            double da = safeDistance(sensorA);
+            double db = safeDistance(sensorB);
+            return (da > 0 && da < DISTANCE_THRESHOLD_MM)
+                    || (db > 0 && db < DISTANCE_THRESHOLD_MM);
+        }
+
+        private float getHue(RevColorSensorV3 sensor) {
+            android.graphics.Color.RGBToHSV(
+                    sensor.red(), sensor.green(), sensor.blue(), hsv
+            );
+            return hsv[0];
+        }
+
+        private boolean isGreenHue(float h)  { return h > 160 && h < 180; }
+        private boolean isPurpleHue(float h) { return h > 180 && h < 225; }
+
+        public String getColor() {
+            if (!ballPresent()) return "EMPTY";
+
+            float h1 = getHue(sensorA);
+            float h2 = getHue(sensorB);
+
+            if (isGreenHue(h1) || isGreenHue(h2))   return "GREEN";
+            if (isPurpleHue(h1) || isPurpleHue(h2)) return "PURPLE";
+
+            return "UNKNOWN";
+        }
     }
 }
