@@ -133,19 +133,19 @@ public class NewBotTester extends LinearOpMode {
 
 
 
-//            if (!bot.shooting) {
-//                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-//                    bot.intake.intake();
-//                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-//                    bot.intake.reverse();
-////                } else if (bot.indexer.countBalls()==3){
-////                    bot.intake.reverse();
-//                } else if (stallIntake){
-//                    bot.intake.storage();
-//                } else {
-//                    bot.intake.stop();
-//                }
-//            }
+            if (!bot.shooting) {
+                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                    bot.intake.intake();
+                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
+                    bot.intake.reverse();
+                } else if (bot.indexer.countBalls()==3){
+                    bot.intake.reverse();
+                } else if (stallIntake){
+                    bot.intake.storage();
+                } else {
+                    bot.intake.stop();
+                }
+            }
 
 
 
@@ -268,23 +268,23 @@ public class NewBotTester extends LinearOpMode {
             telemetry.addLine("=== BACK SENSOR DISTANCE ===");
             telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
 
-
-
-            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
-            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR()));
-            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL()));
-            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL()));
-            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR()));
-            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR()));
-            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL()));
-
-            telemetry.addLine("=== HUEGE AHHH ===");
-            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR()));
-            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL()));
-            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL()));
-            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR()));
-            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR()));
-            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL()));
+//
+//
+//            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
+//            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR()));
+//            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL()));
+//            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL()));
+//            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR()));
+//            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR()));
+//            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL()));
+//
+//            telemetry.addLine("=== HUEGE AHHH ===");
+//            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR()));
+//            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL()));
+//            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL()));
+//            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR()));
+//            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR()));
+//            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL()));
 
 
 

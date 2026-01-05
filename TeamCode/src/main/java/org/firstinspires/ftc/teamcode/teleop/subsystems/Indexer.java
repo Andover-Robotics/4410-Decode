@@ -36,6 +36,9 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.70;
 
+    // If motifs are scoring in reverse, flip this in Dashboard
+    public static boolean reverseMotifOrder = true;
+
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
 
@@ -79,6 +82,7 @@ public class Indexer {
         resetIndexer();
     }
 
+    /* ================= SENSOR GETTERS (TELEMETRY COMPAT) ================= */
 
     public RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
     public RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
@@ -117,11 +121,17 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
+    /**
+     * Shoots ONE green if any holder currently contains GREEN, otherwise no-op.
+     */
     public Action shootGreen() {
         Holder h = findFirstHolderWithColor("GREEN");
         return (h == null) ? new InstantAction(() -> {}) : h.kickResetAction();
     }
 
+    /**
+     * Shoots ONE purple if any holder currently contains PURPLE, otherwise no-op.
+     */
     public Action shootPurple() {
         Holder h = findFirstHolderWithColor("PURPLE");
         return (h == null) ? new InstantAction(() -> {}) : h.kickResetAction();
@@ -134,13 +144,13 @@ public class Indexer {
         return null;
     }
 
-    /* ================= OLD COLOR METHODS (KEEP SIGNATURES) ================= */
+    /* ================= COLOR METHODS (KEEP SIGNATURES) ================= */
 
     public String getRightColor() { return rightHolder.getColor(); }
     public String getLeftColor()  { return leftHolder.getColor(); }
     public String getBackColor()  { return backHolder.getColor(); }
 
-    /* ================= OLD SENSOR HELPERS (KEEP SIGNATURES) ================= */
+    /* ================= SENSOR HELPERS (KEEP SIGNATURES) ================= */
 
     private final float[] hsv = new float[3];
 
@@ -158,22 +168,8 @@ public class Indexer {
 
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
-//    public void shootMotif() {
-//        List<Integer> order = planMotifOrder(motifPattern);
-//
-//        for (int idx : order) {
-//            Holder h = holders[idx];
-//
-//            h.up();
-//            sleepMillis((long) (kickerSleep * 1000));
-//            h.down();
-//
-//            sleepMillis((long) (motifShootSleep * 1000));
-//        }
-//    }
-
     public Action shootMotif() {
-        List<Integer> order = planMotifOrder(motifPattern);
+        List<Integer> order = maybeReverseMotifOrder(planMotifOrder(motifPattern));
         if (order.isEmpty()) return new InstantAction(() -> {});
 
         List<Action> actions = new ArrayList<>();
@@ -185,6 +181,13 @@ public class Indexer {
             actions.add(new SleepAction(motifShootSleep));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
+    private List<Integer> maybeReverseMotifOrder(List<Integer> order) {
+        if (!reverseMotifOrder) return order;
+        ArrayList<Integer> rev = new ArrayList<>(order);
+        Collections.reverse(rev);
+        return rev;
     }
 
     /* ================= MOTIF ORDER (SIMPLE, NO SKIPS) ================= */
@@ -289,11 +292,6 @@ public class Indexer {
         if ("PURPLE".equals(color)) return 'P';
         if ("GREEN".equals(color)) return 'G';
         return 'X';
-    }
-
-    private void sleepMillis(long ms) {
-        try { Thread.sleep(ms); }
-        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
     }
 
     /* =====================================================
