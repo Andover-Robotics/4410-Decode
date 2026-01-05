@@ -29,7 +29,12 @@ public class Indexer {
     public static double kickerBackUp    = 0.34;
 
     public static double kickerSleep = 0.25;
-    public static double shootSleep  = 0.03;
+
+    // Rapid fire between shots (normal)
+    public static double rapidShootSleep = 0.03;
+
+    // Motif between shots (slow, to register motifs)
+    public static double motifShootSleep = 0.70;
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
@@ -74,6 +79,14 @@ public class Indexer {
         resetIndexer();
     }
 
+
+    public RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
+    public RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
+    public RevColorSensorV3 colorLL() { return leftHolder.sensorA; }
+    public RevColorSensorV3 colorLR() { return leftHolder.sensorB; }
+    public RevColorSensorV3 colorBR() { return backHolder.sensorA; }
+    public RevColorSensorV3 colorBL() { return backHolder.sensorB; }
+
     /* ================= INDEXER-LEVEL ================= */
 
     public void resetIndexer() {
@@ -82,45 +95,36 @@ public class Indexer {
 
     public int countBalls() {
         int balls = 0;
-        for (Holder h : holders) {
-            if (h.ballPresent()) balls++;
-        }
+        for (Holder h : holders) if (h.ballPresent()) balls++;
         return balls;
     }
 
-    /* ================= BASIC ACTIONS ================= */
+    /* ================= ACTIONS ================= */
 
     public Action shootRight() { return rightHolder.kickResetAction(); }
     public Action shootLeft()  { return leftHolder.kickResetAction(); }
     public Action shootBack()  { return backHolder.kickResetAction(); }
 
-    public Action shootAllSequential() {
+    /**
+     * Rapid-fire all present holders, using rapidShootSleep between shots.
+     */
+    public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
         for (Holder h : holders) {
             actions.add(h.kickResetAction());
-            actions.add(new SleepAction(shootSleep));
+            actions.add(new SleepAction(rapidShootSleep));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-    /* ================= SHOOT BY COLOR ================= */
-
-    /**
-     * Shoots ONE green if any holder currently contains GREEN, otherwise no-op.
-     */
     public Action shootGreen() {
         Holder h = findFirstHolderWithColor("GREEN");
-        if (h == null) return new InstantAction(() -> {});
-        return h.kickResetAction();
+        return (h == null) ? new InstantAction(() -> {}) : h.kickResetAction();
     }
 
-    /**
-     * Shoots ONE purple if any holder currently contains PURPLE, otherwise no-op.
-     */
     public Action shootPurple() {
         Holder h = findFirstHolderWithColor("PURPLE");
-        if (h == null) return new InstantAction(() -> {});
-        return h.kickResetAction();
+        return (h == null) ? new InstantAction(() -> {}) : h.kickResetAction();
     }
 
     private Holder findFirstHolderWithColor(String color) {
@@ -130,34 +134,45 @@ public class Indexer {
         return null;
     }
 
-    /* ================= MOTIF SHOOT (NO SKIPS, MAXIMIZE MOTIFS) ================= */
+    /* ================= OLD COLOR METHODS (KEEP SIGNATURES) ================= */
 
-    /**
-     * IMPORTANT: We do NOT "skip" motif characters.
-     * We pick an order to shoot AVAILABLE balls such that, as a stream,
-     * we maximize completed motif occurrences (using overlap-aware matching).
-     *
-     * If we don't have the right colors to complete the motif, we'll still choose
-     * the best order to maximize completions (and then partial progress as tie-breaker).
-     */
-    public void shootMotif() {
-        List<Integer> order = planMotifOrder(motifPattern);
+    public String getRightColor() { return rightHolder.getColor(); }
+    public String getLeftColor()  { return leftHolder.getColor(); }
+    public String getBackColor()  { return backHolder.getColor(); }
 
-        for (int idx : order) {
-            Holder h = holders[idx];
+    /* ================= OLD SENSOR HELPERS (KEEP SIGNATURES) ================= */
 
-            h.up();
-            sleepMillis((long) (kickerSleep * 1000));
-            h.down();
+    private final float[] hsv = new float[3];
 
-            sleepMillis((long) (shootSleep * 1000));
-        }
+    public double safeDistance(RevColorSensorV3 s) {
+        double d = s.getDistance(DistanceUnit.MM);
+        return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
     }
 
-    /**
-     * RoadRunner Action version of motif shooting using the same maximizing logic.
-     */
-    public Action shootMotifAction() {
+    public float getHue(RevColorSensorV3 sensor) {
+        android.graphics.Color.RGBToHSV(
+                sensor.red(), sensor.green(), sensor.blue(), hsv
+        );
+        return hsv[0];
+    }
+
+    /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
+
+//    public void shootMotif() {
+//        List<Integer> order = planMotifOrder(motifPattern);
+//
+//        for (int idx : order) {
+//            Holder h = holders[idx];
+//
+//            h.up();
+//            sleepMillis((long) (kickerSleep * 1000));
+//            h.down();
+//
+//            sleepMillis((long) (motifShootSleep * 1000));
+//        }
+//    }
+
+    public Action shootMotif() {
         List<Integer> order = planMotifOrder(motifPattern);
         if (order.isEmpty()) return new InstantAction(() -> {});
 
@@ -167,154 +182,113 @@ public class Indexer {
             actions.add(new InstantAction(h::up));
             actions.add(new SleepAction(kickerSleep));
             actions.add(new InstantAction(h::down));
-            actions.add(new SleepAction(shootSleep));
+            actions.add(new SleepAction(motifShootSleep));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-    /**
-     * Choose a firing order (permutation of available holders) that maximizes:
-     *  1) number of completed motifs in the shot stream (overlap-aware)
-     *  2) remaining motif progress at end (higher is better)
-     *  3) number of shots (higher is better) (usually fixed, but kept for stability)
-     */
+    /* ================= MOTIF ORDER (SIMPLE, NO SKIPS) ================= */
+
     private List<Integer> planMotifOrder(String motif) {
-        // Build list of available holder indices and their current colors
-        ArrayList<Integer> available = new ArrayList<>();
         String[] colorByIdx = new String[holders.length];
+        ArrayList<Integer> avail = new ArrayList<>();
 
         for (int i = 0; i < holders.length; i++) {
-            String c = holders[i].getColor();   // "GREEN", "PURPLE", "EMPTY", "UNKNOWN"
+            String c = holders[i].getColor();
             colorByIdx[i] = c;
-            if (!"EMPTY".equals(c)) available.add(i);
+            if (!"EMPTY".equals(c)) avail.add(i);
         }
 
-        if (available.isEmpty()) return Collections.emptyList();
+        int n = avail.size();
+        if (n == 0) return Collections.emptyList();
+        if (n == 1) return new ArrayList<>(avail);
 
-        // Build overlap-aware automaton for motif (KMP)
-        MotifAutomaton auto = new MotifAutomaton(motif);
+        char[] pat = motif.toCharArray();
+        int[] pi = buildPrefix(pat);
 
-        // Brute force all permutations of up to 3 holders (safe + simple)
-        BestOrder best = new BestOrder();
-        permute(available, 0, auto, colorByIdx, best);
-
-        return best.bestOrder != null ? best.bestOrder : Collections.emptyList();
-    }
-
-    private static class BestOrder {
-        List<Integer> bestOrder = null;
+        List<Integer> best = null;
         int bestMotifs = -1;
         int bestProgress = -1;
-        int bestShots = -1;
-    }
 
-    private void permute(ArrayList<Integer> list, int start, MotifAutomaton auto, String[] colorByIdx, BestOrder best) {
-        if (start == list.size()) {
-            Score s = scoreOrder(list, auto, colorByIdx);
-            if (isBetter(s, best)) {
-                best.bestMotifs = s.motifs;
-                best.bestProgress = s.progress;
-                best.bestShots = s.shots;
-                best.bestOrder = new ArrayList<>(list);
+        if (n == 2) {
+            int a = avail.get(0), b = avail.get(1);
+
+            int[] s1 = scorePermutation(new int[]{a, b}, colorByIdx, pat, pi);
+            best = Arrays.asList(a, b);
+            bestMotifs = s1[0];
+            bestProgress = s1[1];
+
+            int[] s2 = scorePermutation(new int[]{b, a}, colorByIdx, pat, pi);
+            if (betterScore(s2, bestMotifs, bestProgress)) {
+                best = Arrays.asList(b, a);
+                bestMotifs = s2[0];
+                bestProgress = s2[1];
             }
-            return;
+            return best;
         }
 
-        for (int i = start; i < list.size(); i++) {
-            Collections.swap(list, start, i);
-            permute(list, start + 1, auto, colorByIdx, best);
-            Collections.swap(list, start, i);
+        int a = avail.get(0), b = avail.get(1), c = avail.get(2);
+
+        int[][] perms = new int[][]{
+                {a, b, c},
+                {a, c, b},
+                {b, a, c},
+                {b, c, a},
+                {c, a, b},
+                {c, b, a}
+        };
+
+        for (int[] p : perms) {
+            int[] sc = scorePermutation(p, colorByIdx, pat, pi);
+            if (best == null || betterScore(sc, bestMotifs, bestProgress)) {
+                best = Arrays.asList(p[0], p[1], p[2]);
+                bestMotifs = sc[0];
+                bestProgress = sc[1];
+            }
         }
+
+        return best;
     }
 
-    private static class Score {
-        final int motifs;
-        final int progress;
-        final int shots;
-
-        Score(int motifs, int progress, int shots) {
-            this.motifs = motifs;
-            this.progress = progress;
-            this.shots = shots;
-        }
-    }
-
-    private Score scoreOrder(List<Integer> order, MotifAutomaton auto, String[] colorByIdx) {
-        int state = 0;     // how many chars matched so far
+    private int[] scorePermutation(int[] order, String[] colorByIdx, char[] pat, int[] pi) {
+        int state = 0;
         int motifs = 0;
 
         for (int idx : order) {
-            char shotChar = toMotifChar(colorByIdx[idx]); // 'P', 'G', or 'X'
-            MotifAutomaton.StepResult r = auto.step(state, shotChar);
-            state = r.nextState;
-            motifs += r.completed;
+            char shot = toMotifChar(colorByIdx[idx]);
+
+            while (state > 0 && pat[state] != shot) state = pi[state - 1];
+            if (pat[state] == shot) state++;
+
+            if (state == pat.length) {
+                motifs++;
+                state = pi[pat.length - 1];
+            }
         }
 
-        return new Score(motifs, state, order.size());
+        return new int[]{motifs, state};
     }
 
-    private boolean isBetter(Score s, BestOrder best) {
-        if (s.motifs != best.bestMotifs) return s.motifs > best.bestMotifs;
-        if (s.progress != best.bestProgress) return s.progress > best.bestProgress;
-        return s.shots > best.bestShots;
+    private boolean betterScore(int[] sc, int bestMotifs, int bestProgress) {
+        if (sc[0] != bestMotifs) return sc[0] > bestMotifs;
+        return sc[1] > bestProgress;
+    }
+
+    private int[] buildPrefix(char[] p) {
+        int[] pi = new int[p.length];
+        int j = 0;
+        for (int i = 1; i < p.length; i++) {
+            while (j > 0 && p[i] != p[j]) j = pi[j - 1];
+            if (p[i] == p[j]) j++;
+            pi[i] = j;
+        }
+        return pi;
     }
 
     private char toMotifChar(String color) {
         if ("PURPLE".equals(color)) return 'P';
         if ("GREEN".equals(color)) return 'G';
-        return 'X'; // UNKNOWN or anything else acts like mismatch
-    }
-
-    /**
-     * Overlap-aware motif matcher using KMP prefix function.
-     * Lets streams like "P P G P" still count motifs correctly with overlaps.
-     */
-    private static class MotifAutomaton {
-        final char[] pat;
-        final int[] pi;
-
-        MotifAutomaton(String motif) {
-            this.pat = motif.toCharArray();
-            this.pi = buildPrefix(pat);
-        }
-
-        static int[] buildPrefix(char[] p) {
-            int[] pi = new int[p.length];
-            int j = 0;
-            for (int i = 1; i < p.length; i++) {
-                while (j > 0 && p[i] != p[j]) j = pi[j - 1];
-                if (p[i] == p[j]) j++;
-                pi[i] = j;
-            }
-            return pi;
-        }
-
-        static class StepResult {
-            final int nextState;
-            final int completed;
-            StepResult(int nextState, int completed) {
-                this.nextState = nextState;
-                this.completed = completed;
-            }
-        }
-
-        StepResult step(int state, char c) {
-            int j = state;
-
-            while (j > 0 && (j >= pat.length || pat[j] != c)) {
-                j = pi[j - 1];
-            }
-
-            if (j < pat.length && pat[j] == c) j++;
-
-            int completed = 0;
-            if (j == pat.length) {
-                completed = 1;
-                j = pi[pat.length - 1]; // allow overlap
-            }
-
-            return new StepResult(j, completed);
-        }
+        return 'X';
     }
 
     private void sleepMillis(long ms) {
@@ -328,9 +302,9 @@ public class Indexer {
 
     public static class Holder {
 
-        private final Servo kicker;
-        private final RevColorSensorV3 sensorA;
-        private final RevColorSensorV3 sensorB;
+        final Servo kicker;
+        final RevColorSensorV3 sensorA;
+        final RevColorSensorV3 sensorB;
 
         private final double upPos;
         private final double downPos;
@@ -358,15 +332,11 @@ public class Indexer {
             sensorB.setGain(gain);
         }
 
-        /* ================= SERVO ================= */
-
         public void up()   { kicker.setPosition(upPos); }
         public void down() { kicker.setPosition(downPos); }
 
         private void kick()  { up(); }
         private void reset() { down(); }
-
-        /* ================= ACTION ================= */
 
         public Action kickResetAction() {
             return new SequentialAction(
@@ -375,8 +345,6 @@ public class Indexer {
                     new InstantAction(this::reset)
             );
         }
-
-        /* ================= DISTANCE ================= */
 
         private double safeDistance(RevColorSensorV3 s) {
             double d = s.getDistance(DistanceUnit.MM);
@@ -389,8 +357,6 @@ public class Indexer {
             return (da > 0 && da < DISTANCE_THRESHOLD_MM)
                     || (db > 0 && db < DISTANCE_THRESHOLD_MM);
         }
-
-        /* ================= COLOR ================= */
 
         private float getHue(RevColorSensorV3 sensor) {
             android.graphics.Color.RGBToHSV(

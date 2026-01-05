@@ -184,17 +184,16 @@ public class NewBotTester extends LinearOpMode {
                 rpm-=200;
             }
 
-
-                if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                 bot.indexer.resetIndexer();
             }
 
-//            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-//                bot.indexer.shootMotifDirect();
-//            }
-
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                bot.indexer.shootMotif();
+                runningActions.add(bot.indexer.shootMotif());
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                runningActions.add(bot.indexer.shootRapidFire());
             }
 
             if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
@@ -262,30 +261,30 @@ public class NewBotTester extends LinearOpMode {
 
 
             // Back A for hue
-            float backHue = bot.indexer.getHue(bot.indexer.colorBR); // Back A sensor
+            float backHue = bot.indexer.getHue(bot.indexer.colorBR()); // Back A sensor
             telemetry.addLine("=== BACK SENSOR HUE ===");
 // Back B for distance
-            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL); // Back B sensor
+            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
             telemetry.addLine("=== BACK SENSOR DISTANCE ===");
             telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
 
 
 
             telemetry.addLine("=== DIHstance pls speed i need dihs ===");
-            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR));
-            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL));
-            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL));
-            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR));
-            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR));
-            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL));
+            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR()));
+            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL()));
+            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL()));
+            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR()));
+            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR()));
+            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL()));
 
             telemetry.addLine("=== HUEGE AHHH ===");
-            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR));
-            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL));
-            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL));
-            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR));
-            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR));
-            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL));
+            telemetry.addData("BR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBR()));
+            telemetry.addData("BL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorBL()));
+            telemetry.addData("RL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRL()));
+            telemetry.addData("RR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorRR()));
+            telemetry.addData("LR Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLR()));
+            telemetry.addData("LL Hue", "%.1f", bot.indexer.getHue(bot.indexer.colorLL()));
 
 
 
