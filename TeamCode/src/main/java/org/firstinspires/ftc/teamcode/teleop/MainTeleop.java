@@ -288,8 +288,6 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
             telemetry.addData("Velocity", Bot.drive.localizer.update());
             telemetry.update();
-
-
         }
     }
 
