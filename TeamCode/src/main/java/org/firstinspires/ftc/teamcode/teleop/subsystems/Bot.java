@@ -237,6 +237,7 @@ public class Bot {
 
 
     public void periodic() {
+        indexer.updateSensorCache();
         turret.periodic();
 //        intake.periodic();
         lift.periodic();
