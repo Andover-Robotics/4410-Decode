@@ -62,6 +62,7 @@ public class NewBotTester extends LinearOpMode {
 //        waitForStart();
 
         while (!isStarted()) {
+            bot.indexer.updateSensorCache();
 
 
             gp1.readButtons();
@@ -125,6 +126,7 @@ public class NewBotTester extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
+            bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
             bot.shooting = false;
