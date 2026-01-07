@@ -169,7 +169,7 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
-        List<Integer> order = maybeReverseMotifOrder(planMotifOrder(motifPattern));
+        List<Integer> order = planMotifOrder(motifPattern);
         if (order.isEmpty()) return new InstantAction(() -> {});
 
         List<Action> actions = new ArrayList<>();
@@ -183,12 +183,6 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-    private List<Integer> maybeReverseMotifOrder(List<Integer> order) {
-        if (!reverseMotifOrder) return order;
-        ArrayList<Integer> rev = new ArrayList<>(order);
-        Collections.reverse(rev);
-        return rev;
-    }
 
     /* ================= MOTIF ORDER (SIMPLE, NO SKIPS) ================= */
 
