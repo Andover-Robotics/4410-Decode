@@ -12,6 +12,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
@@ -32,6 +33,7 @@ public class NewBotTester extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
+    private final ElapsedTime loopTimer = new ElapsedTime();
 
     NormalizedRGBA colors;
 
@@ -62,6 +64,7 @@ public class NewBotTester extends LinearOpMode {
 //        waitForStart();
 
         while (!isStarted()) {
+            bot.indexer.updateSensorCache();
 
 
             gp1.readButtons();
@@ -122,9 +125,11 @@ public class NewBotTester extends LinearOpMode {
             Bot.useStoredPose();
         }
 
+        loopTimer.reset();
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
+            bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
             bot.shooting = false;
@@ -258,6 +263,8 @@ public class NewBotTester extends LinearOpMode {
             telemetry.addData("Motif:", bot.indexer.motifPattern);
 
             telemetry.addData("rpm:", rpm);
+            telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
+            loopTimer.reset();
 
 
             // Back A for hue

@@ -36,9 +36,6 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.70;
 
-    // If motifs are scoring in reverse, flip this in Dashboard
-    public static boolean reverseMotifOrder = true;
-
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
 
@@ -101,6 +98,10 @@ public class Indexer {
         int balls = 0;
         for (Holder h : holders) if (h.ballPresent()) balls++;
         return balls;
+    }
+
+    public void updateSensorCache() {
+        for (Holder h : holders) h.updateSensorCache();
     }
 
     /* ================= ACTIONS ================= */
@@ -169,118 +170,21 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
-        List<Integer> order = planMotifOrder(motifPattern);
-        if (order.isEmpty()) return new InstantAction(() -> {});
-
         List<Action> actions = new ArrayList<>();
-        for (int idx : order) {
-            Holder h = holders[idx];
-            actions.add(new InstantAction(h::up));
-            actions.add(new SleepAction(kickerSleep));
-            actions.add(new InstantAction(h::down));
+        for (int i = 0; i < motifPattern.length(); i++) {
+            char target = motifPattern.charAt(i);
+            Holder h = null;
+            if (target == 'P') {
+                h = findFirstHolderWithColor("PURPLE");
+            } else if (target == 'G') {
+                h = findFirstHolderWithColor("GREEN");
+            }
+            actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
             actions.add(new SleepAction(motifShootSleep));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-
-    /* ================= MOTIF ORDER (SIMPLE, NO SKIPS) ================= */
-
-    private List<Integer> planMotifOrder(String motif) {
-        String[] colorByIdx = new String[holders.length];
-        ArrayList<Integer> avail = new ArrayList<>();
-
-        for (int i = 0; i < holders.length; i++) {
-            String c = holders[i].getColor();
-            colorByIdx[i] = c;
-            if (!"EMPTY".equals(c)) avail.add(i);
-        }
-
-        int n = avail.size();
-        if (n == 0) return Collections.emptyList();
-        if (n == 1) return new ArrayList<>(avail);
-
-        char[] pat = motif.toCharArray();
-        int[] pi = buildPrefix(pat);
-
-        List<Integer> best = null;
-        int bestMotifs = -1;
-        int bestProgress = -1;
-
-        if (n == 2) {
-            int a = avail.get(0), b = avail.get(1);
-
-            int[] s1 = scorePermutation(new int[]{a, b}, colorByIdx, pat, pi);
-            best = Arrays.asList(a, b);
-            bestMotifs = s1[0];
-            bestProgress = s1[1];
-
-            int[] s2 = scorePermutation(new int[]{b, a}, colorByIdx, pat, pi);
-            if (betterScore(s2, bestMotifs, bestProgress)) {
-                best = Arrays.asList(b, a);
-                bestMotifs = s2[0];
-                bestProgress = s2[1];
-            }
-            return best;
-        }
-
-        int a = avail.get(0), b = avail.get(1), c = avail.get(2);
-
-        int[][] perms = new int[][]{
-                {a, b, c},
-                {a, c, b},
-                {b, a, c},
-                {b, c, a},
-                {c, a, b},
-                {c, b, a}
-        };
-
-        for (int[] p : perms) {
-            int[] sc = scorePermutation(p, colorByIdx, pat, pi);
-            if (best == null || betterScore(sc, bestMotifs, bestProgress)) {
-                best = Arrays.asList(p[0], p[1], p[2]);
-                bestMotifs = sc[0];
-                bestProgress = sc[1];
-            }
-        }
-
-        return best;
-    }
-
-    private int[] scorePermutation(int[] order, String[] colorByIdx, char[] pat, int[] pi) {
-        int state = 0;
-        int motifs = 0;
-
-        for (int idx : order) {
-            char shot = toMotifChar(colorByIdx[idx]);
-
-            while (state > 0 && pat[state] != shot) state = pi[state - 1];
-            if (pat[state] == shot) state++;
-
-            if (state == pat.length) {
-                motifs++;
-                state = pi[pat.length - 1];
-            }
-        }
-
-        return new int[]{motifs, state};
-    }
-
-    private boolean betterScore(int[] sc, int bestMotifs, int bestProgress) {
-        if (sc[0] != bestMotifs) return sc[0] > bestMotifs;
-        return sc[1] > bestProgress;
-    }
-
-    private int[] buildPrefix(char[] p) {
-        int[] pi = new int[p.length];
-        int j = 0;
-        for (int i = 1; i < p.length; i++) {
-            while (j > 0 && p[i] != p[j]) j = pi[j - 1];
-            if (p[i] == p[j]) j++;
-            pi[i] = j;
-        }
-        return pi;
-    }
 
     private char toMotifChar(String color) {
         if ("PURPLE".equals(color)) return 'P';
@@ -302,6 +206,8 @@ public class Indexer {
         private final double downPos;
 
         private final float[] hsv = new float[3];
+        private boolean cachedBallPresent = false;
+        private String cachedColor = "EMPTY";
 
         public Holder(
                 OpMode opMode,
@@ -343,11 +249,31 @@ public class Indexer {
             return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
         }
 
-        public boolean ballPresent() {
+        public void updateSensorCache() {
             double da = safeDistance(sensorA);
             double db = safeDistance(sensorB);
-            return (da > 0 && da < DISTANCE_THRESHOLD_MM)
+            cachedBallPresent = (da > 0 && da < DISTANCE_THRESHOLD_MM)
                     || (db > 0 && db < DISTANCE_THRESHOLD_MM);
+
+            if (!cachedBallPresent) {
+                cachedColor = "EMPTY";
+                return;
+            }
+
+            float h1 = getHue(sensorA);
+            float h2 = getHue(sensorB);
+
+            if (isGreenHue(h1) || isGreenHue(h2)) {
+                cachedColor = "GREEN";
+            } else if (isPurpleHue(h1) || isPurpleHue(h2)) {
+                cachedColor = "PURPLE";
+            } else {
+                cachedColor = "UNKNOWN";
+            }
+        }
+
+        public boolean ballPresent() {
+            return cachedBallPresent;
         }
 
         private float getHue(RevColorSensorV3 sensor) {
@@ -361,15 +287,7 @@ public class Indexer {
         private boolean isPurpleHue(float h) { return h > 180 && h < 225; }
 
         public String getColor() {
-            if (!ballPresent()) return "EMPTY";
-
-            float h1 = getHue(sensorA);
-            float h2 = getHue(sensorB);
-
-            if (isGreenHue(h1) || isGreenHue(h2))   return "GREEN";
-            if (isPurpleHue(h1) || isPurpleHue(h2)) return "PURPLE";
-
-            return "UNKNOWN";
+            return cachedColor;
         }
     }
 }
