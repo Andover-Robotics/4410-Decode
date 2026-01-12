@@ -144,13 +144,17 @@ public class NewBotTester extends LinearOpMode {
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                    bot.intake.intake();
+                    if (bot.indexer.countBalls()==3) {
+                        bot.intake.reverse();
+                    } else {
+                        bot.intake.intake();
+                    }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.intake.reverse();
-                } else if (bot.indexer.countBalls()==3){
-                    bot.intake.reverse();
-                } else if (stallIntake){
-                    bot.intake.storage();
+//                } else if (bot.indexer.countBalls()==3){
+//                    bot.intake.reverse();
+//                } else if (stallIntake){
+//                    bot.intake.storage();
                 } else {
                     bot.intake.stop();
                 }
