@@ -42,6 +42,7 @@ public class NewBotTester extends LinearOpMode {
 
 
     public static boolean stallIntake = true, manualTurret = false;
+    boolean sensing = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -129,7 +130,7 @@ public class NewBotTester extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
-            bot.indexer.updateSensorCache();
+            if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
             bot.shooting = false;
@@ -137,6 +138,9 @@ public class NewBotTester extends LinearOpMode {
             bot.turret.enablePositionTracking(false);
 
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                sensing = !sensing;
+            }
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
@@ -255,10 +259,12 @@ public class NewBotTester extends LinearOpMode {
             }
             runningActions = newActions;
 
-            telemetry.addLine("=== BALL COLORS ===");
-            telemetry.addData("Right Spot", bot.indexer.getRightColor());
-            telemetry.addData("Left Spot", bot.indexer.getLeftColor());
-            telemetry.addData("Back Spot", bot.indexer.getBackColor());
+            if (sensing) {
+                telemetry.addLine("=== BALL COLORS ===");
+                telemetry.addData("Right Spot", bot.indexer.getRightColor());
+                telemetry.addData("Left Spot", bot.indexer.getLeftColor());
+                telemetry.addData("Back Spot", bot.indexer.getBackColor());
+            }
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
 
@@ -267,13 +273,13 @@ public class NewBotTester extends LinearOpMode {
             loopTimer.reset();
 
 
-            // Back A for hue
-            float backHue = bot.indexer.getHue(bot.indexer.colorBR()); // Back A sensor
-            telemetry.addLine("=== BACK SENSOR HUE ===");
-// Back B for distance
-            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
-            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
-            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
+//            // Back A for hue
+//            float backHue = bot.indexer.getHue(bot.indexer.colorBR()); // Back A sensor
+//            telemetry.addLine("=== BACK SENSOR HUE ===");
+//// Back B for distance
+//            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
+//            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
+//            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
 
 //
 //
