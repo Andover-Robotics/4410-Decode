@@ -34,10 +34,7 @@ public class Indexer {
     public static double rapidShootSleep = 0.03;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.70;
-
-    // If motifs are scoring in reverse, flip this in Dashboard
-    public static boolean reverseMotifOrder = true;
+    public static double motifShootSleep = 0.30;
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
@@ -173,105 +170,33 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
-        List<Integer> order = planMotifOrder(motifPattern);
-        if (order.isEmpty()) return new InstantAction(() -> {});
+        List<Integer> purple = new ArrayList<>();
+        List<Integer> green = new ArrayList<>();
+
+        for (int i = 0; i < holders.length; i++) {
+            String color = holders[i].getColor();
+            if ("PURPLE".equals(color)) {
+                purple.add(i);
+            } else if ("GREEN".equals(color)) {
+                green.add(i);
+            }
+        }
 
         List<Action> actions = new ArrayList<>();
-        for (int idx : order) {
-            Holder h = holders[idx];
-            actions.add(new InstantAction(h::up));
-            actions.add(new SleepAction(kickerSleep));
-            actions.add(new InstantAction(h::down));
+        for (int i = 0; i < motifPattern.length(); i++) {
+            char target = motifPattern.charAt(i);
+            Holder h = null;
+            if (target == 'P') {
+                h = purple.isEmpty() ? null : holders[purple.remove(0)];
+            } else if (target == 'G') {
+                h = green.isEmpty() ? null : holders[green.remove(0)];
+            }
+            actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
             actions.add(new SleepAction(motifShootSleep));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-
-    /* ================= MOTIF ORDER (SIMPLE, NO SKIPS) ================= */
-
-    private List<Integer> planMotifOrder(String motif) {
-        String pattern = reverseMotifOrder
-                ? new StringBuilder(motif).reverse().toString()
-                : motif;
-        char[] pat = pattern.toCharArray();
-        char[] shotByIdx = new char[holders.length];
-        ArrayList<Integer> avail = new ArrayList<>();
-
-        for (int i = 0; i < holders.length; i++) {
-            char shot = toMotifChar(holders[i].getColor());
-            shotByIdx[i] = shot;
-            if (shot != 'X') avail.add(i);
-        }
-
-        int n = avail.size();
-        if (n == 0) return Collections.emptyList();
-        if (n == 1) return new ArrayList<>(avail);
-
-        List<Integer> best = null;
-        int bestMatches = -1;
-        int bestPrefix = -1;
-
-        if (n == 2) {
-            int a = avail.get(0), b = avail.get(1);
-
-            int[] s1 = scorePermutation(new int[]{a, b}, shotByIdx, pat);
-            best = Arrays.asList(a, b);
-            bestMatches = s1[0];
-            bestPrefix = s1[1];
-
-            int[] s2 = scorePermutation(new int[]{b, a}, shotByIdx, pat);
-            if (s2[0] > bestMatches || (s2[0] == bestMatches && s2[1] > bestPrefix)) {
-                best = Arrays.asList(b, a);
-                bestMatches = s2[0];
-                bestPrefix = s2[1];
-            }
-            return best;
-        }
-
-        int a = avail.get(0), b = avail.get(1), c = avail.get(2);
-
-        int[][] perms = new int[][]{
-                {a, b, c},
-                {a, c, b},
-                {b, a, c},
-                {b, c, a},
-                {c, a, b},
-                {c, b, a}
-        };
-
-        for (int[] p : perms) {
-            int[] sc = scorePermutation(p, shotByIdx, pat);
-            if (best == null || sc[0] > bestMatches || (sc[0] == bestMatches && sc[1] > bestPrefix)) {
-                best = Arrays.asList(p[0], p[1], p[2]);
-                bestMatches = sc[0];
-                bestPrefix = sc[1];
-            }
-        }
-
-        return best;
-    }
-
-    private int[] scorePermutation(int[] order, char[] shotByIdx, char[] pat) {
-        int matches = 0;
-        int prefix = 0;
-        boolean prefixActive = true;
-
-        int limit = Math.min(order.length, pat.length);
-        for (int i = 0; i < limit; i++) {
-            char shot = shotByIdx[order[i]];
-            if (shot == pat[i]) {
-                matches++;
-                if (prefixActive) {
-                    prefix++;
-                }
-            } else {
-                prefixActive = false;
-            }
-        }
-
-        return new int[]{matches, prefix};
-    }
 
     private char toMotifChar(String color) {
         if ("PURPLE".equals(color)) return 'P';
@@ -337,22 +262,20 @@ public class Indexer {
         }
 
         public void updateSensorCache() {
-            double da = safeDistance(sensorA);
-            double db = safeDistance(sensorB);
-            cachedBallPresent = (da > 0 && da < DISTANCE_THRESHOLD_MM)
-                    || (db > 0 && db < DISTANCE_THRESHOLD_MM);
+            SensorSnapshot a = readSensor(sensorA);
+            SensorSnapshot b = readSensor(sensorB);
+
+            cachedBallPresent = (a.distance > 0 && a.distance < DISTANCE_THRESHOLD_MM)
+                    || (b.distance > 0 && b.distance < DISTANCE_THRESHOLD_MM);
 
             if (!cachedBallPresent) {
                 cachedColor = "EMPTY";
                 return;
             }
 
-            float h1 = getHue(sensorA);
-            float h2 = getHue(sensorB);
-
-            if (isGreenHue(h1) || isGreenHue(h2)) {
+            if (isGreenHue(a.hue) || isGreenHue(b.hue)) {
                 cachedColor = "GREEN";
-            } else if (isPurpleHue(h1) || isPurpleHue(h2)) {
+            } else if (isPurpleHue(a.hue) || isPurpleHue(b.hue)) {
                 cachedColor = "PURPLE";
             } else {
                 cachedColor = "UNKNOWN";
@@ -375,6 +298,32 @@ public class Indexer {
 
         public String getColor() {
             return cachedColor;
+        }
+
+        private SensorSnapshot readSensor(RevColorSensorV3 sensor) {
+            double d = sensor.getDistance(DistanceUnit.MM);
+            float hue = hueFromSensor(sensor);
+            double distance = (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
+            return new SensorSnapshot(distance, hue);
+        }
+
+        private float hueFromSensor(RevColorSensorV3 sensor) {
+            com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return hsv[0];
+        }
+
+        private static final class SensorSnapshot {
+            private final double distance;
+            private final float hue;
+
+            private SensorSnapshot(double distance, float hue) {
+                this.distance = distance;
+                this.hue = hue;
+            }
         }
     }
 }

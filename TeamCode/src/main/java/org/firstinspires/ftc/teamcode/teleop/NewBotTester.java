@@ -12,6 +12,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
@@ -32,6 +33,7 @@ public class NewBotTester extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
+    private final ElapsedTime loopTimer = new ElapsedTime();
 
     NormalizedRGBA colors;
 
@@ -40,6 +42,7 @@ public class NewBotTester extends LinearOpMode {
 
 
     public static boolean stallIntake = true, manualTurret = false;
+    boolean sensing = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -123,15 +126,19 @@ public class NewBotTester extends LinearOpMode {
             Bot.useStoredPose();
         }
 
+        loopTimer.reset();
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
-//            bot.indexer.updateSensorCache();
+            if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
             bot.shooting = false;
 
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                sensing = !sensing;
+            }
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
@@ -261,18 +268,18 @@ public class NewBotTester extends LinearOpMode {
             }
             runningActions = newActions;
 
-            telemetry.addLine("=== BALL COLORS ===");
-            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-            telemetry.addData("Power", bot.turret.shooter.getPower());
-            telemetry.addData("\nRight Spot", bot.indexer.getRightColor());
-            telemetry.addData("Left Spot", bot.indexer.getLeftColor());
-            telemetry.addData("Back Spot", bot.indexer.getBackColor());
+            if (sensing) {
+                telemetry.addLine("=== BALL COLORS ===");
+                telemetry.addData("Right Spot", bot.indexer.getRightColor());
+                telemetry.addData("Left Spot", bot.indexer.getLeftColor());
+                telemetry.addData("Back Spot", bot.indexer.getBackColor());
+            }
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
 
             telemetry.addData("rpm:", rpm);
-
+            telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
+            loopTimer.reset();
 
 
 //            // Back A for hue
