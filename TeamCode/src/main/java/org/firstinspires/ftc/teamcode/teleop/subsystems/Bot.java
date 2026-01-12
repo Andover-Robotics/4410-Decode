@@ -180,67 +180,11 @@ public class Bot {
         return new InstantAction(() -> enableShooter(false));
     }
 
-//    public Action shootLRB() {
-//        return new SequentialAction(
-////                new InstantAction(() -> shooting = true),
-//                new InstantAction(() -> indexer.leftUp()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.leftDown()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.rightUp()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.rightDown()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.backUp()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.backDown()),
-//                new SleepAction(0.1),
-//                new InstantAction(() -> shooting = false)
-//        );
-//    }
-//    public Action shootBack() {
-//        return new SequentialAction(
-////                new InstantAction(() -> shooting = true),
-//                new InstantAction(() -> indexer.backUp()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.backDown()),
-//                new SleepAction(0.1),
-//                new InstantAction(() -> shooting = false)
-//        );
-//    }
-//    public Action shootRight() {
-//        return new SequentialAction(
-////                new InstantAction(() -> shooting = true),
-//                new InstantAction(() -> indexer.rightUp()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.rightDown()),
-//                new SleepAction(0.1),
-//                new InstantAction(() -> shooting = false)
-//        );
-//    }
-//    public Action shootLeft() {
-//        return new SequentialAction(
-////                new InstantAction(() -> shooting = true),
-//                new InstantAction(() -> indexer.leftUp()),
-//                new SleepAction(0.5),
-//                new InstantAction(() -> indexer.leftDown()),
-//                new SleepAction(0.1),
-//                new InstantAction(() -> shooting = false)
-//        );
-//    }
-    public void updateShootingTime() {
-        shootDelay = Math.max((Turret.pureDistance - shootDelayDihThreshold), 0) * shootDelayCF;
-    }
-
-
-
-
-
     public void periodic() {
 //        indexer.updateSensorCache();
         turret.periodic();
-//        intake.periodic();
         lift.periodic();
+//        intake.periodic();
 //        screen.periodic();
     }
 

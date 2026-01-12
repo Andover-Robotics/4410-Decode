@@ -134,8 +134,6 @@ public class NewBotTester extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
             bot.shooting = false;
-            bot.turret.enableFullAuto(false);
-            bot.turret.enablePositionTracking(false);
 
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -209,15 +207,22 @@ public class NewBotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootRapidFire());
             }
 
-            if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootLeft());
             }
-            if (gp1.getButton(GamepadKeys.Button.X) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootRight());
             }
-            if (gp1.getButton(GamepadKeys.Button.Y) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootBack());
             }
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootPurple());
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootGreen());
+            }
+
             if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
             }
@@ -251,7 +256,7 @@ public class NewBotTester extends LinearOpMode {
 
 
             bot.periodic();
-            // DRIVE
+            Bot.drive.localizer.update();
             drive();
 
             List<Action> newActions = new ArrayList<>();
