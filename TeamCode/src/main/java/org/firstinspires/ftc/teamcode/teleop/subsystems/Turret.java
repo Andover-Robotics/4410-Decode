@@ -31,7 +31,7 @@ public class Turret {
 
     private IMU imu;
 
-    private Limelight3A limelight;
+//    private Limelight3A limelight; TODO
     public LLResult llResult;
     public static Pose3D llBotPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0));
 
@@ -91,9 +91,9 @@ public class Turret {
         imu.resetYaw();
 
         // initialize limelight
-        limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(100);
-        limelight.start();
+//        limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight"); TODO
+//        limelight.setPollRateHz(100);TODO
+//        limelight.start();TODO
 
         shooter = new Shooter(opMode);
 
@@ -105,7 +105,7 @@ public class Turret {
     }
 
     public void setPipeline(int i) {
-        limelight.pipelineSwitch(i);
+//        limelight.pipelineSwitch(i); TODO
         /*
             0 is blue alliance
             1 is red alliance
@@ -305,8 +305,7 @@ public class Turret {
 
                 controller.setSetPoint(setPoint);
                 power = controller.calculate(pos);
-            } else
-            {
+            } else {
                 power = manualPower;
             }
 
@@ -361,7 +360,6 @@ public class Turret {
     public void relocalizeBotPose() {
         Bot.drive.localizer.setPose(new Pose2d(llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset, llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset, Math.toRadians(llBotPose.getOrientation().getYaw())));
     }
-
 
     public void resetEncoder() {
         motor.resetEncoder();

@@ -126,24 +126,26 @@ public class NewBotTester extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
-            bot.indexer.updateSensorCache();
+//            bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
             bot.shooting = false;
-            bot.turret.enableFullAuto(false);
-            bot.turret.enablePositionTracking(false);
 
 
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                    bot.intake.intake();
+                    if (bot.indexer.countBalls()==3) {
+                        bot.intake.reverse();
+                    } else {
+                        bot.intake.intake();
+                    }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.intake.reverse();
-                } else if (bot.indexer.countBalls()==3){
-                    bot.intake.reverse();
-                } else if (stallIntake){
-                    bot.intake.storage();
+//                } else if (bot.indexer.countBalls()==3){
+//                    bot.intake.reverse();
+//                } else if (stallIntake){
+//                    bot.intake.storage();
                 } else {
                     bot.intake.stop();
                 }
@@ -198,15 +200,22 @@ public class NewBotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootRapidFire());
             }
 
-            if (gp1.getButton(GamepadKeys.Button.B) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootLeft());
             }
-            if (gp1.getButton(GamepadKeys.Button.X) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootRight());
             }
-            if (gp1.getButton(GamepadKeys.Button.Y) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootBack());
             }
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootPurple());
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootGreen());
+            }
+
             if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
             }
@@ -240,7 +249,7 @@ public class NewBotTester extends LinearOpMode {
 
 
             bot.periodic();
-            // DRIVE
+            Bot.drive.localizer.update();
             drive();
 
             List<Action> newActions = new ArrayList<>();
@@ -253,7 +262,10 @@ public class NewBotTester extends LinearOpMode {
             runningActions = newActions;
 
             telemetry.addLine("=== BALL COLORS ===");
-            telemetry.addData("Right Spot", bot.indexer.getRightColor());
+            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Power", bot.turret.shooter.getPower());
+            telemetry.addData("\nRight Spot", bot.indexer.getRightColor());
             telemetry.addData("Left Spot", bot.indexer.getLeftColor());
             telemetry.addData("Back Spot", bot.indexer.getBackColor());
 
@@ -262,13 +274,14 @@ public class NewBotTester extends LinearOpMode {
             telemetry.addData("rpm:", rpm);
 
 
-            // Back A for hue
-            float backHue = bot.indexer.getHue(bot.indexer.colorBR()); // Back A sensor
-            telemetry.addLine("=== BACK SENSOR HUE ===");
-// Back B for distance
-            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
-            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
-            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
+
+//            // Back A for hue
+//            float backHue = bot.indexer.getHue(bot.indexer.colorBR()); // Back A sensor
+//            telemetry.addLine("=== BACK SENSOR HUE ===");
+//// Back B for distance
+//            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
+//            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
+//            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
 
 //
 //
