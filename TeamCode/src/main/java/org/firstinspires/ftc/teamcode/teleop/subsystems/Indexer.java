@@ -308,9 +308,10 @@ public class Indexer {
         }
 
         private float hueFromSensor(RevColorSensorV3 sensor) {
-            int r = sensor.red();
-            int g = sensor.green();
-            int b = sensor.blue();
+            com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
             android.graphics.Color.RGBToHSV(r, g, b, hsv);
             return hsv[0];
         }
