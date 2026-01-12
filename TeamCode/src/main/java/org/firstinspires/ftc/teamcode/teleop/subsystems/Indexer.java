@@ -170,14 +170,26 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
+        List<Integer> purple = new ArrayList<>();
+        List<Integer> green = new ArrayList<>();
+
+        for (int i = 0; i < holders.length; i++) {
+            String color = holders[i].getColor();
+            if ("PURPLE".equals(color)) {
+                purple.add(i);
+            } else if ("GREEN".equals(color)) {
+                green.add(i);
+            }
+        }
+
         List<Action> actions = new ArrayList<>();
         for (int i = 0; i < motifPattern.length(); i++) {
             char target = motifPattern.charAt(i);
             Holder h = null;
             if (target == 'P') {
-                h = findFirstHolderWithColor("PURPLE");
+                h = purple.isEmpty() ? null : holders[purple.remove(0)];
             } else if (target == 'G') {
-                h = findFirstHolderWithColor("GREEN");
+                h = green.isEmpty() ? null : holders[green.remove(0)];
             }
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
             actions.add(new SleepAction(motifShootSleep));
@@ -250,22 +262,20 @@ public class Indexer {
         }
 
         public void updateSensorCache() {
-            double da = safeDistance(sensorA);
-            double db = safeDistance(sensorB);
-            cachedBallPresent = (da > 0 && da < DISTANCE_THRESHOLD_MM)
-                    || (db > 0 && db < DISTANCE_THRESHOLD_MM);
+            SensorSnapshot a = readSensor(sensorA);
+            SensorSnapshot b = readSensor(sensorB);
+
+            cachedBallPresent = (a.distance > 0 && a.distance < DISTANCE_THRESHOLD_MM)
+                    || (b.distance > 0 && b.distance < DISTANCE_THRESHOLD_MM);
 
             if (!cachedBallPresent) {
                 cachedColor = "EMPTY";
                 return;
             }
 
-            float h1 = getHue(sensorA);
-            float h2 = getHue(sensorB);
-
-            if (isGreenHue(h1) || isGreenHue(h2)) {
+            if (isGreenHue(a.hue) || isGreenHue(b.hue)) {
                 cachedColor = "GREEN";
-            } else if (isPurpleHue(h1) || isPurpleHue(h2)) {
+            } else if (isPurpleHue(a.hue) || isPurpleHue(b.hue)) {
                 cachedColor = "PURPLE";
             } else {
                 cachedColor = "UNKNOWN";
@@ -288,6 +298,31 @@ public class Indexer {
 
         public String getColor() {
             return cachedColor;
+        }
+
+        private SensorSnapshot readSensor(RevColorSensorV3 sensor) {
+            double d = sensor.getDistance(DistanceUnit.MM);
+            float hue = hueFromSensor(sensor);
+            double distance = (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
+            return new SensorSnapshot(distance, hue);
+        }
+
+        private float hueFromSensor(RevColorSensorV3 sensor) {
+            int r = sensor.red();
+            int g = sensor.green();
+            int b = sensor.blue();
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return hsv[0];
+        }
+
+        private static final class SensorSnapshot {
+            private final double distance;
+            private final float hue;
+
+            private SensorSnapshot(double distance, float hue) {
+                this.distance = distance;
+                this.hue = hue;
+            }
         }
     }
 }
