@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 
+import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -238,8 +239,17 @@ public class Indexer {
             this.upPos = upPos;
             this.downPos = downPos;
 
+            setFastMode(sensorA);
+            setFastMode(sensorB);
             sensorA.setGain(gain);
             sensorB.setGain(gain);
+        }
+
+        private void setFastMode(RevColorSensorV3 sensor) {
+            if (sensor.getDeviceClient() instanceof LynxI2cDeviceSynch) {
+                ((LynxI2cDeviceSynch) sensor.getDeviceClient())
+                        .setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+            }
         }
 
         public void up()   { kicker.setPosition(upPos); }
