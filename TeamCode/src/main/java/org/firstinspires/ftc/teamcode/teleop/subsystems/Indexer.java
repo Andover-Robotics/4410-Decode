@@ -39,6 +39,7 @@ public class Indexer {
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
+    public static boolean staggerSensorUpdates = true;
 
     /* ================= HOLDERS ================= */
 
@@ -47,6 +48,8 @@ public class Indexer {
     public final Holder backHolder;
 
     public final Holder[] holders;
+    private int nextSensorIndex = 0;
+    private SensorTarget[] sensorReadOrder;
 
     /* ================= INIT ================= */
 
@@ -76,6 +79,14 @@ public class Indexer {
         );
 
         holders = new Holder[]{ rightHolder, leftHolder, backHolder };
+        sensorReadOrder = new SensorTarget[] {
+                new SensorTarget(leftHolder, true),
+                new SensorTarget(rightHolder, false),
+                new SensorTarget(backHolder, false),
+                new SensorTarget(leftHolder, false),
+                new SensorTarget(rightHolder, true),
+                new SensorTarget(backHolder, true)
+        };
 
         resetIndexer();
     }
@@ -102,7 +113,16 @@ public class Indexer {
     }
 
     public void updateSensorCache() {
-        for (Holder h : holders) h.updateSensorCache();
+        if (!staggerSensorUpdates) {
+            for (Holder h : holders) {
+                h.updateSensorCache();
+            }
+            return;
+        }
+
+        SensorTarget target = sensorReadOrder[nextSensorIndex];
+        target.holder.updateSensorCache(target.isSensorA);
+        nextSensorIndex = (nextSensorIndex + 1) % sensorReadOrder.length;
     }
 
     /* ================= ACTIONS ================= */
@@ -219,6 +239,10 @@ public class Indexer {
         private final double downPos;
 
         private final float[] hsv = new float[3];
+        private double distanceA = -1;
+        private double distanceB = -1;
+        private float hueA = Float.NaN;
+        private float hueB = Float.NaN;
         private boolean cachedBallPresent = false;
         private String cachedColor = "EMPTY";
 
@@ -272,20 +296,32 @@ public class Indexer {
         }
 
         public void updateSensorCache() {
-            SensorSnapshot a = readSensor(sensorA);
-            SensorSnapshot b = readSensor(sensorB);
+            updateSensorCache(true);
+            updateSensorCache(false);
+        }
 
-            cachedBallPresent = (a.distance > 0 && a.distance < DISTANCE_THRESHOLD_MM)
-                    || (b.distance > 0 && b.distance < DISTANCE_THRESHOLD_MM);
+        public void updateSensorCache(boolean updateSensorA) {
+            if (updateSensorA) {
+                distanceA = safeDistance(sensorA);
+                hueA = hueFromSensor(sensorA);
+            } else {
+                distanceB = safeDistance(sensorB);
+                hueB = hueFromSensor(sensorB);
+            }
+
+            boolean presentA = distanceA > 0 && distanceA < DISTANCE_THRESHOLD_MM;
+            boolean presentB = distanceB > 0 && distanceB < DISTANCE_THRESHOLD_MM;
+
+            cachedBallPresent = presentA || presentB;
 
             if (!cachedBallPresent) {
                 cachedColor = "EMPTY";
                 return;
             }
 
-            if (isGreenHue(a.hue) || isGreenHue(b.hue)) {
+            if ((presentA && isGreenHue(hueA)) || (presentB && isGreenHue(hueB))) {
                 cachedColor = "GREEN";
-            } else if (isPurpleHue(a.hue) || isPurpleHue(b.hue)) {
+            } else if ((presentA && isPurpleHue(hueA)) || (presentB && isPurpleHue(hueB))) {
                 cachedColor = "PURPLE";
             } else {
                 cachedColor = "UNKNOWN";
@@ -310,13 +346,6 @@ public class Indexer {
             return cachedColor;
         }
 
-        private SensorSnapshot readSensor(RevColorSensorV3 sensor) {
-            double d = sensor.getDistance(DistanceUnit.MM);
-            float hue = hueFromSensor(sensor);
-            double distance = (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
-            return new SensorSnapshot(distance, hue);
-        }
-
         private float hueFromSensor(RevColorSensorV3 sensor) {
             com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
             int r = Math.round(colors.red * 255f);
@@ -325,15 +354,15 @@ public class Indexer {
             android.graphics.Color.RGBToHSV(r, g, b, hsv);
             return hsv[0];
         }
+    }
 
-        private static final class SensorSnapshot {
-            private final double distance;
-            private final float hue;
+    private static final class SensorTarget {
+        private final Holder holder;
+        private final boolean isSensorA;
 
-            private SensorSnapshot(double distance, float hue) {
-                this.distance = distance;
-                this.hue = hue;
-            }
+        private SensorTarget(Holder holder, boolean isSensorA) {
+            this.holder = holder;
+            this.isSensorA = isSensorA;
         }
     }
 }
