@@ -421,7 +421,8 @@ import java.util.ArrayList;
 @Config
 public class Turret {
     private final MotorEx motor;
-    private PIDController controller;
+    private final PIDController largeErrorController;
+    private final PIDController smallErrorController;
     private final ElapsedTime timer = new ElapsedTime();
 
     private IMU imu;
@@ -440,7 +441,7 @@ public class Turret {
     public static double POS_TRACK_Y = 0;
     public static double llxRLOffset = 120, llyRLOffset = 108.5;
     public static double TURRET_OFFSET_BACK_IN = 3.25; // inches back from robot center
-    public static double p = 0.0115, i = 0, d = 0.0005, p2 = 0.0075, i2 = 0, d2 = 0.0002, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
+    public static double largeP = 0.0115, largeI = 0, largeD = 0.0005, smallP = 0.0075, smallI = 0, smallD = 0.0002, errorThresholdDeg = 45, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-4096.01855, shooterG = -0.00809392, shooterH = 1.81342, shooterI = 7854.91759;
 
     public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 185, lowLimit = -185, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
@@ -469,9 +470,12 @@ public class Turret {
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         motor.setInverted(false);
-        controller = new PIDController(p, i, d);
-        controller.setTolerance(tolerance);
-        controller.setSetPoint(0);
+        largeErrorController = new PIDController(largeP, largeI, largeD);
+        smallErrorController = new PIDController(smallP, smallI, smallD);
+        largeErrorController.setTolerance(tolerance);
+        smallErrorController.setTolerance(tolerance);
+        largeErrorController.setSetPoint(0);
+        smallErrorController.setSetPoint(0);
         motor.setRunMode(Motor.RunMode.RawPower);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
@@ -688,19 +692,24 @@ public class Turret {
     public void periodic() {
         power = 0;
         pos = getPosition();
-        controller.setPID(p, i, d);
         orientation = imu.getRobotYawPitchRollAngles();
 
         if (!obelisk) {
             // Early-out: position tracking mode
             if (positionTracking) {
-                controller.setPID(p2, i2, d2);
                 runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
 //                runToAngle(aimAtGlobalPoint(goalX, goalY));
-
-                controller.setSetPoint(setPoint);
-                power = controller.calculate(pos);
-            } else {
+                double errorDeg = Math.abs((setPoint - pos) * degsPerTick);
+                PIDController activeController = errorDeg > errorThresholdDeg ? largeErrorController : smallErrorController;
+                if (activeController == largeErrorController) {
+                    activeController.setPID(largeP, largeI, largeD);
+                } else {
+                    activeController.setPID(smallP, smallI, smallD);
+                }
+                activeController.setSetPoint(setPoint);
+                power = activeController.calculate(pos);
+            } else
+            {
                 power = manualPower;
             }
 
