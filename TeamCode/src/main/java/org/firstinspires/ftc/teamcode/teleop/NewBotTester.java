@@ -140,6 +140,10 @@ public class NewBotTester extends LinearOpMode {
                 sensing = !sensing;
             }
 
+//            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+//                sensing = !sensing;
+//            }
+
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                     if (bot.indexer.countBalls()==3) {
@@ -273,7 +277,6 @@ public class NewBotTester extends LinearOpMode {
                 telemetry.addData("Right Spot", bot.indexer.getRightColor());
                 telemetry.addData("Left Spot", bot.indexer.getLeftColor());
                 telemetry.addData("Back Spot", bot.indexer.getBackColor());
-                telemetry.addData("hsv br", bot.indexer.backHolder.hsvFromSensor(bot.indexer.colorBR()));
             }
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
@@ -291,7 +294,7 @@ public class NewBotTester extends LinearOpMode {
 //            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
 //            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
 
-//
+////
 //
 //            telemetry.addLine("=== DIHstance pls speed i need dihs ===");
 //            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR()));
