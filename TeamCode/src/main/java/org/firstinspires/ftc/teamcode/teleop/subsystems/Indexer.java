@@ -80,14 +80,14 @@ public class Indexer {
         resetIndexer();
     }
 
-    /* ================= SENSOR GETTERS (TELEMETRY COMPAT) ================= */
+    /* ================= SENSOR GETTERS ================= */
 
-    public RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
-    public RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
-    public RevColorSensorV3 colorLL() { return leftHolder.sensorA; }
-    public RevColorSensorV3 colorLR() { return leftHolder.sensorB; }
+    private RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
+    private RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
+    private RevColorSensorV3 colorLL() { return leftHolder.sensorA; }
+    private RevColorSensorV3 colorLR() { return leftHolder.sensorB; }
     public RevColorSensorV3 colorBR() { return backHolder.sensorA; }
-    public RevColorSensorV3 colorBL() { return backHolder.sensorB; }
+    private RevColorSensorV3 colorBL() { return backHolder.sensorB; }
 
     /* ================= INDEXER-LEVEL ================= */
 
@@ -230,7 +230,8 @@ public class Indexer {
                 double upPos,
                 double downPos,
                 int gain
-        ) {
+        )
+        {
             kicker = opMode.hardwareMap.servo.get(kickerServoName);
 
             sensorA = opMode.hardwareMap.get(RevColorSensorV3.class, leftSensorName);
@@ -296,13 +297,6 @@ public class Indexer {
             return cachedBallPresent;
         }
 
-        private float getHue(RevColorSensorV3 sensor) {
-            android.graphics.Color.RGBToHSV(
-                    sensor.red(), sensor.green(), sensor.blue(), hsv
-            );
-            return hsv[0];
-        }
-
         private boolean isGreenHue(float h)  { return h > 160 && h < 180; }
         private boolean isPurpleHue(float h) { return h > 180 && h < 225; }
 
@@ -324,6 +318,15 @@ public class Indexer {
             int b = Math.round(colors.blue * 255f);
             android.graphics.Color.RGBToHSV(r, g, b, hsv);
             return hsv[0];
+        }
+
+        public float[] hsvFromSensor(RevColorSensorV3 sensor) {
+            com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return hsv;
         }
 
         private static final class SensorSnapshot {

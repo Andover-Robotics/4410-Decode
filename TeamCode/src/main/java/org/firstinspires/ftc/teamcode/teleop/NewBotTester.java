@@ -273,6 +273,7 @@ public class NewBotTester extends LinearOpMode {
                 telemetry.addData("Right Spot", bot.indexer.getRightColor());
                 telemetry.addData("Left Spot", bot.indexer.getLeftColor());
                 telemetry.addData("Back Spot", bot.indexer.getBackColor());
+                telemetry.addData("hsv br", bot.indexer.backHolder.hsvFromSensor(bot.indexer.colorBR()));
             }
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
