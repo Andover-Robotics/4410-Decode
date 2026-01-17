@@ -184,6 +184,10 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.indexer.shootRapidFire());
             }
 
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                runningActions.add(bot.indexer.shootRapidFireSensor());
+            }
+
             if (gp2.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootRight());
             }

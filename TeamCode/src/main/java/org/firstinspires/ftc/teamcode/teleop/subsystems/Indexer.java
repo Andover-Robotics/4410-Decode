@@ -35,7 +35,7 @@ public class Indexer {
     public static double rapidShootSleep = 0.08;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.30;
+    public static double motifShootSleep = 0.4;
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
@@ -81,17 +81,17 @@ public class Indexer {
         holders = new Holder[]{ rightHolder, leftHolder, backHolder };
         sensorReadOrder = new SensorTarget[] {
                 new SensorTarget(leftHolder, true),
-                new SensorTarget(rightHolder, false),
-                new SensorTarget(backHolder, false),
-                new SensorTarget(leftHolder, false),
                 new SensorTarget(rightHolder, true),
-                new SensorTarget(backHolder, true)
+                new SensorTarget(backHolder, true),
+                new SensorTarget(leftHolder, false),
+                new SensorTarget(rightHolder, false),
+                new SensorTarget(backHolder, false)
         };
 
         resetIndexer();
     }
 
-    /* ================= SENSOR GETTERS (TELEMETRY COMPAT) ================= */
+    /* ================= SENSOR GETTERS (TELEMETRY) ================= */
 
     public RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
     public RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
@@ -143,6 +143,17 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
+    public Action shootRapidFireSensor() {
+        List<Action> actions = new ArrayList<>();
+        for (Holder h : holders) {
+            if (h.cachedBallPresent) {
+                actions.add(h.kickResetAction());
+                actions.add(new SleepAction(rapidShootSleep));
+            }
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
     /**
      * Shoots ONE green if any holder currently contains GREEN, otherwise no-op.
      */
@@ -171,15 +182,6 @@ public class Indexer {
     public String getRightColor() { return rightHolder.getColor(); }
     public String getLeftColor()  { return leftHolder.getColor(); }
     public String getBackColor()  { return backHolder.getColor(); }
-
-    /* ================= SENSOR HELPERS (KEEP SIGNATURES) ================= */
-
-    private final float[] hsv = new float[3];
-
-    public double safeDistance(RevColorSensorV3 s) {
-        double d = s.getDistance(DistanceUnit.MM);
-        return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
-    }
 
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
@@ -211,12 +213,6 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
-
-    private char toMotifChar(String color) {
-        if ("PURPLE".equals(color)) return 'P';
-        if ("GREEN".equals(color)) return 'G';
-        return 'X';
-    }
 
     /* =====================================================
        ======================= HOLDER =======================
