@@ -349,6 +349,9 @@ public class Indexer {
         }
 
         public boolean isClogDetected() {
+            if (hasValidColor()) {
+                return false;
+            }
             return isCloggedSnapshot(cachedSensorA) || isCloggedSnapshot(cachedSensorB);
         }
 
@@ -357,6 +360,10 @@ public class Indexer {
 
         public String getColor() {
             return cachedColor;
+        }
+
+        private boolean hasValidColor() {
+            return "GREEN".equals(cachedColor) || "PURPLE".equals(cachedColor);
         }
 
         private SensorSnapshot readSensor(RevColorSensorV3 sensor) {
