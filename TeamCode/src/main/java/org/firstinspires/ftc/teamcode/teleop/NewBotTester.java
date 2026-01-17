@@ -41,7 +41,7 @@ public class NewBotTester extends LinearOpMode {
 
 
 
-    public static boolean stallIntake = true, manualTurret = false;
+    public static boolean stallIntake = true, manualTurret = false, shooting = false, intakeOverride = false;
     boolean sensing = true;
 
     @Override
@@ -67,24 +67,9 @@ public class NewBotTester extends LinearOpMode {
         while (!isStarted()) {
             bot.indexer.updateSensorCache();
 
-
             gp1.readButtons();
             gp2.readButtons();
 
-            TelemetryPacket packet = new TelemetryPacket();
-
-//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.turret.resetEncoder();
-//            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
-                bot.switchStartingPos();
-                useStoredPose = false;
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-                useStoredPose = !useStoredPose;
-            }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
                 bot.indexer.motifPattern="GPP";
             }
@@ -95,15 +80,33 @@ public class NewBotTester extends LinearOpMode {
                 bot.indexer.motifPattern="PGP";
             }
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetEncoder();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.switchAlliance();
+                useStoredPose = false;
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
+                bot.switchStartingPos();
+                useStoredPose = false;
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
+                useStoredPose = !useStoredPose;
+            }
+
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
+
             telemetry.addData("Motif:", bot.indexer.motifPattern);
             telemetry.addLine("DPAD Down: PPG");
             telemetry.addLine("DPAD Left: GPP");
             telemetry.addLine("DPAD Right: PGP");
-
 
             telemetry.update();
         }
@@ -127,25 +130,21 @@ public class NewBotTester extends LinearOpMode {
         }
 
         loopTimer.reset();
+
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
             if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
-            bot.shooting = false;
-
+//            bot.shooting = false;
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
                 sensing = !sensing;
-            }
-
-//            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-//                sensing = !sensing;
-//            }
+            } //TODO
 
             if (!bot.shooting) {
-                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2 || intakeOverride) {
                     if (bot.indexer.countBalls()==3) {
                         bot.intake.reverse();
                     } else {
@@ -153,19 +152,13 @@ public class NewBotTester extends LinearOpMode {
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.intake.reverse();
-//                } else if (bot.indexer.countBalls()==3){
-//                    bot.intake.reverse();
-//                } else if (stallIntake){
-//                    bot.intake.storage();
                 } else {
                     bot.intake.stop();
                 }
             }
 
-
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                stallIntake = !stallIntake;
+            if (manualTurret) {
+                bot.turret.runManual(gp2.getLeftX());
             }
 
             // TURRET
@@ -186,7 +179,7 @@ public class NewBotTester extends LinearOpMode {
 
             // SHOOTING
 
-            if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+            if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shooting) {
                 bot.turret.shooter.setManualPower(rpm);
                 bot.turret.enableShooter(true);
             } else {
@@ -280,6 +273,18 @@ public class NewBotTester extends LinearOpMode {
             }
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
+
+
+//            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+//            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("\nalliance", Bot.getAlliance());
+            telemetry.addData("starting pos", Bot.getStartingPos());
+
+            telemetry.addData("\nGoal Distance", Turret.trackingDistance);
+            telemetry.addData("Shoot Delay", Bot.shootDelay);
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
+            telemetry.addData("Power", bot.turret.getPower());
 
             telemetry.addData("rpm:", rpm);
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());

@@ -184,7 +184,6 @@ public class Bot {
 //        indexer.updateSensorCache();
         turret.periodic();
         lift.periodic();
-//        intake.periodic();
         screen.periodic();
     }
 

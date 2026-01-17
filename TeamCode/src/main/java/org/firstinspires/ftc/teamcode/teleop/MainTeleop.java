@@ -5,28 +5,26 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 //import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "MainTeleop", group = "Competition")
+@TeleOp(name = "V2 Main Teleop", group = "Competition")
 public class MainTeleop extends LinearOpMode {
 
     private Bot bot;
@@ -35,10 +33,10 @@ public class MainTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-
-    NormalizedRGBA colors;
+    private final ElapsedTime loopTimer = new ElapsedTime();
 
     public static boolean stallIntake = true, manualTurret = false;
+    boolean sensing = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -54,17 +52,27 @@ public class MainTeleop extends LinearOpMode {
         bot.setTargetGoalPose();
         stallIntake = true;
 
+
         // Initialize bot
 //        bot.stopMotors();
 
 //        waitForStart();
 
         while (!isStarted()) {
+            bot.indexer.updateSensorCache();
 
             gp1.readButtons();
             gp2.readButtons();
 
-            TelemetryPacket packet = new TelemetryPacket();
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+                bot.indexer.motifPattern="GPP";
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                bot.indexer.motifPattern="PPG";
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                bot.indexer.motifPattern="PGP";
+            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetEncoder();
@@ -84,9 +92,15 @@ public class MainTeleop extends LinearOpMode {
                 useStoredPose = !useStoredPose;
             }
 
+
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
+
+            telemetry.addData("Motif:", bot.indexer.motifPattern);
+            telemetry.addLine("DPAD Down: PPG");
+            telemetry.addLine("DPAD Left: GPP");
+            telemetry.addLine("DPAD Right: PGP");
 
             telemetry.update();
         }
@@ -109,55 +123,43 @@ public class MainTeleop extends LinearOpMode {
             Bot.useStoredPose();
         }
 
-        //bot.intake.closeGate();
+        loopTimer.reset();
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
+            if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
+//            bot.shooting = false;
+
+//            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+//                sensing = !sensing;
+//            } //
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                    bot.intake.intake();
-                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                    bot.intake.reverse();
-                } else {
-                    if (stallIntake) {
-                        bot.intake.storage();
+                    if (bot.indexer.countBalls()==3) {
+                        bot.intake.reverse();
                     } else {
-                        bot.intake.stop();
+                        bot.intake.intake();
                     }
+                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
+                    bot.intake.reverse();
+//                } else if (bot.indexer.countBalls()==3){
+//                    bot.intake.reverse();
+//                } else if (stallIntake){
+//                    bot.intake.storage();
+                } else {
+                    bot.intake.stop();
                 }
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                stallIntake = !stallIntake;
-            }
-
-            // CLIMB
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
-                bot.lift.liftUp();
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
-                bot.lift.balance();
-            }
 
             // TURRET
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) { //everything!
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) { //everything!
                 bot.enableFullAuto(true);
-                manualTurret = false;
-            }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
-                bot.enableFullAuto(false);
-                bot.turret.enablePositionTracking(true);
                 manualTurret = false;
             }
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
@@ -168,17 +170,48 @@ public class MainTeleop extends LinearOpMode {
             // SHOOTING
 
             if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+//                bot.turret.shooter.setManualPower(rpm);
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp2.getButton(GamepadKeys.Button.A) && !bot.shooting) {
-                //runningActions.add(bot.shootOne());
+            if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
+                runningActions.add(bot.indexer.shootMotif());
             }
 
-            if (gp2.getButton(GamepadKeys.Button.B) && !bot.shooting && !gp2.isDown(GamepadKeys.Button.START)) {
-                //runningActions.add(bot.shootThree());
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                runningActions.add(bot.indexer.shootRapidFire());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootRight());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootLeft());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.Y) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootBack());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootPurple());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
+                runningActions.add(bot.indexer.shootGreen());
+            }
+
+
+            // CLIMB
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
+                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.lift.liftUp();
             }
 
             // FAILSAFES
@@ -195,14 +228,6 @@ public class MainTeleop extends LinearOpMode {
                 bot.resetPose();
             }
 
-            if (gp2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                //bot.intake.openGate();
-            }
-
-            if (gp2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                //bot.intake.closeGate();
-            }
-
             if (manualTurret) {
                 bot.turret.runManual(gp2.getLeftX());
             }
@@ -211,10 +236,8 @@ public class MainTeleop extends LinearOpMode {
                 bot.turret.resetEncoder();
             }
 
-
-
             bot.periodic();
-            // DRIVE
+            Bot.drive.localizer.update();
             drive();
 
             List<Action> newActions = new ArrayList<>();
@@ -226,68 +249,92 @@ public class MainTeleop extends LinearOpMode {
             }
             runningActions = newActions;
 
+            if (sensing) {
+                telemetry.addLine("=== BALL COLORS ===");
+                telemetry.addData("Right Spot", bot.indexer.getRightColor());
+                telemetry.addData("Left Spot", bot.indexer.getLeftColor());
+                telemetry.addData("Back Spot", bot.indexer.getBackColor());
+            }
+
+            telemetry.addData("Motif:", bot.indexer.motifPattern);
+
+
             telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
-            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+//            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
-            //telemetry.addData("\n", bot.intake.storageCount());
-            //telemetry.addData("\nHolding Bottom", bot.intake.holdingBottom());
-            //telemetry.addData("Status Bottom", bot.intake.bottomStatus());
-//            telemetry.addData("Color Bottom", bot.intake.rawBottomColor());
-//            telemetry.addData("Break Beam Bottom", bot.intake.rawBottomBreakBeam());
-//            telemetry.addData("Bottom Purple State", bot.intake.blb0.getState());
-//            telemetry.addData("Bottom Green State", bot.intake.blb1.getState());
-            //telemetry.addData("\nHolding Middle", bot.intake.holdingMiddle());
-            //telemetry.addData("Status Middle", bot.intake.middleStatus());
-//            telemetry.addData("Color Middle", bot.intake.rawMiddleColor());
-//            telemetry.addData("Break Beam Middle", bot.intake.rawMiddleBreakBeam());
-//            telemetry.addData("Middle Purple State", bot.intake.blm0.getState());
-//            telemetry.addData("CMiddle Green State", bot.intake.blm1.getState());
-            //telemetry.addData("\nHolding Top", bot.intake.holdingTop());
-            //telemetry.addData("Status Top", bot.intake.topStatus());
-//            telemetry.addData("Color Top", bot.intake.rawTopColor());
-//            telemetry.addData("Break Beam Top", bot.intake.rawTopBreakBeam());
-//            telemetry.addData("Top Purple State", bot.intake.blt0.getState());
-//            telemetry.addData("Top Green State", bot.intake.blt1.getState());
-//
-//            telemetry.addData("\nPose", Bot.drive.localizer.getPose());
-//            telemetry.addData("Velocity", Bot.drive.localizer.update());
+
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("Shoot Delay", Bot.shootDelay);
-            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
-
-//
-//            telemetry.addData("\ntx", Turret.tx);
-//            telemetry.addData("ty", Turret.ty);
-//
-//            telemetry.addData("txAvg", bot.turret.txAvg);
-//
-//            telemetry.addData("correct distance", Turret.distance);
-//            telemetry.addData( "tag angle", Turret.tAngle);
-//            telemetry.addData("tOffset", Turret.tOffset);
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
+            telemetry.addData("Power", bot.turret.getPower());
+            telemetry.addData("Target RPM", Turret.shooterRpm);
+            telemetry.addData("Current", bot.turret.shooter.getFilteredRPM());
 
-            telemetry.addData("auto target rpm", Turret.shooterRpm);
-            telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
+            loopTimer.reset();
 
-            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
-            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
-            telemetry.addData("\nLeft Climb Abs Position", bot.lift.getLeftEncAbsDeg());
-            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
 
-//            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-            telemetry.addData("Left Power", bot.lift.leftPower);
-            telemetry.addData("Right Power", bot.lift.rightPower);
-            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
-            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+//            // Back A for hue
+//            float backHue = bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorBR()); // Back A sensor
+//            telemetry.addLine("=== BACK SENSOR HUE ===");
+//// Back B for distance
+//            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
+//            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
+//            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
+
+////
+//
+//            telemetry.addLine("=== Distance ===");
+//            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR()));
+//            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL()));
+//            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL()));
+//            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR()));
+//            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR()));
+//            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL()));
+//
+//            telemetry.addLine("=== HUE ===");
+//            telemetry.addData("BR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorBR()));
+//            telemetry.addData("BL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorBL()));
+//            telemetry.addData("RL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorRL()));
+//            telemetry.addData("RL HSV", bot.indexer.leftHolder.hsvFromSensor(bot.indexer.colorRL()));
+//            telemetry.addData("RR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorRR()));
+//            telemetry.addData("RR HSV", bot.indexer.leftHolder.hsvFromSensor(bot.indexer.colorRR()));
+//            telemetry.addData("LR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorLR()));
+//            telemetry.addData("LL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorLL()));
+
+
+
+
+
+
+
+
+//            telemetry.addData("auto target rpm", Turret.shooterRpm);
+//            telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
+//
+//            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
+//            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
+//            telemetry.addData("\nLeft Climb Abs Position", bot.lift.getLeftEncAbsDeg());
+//            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
+//
+////            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
+//            telemetry.addData("Left Power", bot.lift.leftPower);
+//            telemetry.addData("Right Power", bot.lift.rightPower);
+//            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
+//            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
 ////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
-////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
-            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
-            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
-//            telemetry.addData("Offset", bot.lift.offset);
-//            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
-            telemetry.addData("Velocity", Bot.drive.localizer.update());
+//////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
+//            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
+//            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
+////            telemetry.addData("Offset", bot.lift.offset);
+////            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
+//            telemetry.addData("Velocity", Bot.drive.localizer.update());
+
             telemetry.update();
+
+
         }
     }
 

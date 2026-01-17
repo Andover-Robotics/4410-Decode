@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleop;
+package org.firstinspires.ftc.teamcode.util;
 
 import android.graphics.Color;
 
@@ -8,8 +8,8 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "colorTester")
-public class colorTester extends LinearOpMode {
+@TeleOp(name = "ColorTester", group = "Utility")
+public class ColorTester extends LinearOpMode {
 
     // Logic sensors
     RevColorSensorV3 colorRR; // RIGHT A
