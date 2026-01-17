@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
@@ -178,6 +179,20 @@ public class Bot {
 
     public Action disableShooter() {
         return new InstantAction(() -> enableShooter(false));
+    }
+
+    public Action clearBallClog() {
+        if (!indexer.isClogDetected()) {
+            return new InstantAction(() -> {});
+        }
+
+        Action reverseIntake = new SequentialAction(
+                new InstantAction(intake::reverse),
+                new SleepAction(0.5),
+                new InstantAction(intake::stop)
+        );
+
+        return new ParallelAction(reverseIntake, indexer.jiggleKickers());
     }
 
     public void periodic() {
