@@ -37,6 +37,10 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.30;
 
+    public static double clogValueThreshold = 0.53;
+    public static double clogKickerDelta = 0.03;
+    public static double clogKickerSleep = 0.05;
+
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
 
@@ -111,6 +115,23 @@ public class Indexer {
     public Action shootLeft()  { return leftHolder.kickResetAction(); }
     public Action shootBack()  { return backHolder.kickResetAction(); }
 
+    public boolean isClogDetected() {
+        for (Holder h : holders) {
+            if (h.isClogDetected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Action jiggleKickers() {
+        List<Action> actions = new ArrayList<>();
+        for (Holder h : holders) {
+            actions.add(h.nudgeResetAction(clogKickerDelta, clogKickerSleep));
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
     /**
      * Rapid-fire all present holders, using rapidShootSleep between shots.
      */
@@ -168,6 +189,15 @@ public class Indexer {
         return hsv[0];
     }
 
+    public float getValue(RevColorSensorV3 sensor) {
+        com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
+        int r = Math.round(colors.red * 255f);
+        int g = Math.round(colors.green * 255f);
+        int b = Math.round(colors.blue * 255f);
+        android.graphics.Color.RGBToHSV(r, g, b, hsv);
+        return hsv[2];
+    }
+
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
@@ -221,6 +251,8 @@ public class Indexer {
         private final float[] hsv = new float[3];
         private boolean cachedBallPresent = false;
         private String cachedColor = "EMPTY";
+        private SensorSnapshot cachedSensorA = null;
+        private SensorSnapshot cachedSensorB = null;
 
         public Holder(
                 OpMode opMode,
@@ -267,6 +299,23 @@ public class Indexer {
             );
         }
 
+        public Action nudgeResetAction(double delta, double sleepSeconds) {
+            return new SequentialAction(
+                    new InstantAction(() -> nudge(delta)),
+                    new SleepAction(sleepSeconds),
+                    new InstantAction(this::reset)
+            );
+        }
+
+        private void nudge(double delta) {
+            double target = downPos - delta;
+            kicker.setPosition(clampPosition(target));
+        }
+
+        private double clampPosition(double position) {
+            return Math.max(0.0, Math.min(1.0, position));
+        }
+
         private double safeDistance(RevColorSensorV3 s) {
             double d = s.getDistance(DistanceUnit.MM);
             return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
@@ -275,6 +324,8 @@ public class Indexer {
         public void updateSensorCache() {
             SensorSnapshot a = readSensor(sensorA);
             SensorSnapshot b = readSensor(sensorB);
+            cachedSensorA = a;
+            cachedSensorB = b;
 
             cachedBallPresent = (a.distance > 0 && a.distance < DISTANCE_THRESHOLD_MM)
                     || (b.distance > 0 && b.distance < DISTANCE_THRESHOLD_MM);
@@ -297,6 +348,13 @@ public class Indexer {
             return cachedBallPresent;
         }
 
+        public boolean isClogDetected() {
+            if (hasValidColor()) {
+                return false;
+            }
+            return isCloggedSnapshot(cachedSensorA) || isCloggedSnapshot(cachedSensorB);
+        }
+
         private boolean isGreenHue(float h)  { return h > 160 && h < 180; }
         private boolean isPurpleHue(float h) { return h > 180 && h < 225; }
 
@@ -304,11 +362,15 @@ public class Indexer {
             return cachedColor;
         }
 
+        private boolean hasValidColor() {
+            return "GREEN".equals(cachedColor) || "PURPLE".equals(cachedColor);
+        }
+
         private SensorSnapshot readSensor(RevColorSensorV3 sensor) {
             double d = sensor.getDistance(DistanceUnit.MM);
-            float hue = hueFromSensor(sensor);
+            HsvSnapshot hsvSnapshot = hsvFromSensor(sensor);
             double distance = (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
-            return new SensorSnapshot(distance, hue);
+            return new SensorSnapshot(distance, hsvSnapshot.hue, hsvSnapshot.value);
         }
 
         private float hueFromSensor(RevColorSensorV3 sensor) {
@@ -320,6 +382,15 @@ public class Indexer {
             return hsv[0];
         }
 
+        private HsvSnapshot hsvFromSensor(RevColorSensorV3 sensor) {
+            com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return new HsvSnapshot(hsv[0], hsv[2]);
+        }
+
         public String hsvFromSensor(RevColorSensorV3 sensor) {
             com.qualcomm.robotcore.hardware.NormalizedRGBA colors = sensor.getNormalizedColors();
             int r = Math.round(colors.red * 255f);
@@ -329,13 +400,32 @@ public class Indexer {
             return Arrays.toString(hsv);
         }
 
+        private boolean isCloggedSnapshot(SensorSnapshot snapshot) {
+            if (snapshot == null) {
+                return false;
+            }
+            return snapshot.distance > DISTANCE_THRESHOLD_MM && snapshot.value > clogValueThreshold;
+        }
+
+        private static final class HsvSnapshot {
+            private final float hue;
+            private final float value;
+
+            private HsvSnapshot(float hue, float value) {
+                this.hue = hue;
+                this.value = value;
+            }
+        }
+
         private static final class SensorSnapshot {
             private final double distance;
             private final float hue;
+            private final float value;
 
-            private SensorSnapshot(double distance, float hue) {
+            private SensorSnapshot(double distance, float hue, float value) {
                 this.distance = distance;
                 this.hue = hue;
+                this.value = value;
             }
         }
     }
