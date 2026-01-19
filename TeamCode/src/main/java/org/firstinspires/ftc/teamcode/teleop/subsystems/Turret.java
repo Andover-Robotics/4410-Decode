@@ -40,17 +40,17 @@ public class Turret {
     public Shooter shooter;
 
     public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
-//    public static double goalX = 65;
-//    public static double goalY = 60;
+    public static double goalX = 62;
+    public static double goalY = 60;
 
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double llxRLOffset = 120, llyRLOffset = 108.5;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
     public static double
-            largeP = 0.0065, largeI = 0, largeD = 0.00035,
-            smallP = 0.007, smallI = 0, smallD = 0.0003,
-            errorThresholdDeg = 6, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
+            largeP = 0.006, largeI = 0, largeD = 0.0003,
+            smallP = 0.0125, smallI = 0, smallD = 0.0004,
+            errorThresholdDeg = 4, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-4096.01855, shooterG = -0.00809392, shooterH = 1.81342, shooterI = 7854.91759;
 
@@ -306,8 +306,8 @@ public class Turret {
         if (!obelisk) {
             // Early-out: position tracking mode
             if (positionTracking) {
-                runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
-//                runToAngle(aimAtGlobalPoint(goalX, goalY));
+//                runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
+                runToAngle(aimAtGlobalPoint(goalX, goalY));
                 double errorDeg = Math.abs((setPoint - pos) * degsPerTick);
                 activeController = errorDeg > errorThresholdDeg ? largeErrorController : smallErrorController;
                 if (activeController == largeErrorController) {

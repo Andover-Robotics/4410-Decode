@@ -29,10 +29,10 @@ public class Indexer {
     public static double kickerBackDown  = 0.60;
     public static double kickerBackUp    = 0.34;
 
-    public static double kickerSleep = 0.17;
+    public static double kickerSleep = 0.18;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.045;
+    public static double rapidShootSleep = 0.07;
 
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.4;
