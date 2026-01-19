@@ -131,7 +131,6 @@ public class MainTeleop extends LinearOpMode {
             if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
-//            bot.shooting = false;
 
 //            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
 //                sensing = !sensing;
@@ -146,10 +145,6 @@ public class MainTeleop extends LinearOpMode {
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.intake.reverse();
-//                } else if (bot.indexer.countBalls()==3){
-//                    bot.intake.reverse();
-//                } else if (stallIntake){
-//                    bot.intake.storage();
                 } else {
                     bot.intake.stop();
                 }
@@ -170,7 +165,6 @@ public class MainTeleop extends LinearOpMode {
             // SHOOTING
 
             if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
-//                bot.turret.shooter.setManualPower(rpm);
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);

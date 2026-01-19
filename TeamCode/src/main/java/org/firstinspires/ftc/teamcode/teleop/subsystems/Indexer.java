@@ -32,7 +32,7 @@ public class Indexer {
     public static double kickerSleep = 0.17;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.08;
+    public static double rapidShootSleep = 0.045;
 
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.4;
@@ -146,7 +146,7 @@ public class Indexer {
     public Action shootRapidFireSensor() {
         List<Action> actions = new ArrayList<>();
         for (Holder h : holders) {
-            if (h.cachedBallPresent) {
+            if (h.ballPresent()) {
                 actions.add(h.kickResetAction());
                 actions.add(new SleepAction(rapidShootSleep));
             }

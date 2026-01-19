@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.auto.Drawing;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
@@ -34,14 +35,12 @@ public class NewBotTester extends LinearOpMode {
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
     private final ElapsedTime loopTimer = new ElapsedTime();
+    private int n = 0, rpmTotalError = 0;
 
     NormalizedRGBA colors;
 
-    public static int rpm=2000;
-
-
-
-    public static boolean stallIntake = true, manualTurret = false, shooting = false, intakeOverride = false;
+    public static int rpm = 2000;
+    public static boolean manualTurret = false, shooting = false, intakeOverride = false;
     boolean sensing = true;
 
     @Override
@@ -56,13 +55,9 @@ public class NewBotTester extends LinearOpMode {
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
-        stallIntake = true;
-
+        bot.turret.setShooterOverride(true);
 
         // Initialize bot
-//        bot.stopMotors();
-
-//        waitForStart();
 
         while (!isStarted()) {
             bot.indexer.updateSensorCache();
@@ -143,6 +138,11 @@ public class NewBotTester extends LinearOpMode {
                 sensing = !sensing;
             } //TODO
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                shooting = !shooting;
+                Bot.drive.localizer.updateOffsets();
+            }
+
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2 || intakeOverride) {
                     if (bot.indexer.countBalls()==3) {
@@ -180,7 +180,7 @@ public class NewBotTester extends LinearOpMode {
             // SHOOTING
 
             if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shooting) {
-                bot.turret.shooter.setManualPower(rpm);
+                bot.turret.setShooterVelocity(rpm);
                 bot.turret.enableShooter(true);
             } else {
                 bot.turret.enableShooter(false);
@@ -232,23 +232,18 @@ public class NewBotTester extends LinearOpMode {
 //            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
 //                bot.switchAlliance();
 //            }
-//
-//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.turret.relocalizeBotPose();
-//            }
-//
-//            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-//                bot.resetPose();
-//            }
-//
-//
-//            if (manualTurret) {
-//                bot.turret.runManual(gp2.getLeftX());
-//            }
 
-//            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.turret.resetEncoder();
-//            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.relocalizeBotPose();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.resetPose();
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetEncoder();
+            }
 
 
 
@@ -286,10 +281,21 @@ public class NewBotTester extends LinearOpMode {
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
 
-            telemetry.addData("rpm:", rpm);
-            telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
-            loopTimer.reset();
+            telemetry.addData("rpm target:", rpm);
+            telemetry.addData("current rpm:", bot.turret.shooter.getFilteredRPM());
+            n += 1;
+            rpmTotalError += Math.abs((int) (bot.turret.shooter.getFilteredRPM() - rpm));
+            telemetry.addData("avg rpm error:", rpmTotalError/n);
+            telemetry.addData("shooting override:", shooting);
 
+            telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
+            packet.fieldOverlay().setStroke("#3F51B5");
+            Drawing.drawRobot(packet.fieldOverlay(), Bot.drive.localizer.getPose());
+            telemetry.addData("Odom Pose", Bot.drive.localizer.getPose().position.x + " " + Bot.drive.localizer.getPose().position.y + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+//
+            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+
+            loopTimer.reset();
 
 //            // Back A for hue
 //            float backHue = bot.indexer.getHue(bot.indexer.colorBR()); // Back A sensor

@@ -48,7 +48,7 @@ public class Turret {
     public static double llxRLOffset = 120, llyRLOffset = 108.5;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
     public static double
-            largeP = 0.006, largeI = 0, largeD = 0.00035,
+            largeP = 0.0065, largeI = 0, largeD = 0.00035,
             smallP = 0.007, smallI = 0, smallD = 0.0003,
             errorThresholdDeg = 6, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
 
@@ -64,7 +64,7 @@ public class Turret {
     public ArrayList<Double> txArr, tyArr;
 
     private boolean isManual = false, wraparound = false;
-    private boolean velComp = true;
+    private boolean velComp = true, shooterOverride = false;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -147,7 +147,6 @@ public class Turret {
     public void enableAutoAim(boolean on) {
         enablePositionTracking(on);
     }
-
 
     public void enableShooter(boolean enable) {
         shooterActive = enable;
@@ -318,12 +317,9 @@ public class Turret {
                 }
                 activeController.setSetPoint(setPoint);
                 power = activeController.calculate(pos);
-            } else
-            {
+            } else {
                 power = manualPower;
             }
-
-
 
             double maxPower = 1;
             power = Math.max(-maxPower, Math.min(maxPower, power));
@@ -336,7 +332,9 @@ public class Turret {
 
             if (shooterActive) {
                 shooter.periodic();
-                shooter.setVelocity(shooterRpm);
+                if (!shooterOverride) {
+                    shooter.setVelocity(shooterRpm);
+                }
             } else {
                 shooter.setPower(0);
             }
@@ -369,6 +367,14 @@ public class Turret {
         */
 
         motor.set(power);
+    }
+
+    public void setShooterVelocity(double rpm) {
+        shooter.setVelocity(rpm);
+    }
+
+    public void setShooterOverride(boolean override) {
+        shooterOverride = override;
     }
 
     public void relocalizeBotPose() {
