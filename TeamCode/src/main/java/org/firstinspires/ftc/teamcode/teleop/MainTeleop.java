@@ -35,7 +35,12 @@ public class MainTeleop extends LinearOpMode {
     private boolean useStoredPose = true;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
+    public static int rpm=2000;
+
+
+
     public static boolean stallIntake = true, manualTurret = false;
+    public static boolean shooting = true, intakeOverride = false;
     boolean sensing = true;
 
     @Override
@@ -51,6 +56,7 @@ public class MainTeleop extends LinearOpMode {
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
         stallIntake = true;
+        shooting = true;
 
 
         // Initialize bot
@@ -168,13 +174,19 @@ public class MainTeleop extends LinearOpMode {
             }
 
             // SHOOTING
-
-            if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+//            if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shooting) {
 //                bot.turret.shooter.setManualPower(rpm);
-                bot.turret.enableShooter(true);
-            } else {
-                bot.turret.enableShooter(false);
-            }
+//                bot.turret.enableShooter(true);
+//            } else {
+//                bot.turret.enableShooter(false);
+//            }
+
+//            if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2) {
+////                bot.turret.shooter.setManualPower(rpm);
+//                bot.turret.enableShooter(true);
+//            } else {
+//                bot.turret.enableShooter(false);
+//            }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
                 runningActions.add(bot.indexer.shootMotif());
@@ -207,7 +219,6 @@ public class MainTeleop extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootGreen());
             }
-
 
             // CLIMB
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {

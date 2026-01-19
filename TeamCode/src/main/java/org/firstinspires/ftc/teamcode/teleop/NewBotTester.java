@@ -237,9 +237,9 @@ public class NewBotTester extends LinearOpMode {
 //                bot.turret.relocalizeBotPose();
 //            }
 //
-//            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-//                bot.resetPose();
-//            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.resetPose();
+            }
 //
 //
 //            if (manualTurret) {
@@ -275,7 +275,7 @@ public class NewBotTester extends LinearOpMode {
             telemetry.addData("Motif:", bot.indexer.motifPattern);
 
 
-//            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
 //            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
