@@ -15,6 +15,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
@@ -53,6 +54,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
+
         Bot.instance = null;
         bot = Bot.getInstance(this);
         gp1 = new GamepadEx(gamepad1);
@@ -63,11 +67,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
         bot.enableShooter(false);
         bot.setAllianceBlue();
         applyStartingPosition(drive);
-        bot.intake.storage();
         bot.setTargetGoalPose();
         Bot.drive.localizer.recalibrateIMU();
 
         builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
+        bot.limelight.trackObelisk();
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
         while (opModeInInit() && !isStopRequested() && !isStarted()) {
@@ -75,6 +79,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             applyStartingPosition(drive);
 
             telemetry.addData("ALLIANCE (A)", "<big><b>%s</b></big>", Bot.getAlliance());
+            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
             addSegmentLine(0, "STARTING POSITION (X)", "%s", cfg.startFar ? "Far" : "Close");
             addSegmentLine(1, "Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayPreload);
@@ -156,6 +161,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
         if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
             bot.switchAlliance();
+            bot.limelight.trackObelisk();
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
@@ -285,11 +291,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.intake.intake()))
-                    .turnTo(Math.toRadians(135))
-                    .setTangent(Math.toRadians(135))
+//                    .turnTo(Math.toRadians(135))
+//                    .setTangent(Math.toRadians(135))
+                    .splineTo(new Vector2d(10, 19), Math.toRadians(90))
                     .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + 18))
+                            Pos.blueMidIntake.position.y + 22))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, (() -> bot.intake.reverse()))
                     .setReversed(true)
@@ -330,7 +337,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + 18))
+                            Pos.blueCloseIntake.position.y + 22))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, (() -> bot.intake.reverse()))
                     .setReversed(true)
@@ -350,7 +357,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.intake.intake()))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + 18))
+                            Pos.blueFarIntake.position.y + 22))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, (() -> bot.intake.reverse()))
                     .setReversed(true)
@@ -368,10 +375,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.intake.intake()))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y))
+//                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y))
 
-                    .setReversed(true)
                     .stopAndAdd((() -> bot.intake.reverse()))
+                    .setReversed(true)
                     .afterTime(0.1, bot.enableShooter())
                     .splineTo(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.indexer.shootMotif());

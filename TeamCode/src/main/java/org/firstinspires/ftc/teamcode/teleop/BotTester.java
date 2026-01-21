@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
-import org.firstinspires.ftc.teamcode.auto.OldPoses;
+import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
@@ -109,15 +109,15 @@ public class BotTester extends LinearOpMode {
         if (!useStoredPose) {
             if (Bot.isFar()) {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(OldPoses.initialFarBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialFarBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(OldPoses.initialFarRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialFarRedPose);
                 }
             } else {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(OldPoses.initialCloseBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(OldPoses.initialCloseRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseRedPose);
                 }
             }
         } else {
@@ -125,6 +125,7 @@ public class BotTester extends LinearOpMode {
         }
 
         loopTimer.reset();
+        bot.limelight.trackObelisk();
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -306,7 +307,9 @@ public class BotTester extends LinearOpMode {
 
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Indexer.getMotifPattern() + "</big></b></u>");
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
-            telemetry.addData("Obelisk Detection", bot.limelight.isObelisk());
+//            telemetry.addData("Obelisk Detection", bot.limelight.isObelisk());
+//            if (bot.limelight.llResult != null && bot.limelight.llResult.isValid())
+//            telemetry.addData("Obelisk Detection", bot.limelight.llResult);
 
 
 //            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));

@@ -13,7 +13,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.auto.OldPoses;
+import org.firstinspires.ftc.teamcode.auto.Pos;
+import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
@@ -105,15 +106,15 @@ public class MainTeleop extends LinearOpMode {
         if (!useStoredPose) {
             if (Bot.isFar()) {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(OldPoses.initialFarBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialFarBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(OldPoses.initialFarRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialFarRedPose);
                 }
             } else {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(OldPoses.initialCloseBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(OldPoses.initialCloseRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseRedPose);
                 }
             }
         } else {
@@ -136,7 +137,7 @@ public class MainTeleop extends LinearOpMode {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                     if (bot.indexer.countBalls()==3) {
                         bot.intake.reverse();
-                        gp1.gamepad.rumble(-1);
+                        gp1.gamepad.rumble(0, 1, -1);
                     } else {
                         bot.intake.intake();
                         gp1.gamepad.stopRumble();

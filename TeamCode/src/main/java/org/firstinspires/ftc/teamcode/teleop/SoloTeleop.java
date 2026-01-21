@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.auto.OldPoses;
+import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
@@ -109,15 +109,15 @@ public class SoloTeleop extends LinearOpMode {
         if (!useStoredPose) {
             if (Bot.isFar()) {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(OldPoses.initialFarBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialFarBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(OldPoses.initialFarRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialFarRedPose);
                 }
             } else {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(OldPoses.initialCloseBluePose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(OldPoses.initialCloseRedPose);
+                    Bot.drive.localizer.setPose(Pos.initialCloseRedPose);
                 }
             }
         } else {

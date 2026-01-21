@@ -15,6 +15,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
@@ -53,6 +54,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
         Bot.instance = null;
         bot = Bot.getInstance(this);
         gp1 = new GamepadEx(gamepad1);
@@ -63,7 +65,6 @@ public class AdaptiveFSAuto extends LinearOpMode {
         bot.enableShooter(false);
         bot.setAllianceBlue();
         applyStartingPosition(drive);
-        bot.intake.storage();
         bot.setTargetGoalPose();
         Bot.drive.localizer.recalibrateIMU();
 
