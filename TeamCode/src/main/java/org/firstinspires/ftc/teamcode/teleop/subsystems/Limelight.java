@@ -49,6 +49,14 @@ public class Limelight {
         obelisk = false;
     }
 
+    public void trackAlliance() {
+        if (Bot.getAlliance() == Bot.allianceOptions.BLUE_ALLIANCE) {
+            trackBlueAlliance();
+        } else {
+            trackRedAlliance();
+        }
+    }
+
     public void trackObelisk() {
         setPipeline(2);
         obelisk = true;
