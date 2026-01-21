@@ -20,7 +20,6 @@ public class Indexer {
 
     /* ================= CONFIG ================= */
 
-    public static String motifPattern = "PPG";
 
     public static double kickerLeftDown  = 0.705;
     public static double kickerLeftUp    = 0.45;
@@ -186,6 +185,7 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
+        String motifPattern = getMotifPattern();
         List<Integer> purple = new ArrayList<>();
         List<Integer> green = new ArrayList<>();
 
@@ -213,6 +213,23 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
+    public static String getMotifPattern() {
+        if (Bot.motif == null) {
+            return "PPP"; //DEFAULT
+        }
+
+        switch (Bot.motif) {
+            case GPP:
+                return "GPP";
+            case PGP:
+                return "PGP";
+            case PPG:
+                return "PPG";
+            case UNKNOWN:
+            default:
+                return "PPP";
+        }
+    }
 
     /* =====================================================
        ======================= HOLDER =======================

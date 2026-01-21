@@ -77,13 +77,10 @@ public class Limelight {
                 int id = llResult.getFiducialResults().get(0).getFiducialId();
                 if (id == 21) {
                     Bot.motif = Bot.Motif.GPP;
-                    Indexer.motifPattern = "GPP";
                 } else if (id == 22) {
                     Bot.motif = Bot.Motif.PGP;
-                    Indexer.motifPattern = "PGP";
                 } else if (id == 23) {
                     Bot.motif = Bot.Motif.PPG;
-                    Indexer.motifPattern = "PPG";
                 }
             }
         }

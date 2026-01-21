@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,13 +69,13 @@ public class SoloTeleop extends LinearOpMode {
             gp2.readButtons();
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-                bot.indexer.motifPattern="GPP";
+                Bot.motif = Bot.Motif.GPP;
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                bot.indexer.motifPattern="PPG";
+                Bot.motif = Bot.Motif.PPG;
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                bot.indexer.motifPattern="PGP";
+                Bot.motif = Bot.Motif.PGP;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
@@ -100,7 +101,7 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
 
-            telemetry.addData("Motif:", bot.indexer.motifPattern);
+            telemetry.addData("Motif:", Indexer.getMotifPattern());
             telemetry.addLine("DPAD Down: PPG");
             telemetry.addLine("DPAD Left: GPP");
             telemetry.addLine("DPAD Right: PGP");
@@ -261,7 +262,7 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("Left Spot", bot.indexer.getLeftColor());
             telemetry.addData("Back Spot", bot.indexer.getBackColor());
 
-            telemetry.addData("Motif:", bot.indexer.motifPattern);
+            telemetry.addData("Motif:", Indexer.getMotifPattern());
 
 
 //            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));

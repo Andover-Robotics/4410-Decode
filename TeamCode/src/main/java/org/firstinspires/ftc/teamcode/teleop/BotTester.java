@@ -66,13 +66,13 @@ public class BotTester extends LinearOpMode {
             gp2.readButtons();
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-                bot.indexer.motifPattern="GPP";
+                Bot.motif = Bot.Motif.GPP;
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                bot.indexer.motifPattern="PPG";
+                Bot.motif = Bot.Motif.PPG;
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                bot.indexer.motifPattern="PGP";
+                Bot.motif = Bot.Motif.PGP;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
@@ -98,7 +98,7 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
 
-            telemetry.addData("Motif:", bot.indexer.motifPattern);
+            telemetry.addData("Motif:", Indexer.getMotifPattern());
             telemetry.addLine("DPAD Down: PPG");
             telemetry.addLine("DPAD Left: GPP");
             telemetry.addLine("DPAD Right: PGP");
@@ -304,7 +304,7 @@ public class BotTester extends LinearOpMode {
 //
 //            telemetry.addData("<big><b><u>Total loop time</big></b></u>", "<font color=\""+ color + "\"><b>%.1f ms</b></font>", lastLoopTime);
 
-            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Indexer.motifPattern + "</big></b></u>");
+            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Indexer.getMotifPattern() + "</big></b></u>");
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
             telemetry.addData("Obelisk Detection", bot.limelight.isObelisk());
 
