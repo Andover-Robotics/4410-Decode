@@ -27,14 +27,12 @@ public class Bot {
     public Lift lift;
     public Indexer indexer;
     public Screen screen;
+    public Limelight limelight;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
-    // 65, 60
-    public static Vector2d farAutoGoalPose = new Vector2d(61, 64); //TODO DO NOT USE
     public static Vector2d targetPose = goalPose;
-    public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.02, shootDelayDihThreshold = 100;
     public boolean shooting = false;
 
     public static MecanumDrive drive;
@@ -49,14 +47,23 @@ public class Bot {
         FAR
     }
 
+    public static enum Motif {
+        GPP,
+        PGP,
+        PPG,
+        UNKNOWN //TODO Remove
+    }
+
+    public static Motif motif = Motif.UNKNOWN; //TODO Remove this so it doesn't reset every time we run an opmode, and stores it (currently initialized just for testing)
+
     private static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     private static startingPosition startingPos = startingPosition.FAR;
 
     private Bot(OpMode opMode) {
         this.opMode = opMode;
 
-
         drive = new MecanumDrive(opMode.hardwareMap, storedPose);
+        limelight = new Limelight(opMode);
         turret = new Turret(opMode);
         intake = new Intake(opMode);
         lift = new Lift(opMode);
@@ -76,13 +83,13 @@ public class Bot {
 
     public void setAllianceBlue() {
         alliance = allianceOptions.BLUE_ALLIANCE;
-//        turret.trackBlueAlliance();
+        limelight.trackBlueAlliance();
         updatePoses();
     }
 
     public void setAllianceRed() {
         alliance = allianceOptions.RED_ALLIANCE;
-//        turret.trackRedAlliance();
+        limelight.trackRedAlliance();
         updatePoses();
     }
 
@@ -97,15 +104,11 @@ public class Bot {
     public static void updatePoses() {
         if (isRed()) {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
-            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, -1 * Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
-//            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset) * -1;
 
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
-            farAutoGoalPose = new Vector2d(farAutoGoalPose.x, Math.abs(farAutoGoalPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
-//            Turret.llyRLOffset = Math.abs(Turret.llyRLOffset);
         }
         targetPose = goalPose;
     }
@@ -189,7 +192,8 @@ public class Bot {
 //    }
 
     public void periodic() {
-//        indexer.updateSensorCache();
+        indexer.updateSensorCache();
+        limelight.periodic();
         turret.periodic();
         lift.periodic();
         screen.periodic();
@@ -221,60 +225,4 @@ public class Bot {
         instance.opMode = opMode;
         return instance;
     }
-
-//    public void driveRobotCentric(double strafeSpeed, double forwardBackSpeed, double turnSpeed) {
-//        double frontWheelModifier = 1;
-//        double rearWheelModifier = 1;
-//        double[] speeds = {
-//                (forwardBackSpeed + strafeSpeed + turnSpeed) * frontWheelModifier,
-//                (forwardBackSpeed - strafeSpeed - turnSpeed) * frontWheelModifier,
-//                (forwardBackSpeed - strafeSpeed + turnSpeed) * rearWheelModifier,
-//                (forwardBackSpeed + strafeSpeed - turnSpeed) * rearWheelModifier
-//        };
-//        double maxSpeed = 0;
-//        for (int i = 0; i < 4; i++) {
-//            maxSpeed = Math.max(maxSpeed, speeds[i]);
-//        }
-//        if (maxSpeed > 1) {
-//            for (int i = 0; i < 4; i++) {
-//                speeds[i] /= maxSpeed;
-//            }
-//        }
-//        fl.set(speeds[0]);
-//        fr.set(-speeds[1]);
-//        bl.set(speeds[2]);
-//        br.set(-speeds[3]);
-//    }
-
-
-//    public void fixMotors() {
-//        fl.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-//        fr.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-//        bl.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-//        br.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-//
-////        fl.setInverted(false);
-////        fr.setInverted(true);
-////        bl.setInverted(false);
-////        br.setInverted(true);
-//
-//        fl.setRunMode(Motor.RunMode.RawPower);
-//        fr.setRunMode(Motor.RunMode.RawPower);
-//        bl.setRunMode(Motor.RunMode.RawPower);
-//        br.setRunMode(Motor.RunMode.RawPower);
-//    }
-
-//    public void stopMotors() {
-//        fl.set(0.0);
-//        fr.set(0.0);
-//        bl.set(0.0);
-//        br.set(0.0);
-//    }
-
-//    public double getMotorCurrent() {
-//        return fl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + fr.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + bl.motorEx.getCurrent(CurrentUnit.MILLIAMPS) + br.motorEx.getCurrent(CurrentUnit.MILLIAMPS);
-//    }
-
-
-
 }

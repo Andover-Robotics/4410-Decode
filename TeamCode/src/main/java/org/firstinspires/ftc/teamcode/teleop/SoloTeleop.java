@@ -10,15 +10,12 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-//import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
@@ -42,11 +39,7 @@ public class SoloTeleop extends LinearOpMode {
     NormalizedRGBA colors;
 
     public static int rpm=2000;
-
-
-
     public static boolean stallIntake = true, manualTurret = false;
-    boolean sensing = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -138,7 +131,6 @@ public class SoloTeleop extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
-            if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
 //            bot.shooting = false;
@@ -236,7 +228,7 @@ public class SoloTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.relocalizeBotPose();
+                bot.limelight.relocalizeBotPose();
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -264,12 +256,10 @@ public class SoloTeleop extends LinearOpMode {
             }
             runningActions = newActions;
 
-            if (sensing) {
-                telemetry.addLine("=== BALL COLORS ===");
-                telemetry.addData("Right Spot", bot.indexer.getRightColor());
-                telemetry.addData("Left Spot", bot.indexer.getLeftColor());
-                telemetry.addData("Back Spot", bot.indexer.getBackColor());
-            }
+            telemetry.addLine("=== BALL COLORS ===");
+            telemetry.addData("Right Spot", bot.indexer.getRightColor());
+            telemetry.addData("Left Spot", bot.indexer.getLeftColor());
+            telemetry.addData("Back Spot", bot.indexer.getBackColor());
 
             telemetry.addData("Motif:", bot.indexer.motifPattern);
 
@@ -280,7 +270,6 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("starting pos", Bot.getStartingPos());
 
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-            telemetry.addData("Shoot Delay", Bot.shootDelay);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());

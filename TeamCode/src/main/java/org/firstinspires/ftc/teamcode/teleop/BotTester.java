@@ -41,8 +41,6 @@ public class BotTester extends LinearOpMode {
 
     public static int rpm = 2000;
     public static boolean manualTurret = false, shooting = false, intakeOverride = false;
-    boolean sensing = true;
-
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -59,7 +57,7 @@ public class BotTester extends LinearOpMode {
 
         // Initialize bot
 
-        bot.turret.trackObelisk();
+        bot.limelight.trackObelisk();
 
         while (!isStarted()) {
             bot.indexer.updateSensorCache();
@@ -131,13 +129,12 @@ public class BotTester extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
-            if (sensing) bot.indexer.updateSensorCache();
             gp1.readButtons();
             gp2.readButtons();
 //            bot.shooting = false;
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                Turret.obelisk = !Turret.obelisk;
+                bot.limelight.setObelisk(!bot.limelight.isObelisk());
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
@@ -236,7 +233,7 @@ public class BotTester extends LinearOpMode {
 //            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.relocalizeBotPose();
+                bot.limelight.relocalizeBotPose();
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -262,56 +259,54 @@ public class BotTester extends LinearOpMode {
             }
             runningActions = newActions;
 
-            if (sensing) {
-                telemetry.addLine("=== BALL COLORS ===");
-//                telemetry.addData("Right", bot.indexer.getRightColor());
-//                telemetry.addData("Left", bot.indexer.getLeftColor());
-//                telemetry.addData("Back", bot.indexer.getBackColor());
-                String right = bot.indexer.getRightColor();
-                String left  = bot.indexer.getLeftColor();
-                String back  = bot.indexer.getBackColor();
+            telemetry.addLine("=== BALL COLORS ===");
+//            telemetry.addData("Right", bot.indexer.getRightColor());
+//            telemetry.addData("Left", bot.indexer.getLeftColor());
+//            telemetry.addData("Back", bot.indexer.getBackColor());
+            String right = bot.indexer.getRightColor();
+            String left  = bot.indexer.getLeftColor();
+            String back  = bot.indexer.getBackColor();
 
-                String rightColor = right.equals("GREEN") ? "green"
-                        : right.equals("PURPLE") ? "#f000c3"
-                        : right.equals("UNKNOWN") ? "#ff0000"
-                        : right.equals("EMPTY") ? "#ffffff"
-                        : null;
+            String rightColor = right.equals("GREEN") ? "green"
+                    : right.equals("PURPLE") ? "#f000c3"
+                    : right.equals("UNKNOWN") ? "#ff0000"
+                    : right.equals("EMPTY") ? "#ffffff"
+                    : null;
 
-                String leftColor = left.equals("GREEN") ? "green"
-                        : left.equals("PURPLE") ? "#f000c3"
-                        : left.equals("UNKNOWN") ? "#ff0000"
-                        : left.equals("EMPTY") ? "#ffffff"
-                        : null;
+            String leftColor = left.equals("GREEN") ? "green"
+                    : left.equals("PURPLE") ? "#f000c3"
+                    : left.equals("UNKNOWN") ? "#ff0000"
+                    : left.equals("EMPTY") ? "#ffffff"
+                    : null;
 
-                String backColor = back.equals("GREEN") ? "green"
-                        : back.equals("PURPLE") ? "#f000c3"
-                        : back.equals("UNKNOWN") ? "#ff0000"
-                        : back.equals("EMPTY") ? "#ffffff"
-                        : null;
+            String backColor = back.equals("GREEN") ? "green"
+                    : back.equals("PURPLE") ? "#f000c3"
+                    : back.equals("UNKNOWN") ? "#ff0000"
+                    : back.equals("EMPTY") ? "#ffffff"
+                    : null;
 
-                telemetry.addData("<big>Right</big>",
-                        rightColor != null
-                                ? "<big><font color=\"" + rightColor + "\"><b>" + right + "</b></font></big>"
-                                : right);
+            telemetry.addData("<big>Right</big>",
+                    rightColor != null
+                            ? "<big><font color=\"" + rightColor + "\"><b>" + right + "</b></font></big>"
+                            : right);
 
-                telemetry.addData("<big>Left</big>",
-                        leftColor != null
-                                ? "<big><font color=\"" + leftColor + "\"><b>" + left + "</b></font></big>"
-                                : left);
+            telemetry.addData("<big>Left</big>",
+                    leftColor != null
+                            ? "<big><font color=\"" + leftColor + "\"><b>" + left + "</b></font></big>"
+                            : left);
 
-                telemetry.addData("<big>Back</big>",
-                        backColor != null
-                                ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
-                                : back);
+            telemetry.addData("<big>Back</big>",
+                    backColor != null
+                            ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
+                            : back);
 
-            }
 //            String color = lastLoopTime < 20? "green" : lastLoopTime < 40? "yellow" : lastLoopTime < 60? "#FFA500" : "#FF3333";
 //
 //            telemetry.addData("<big><b><u>Total loop time</big></b></u>", "<font color=\""+ color + "\"><b>%.1f ms</b></font>", lastLoopTime);
 
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Indexer.motifPattern + "</big></b></u>");
-            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Turret.motif + "</big></b></u>");
-            telemetry.addData("Obelisk Detection", Turret.obelisk);
+            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
+            telemetry.addData("Obelisk Detection", bot.limelight.isObelisk());
 
 
 //            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
@@ -321,7 +316,6 @@ public class BotTester extends LinearOpMode {
 
 
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-            telemetry.addData("Shoot Delay", Bot.shootDelay);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());

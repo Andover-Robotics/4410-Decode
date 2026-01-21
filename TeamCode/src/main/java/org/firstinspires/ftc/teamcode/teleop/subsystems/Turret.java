@@ -6,19 +6,9 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
 
 import java.util.ArrayList;
@@ -31,19 +21,14 @@ public class Turret {
     public PIDController activeController;
     private final ElapsedTime timer = new ElapsedTime();
 
-    private Limelight3A limelight;
-    public LLResult llResult;
-    public static Pose3D llBotPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0));
-
     public Shooter shooter;
 
-    public static boolean shooterActive = true, obelisk = false, positionTracking = true;
+    public static boolean shooterActive = true, positionTracking = true;
 //    public static double goalX = 62;
 //    public static double goalY = 60;
 
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
-    public static double llxRLOffset = 120, llyRLOffset = 108.5;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
     public static double
             largeP = 0.006, largeI = 0, largeD = 0.0003,
@@ -65,15 +50,6 @@ public class Turret {
     public Pose2d pose;
     public PoseVelocity2d velocity;
 
-    public enum Motif {
-        GPP,
-        PGP,
-        PPG,
-        UNKNOWN //TODO Remove
-    }
-
-    public static Motif motif; //TODO Remove initial value, should save between opmodes
-
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         motor.setInverted(false);
@@ -86,11 +62,6 @@ public class Turret {
         motor.setRunMode(Motor.RunMode.RawPower);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        // initialize limelight
-        limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(100);
-        limelight.start();
-
         shooter = new Shooter(opMode);
 
         timer.reset();
@@ -98,32 +69,6 @@ public class Turret {
         startingOffset = 45 * ((Bot.isBlue())? -1 : 1);
         txArr = new ArrayList<>(0);
         tyArr = new ArrayList<>(0);
-    }
-
-    public void setPipeline(int i) {
-        limelight.pipelineSwitch(i);
-        /*
-            0 is blue alliance
-            1 is red alliance
-            2 is obelisk tracking
-         */
-    }
-
-    public void trackRedAlliance() {
-        setPipeline(1);
-//        POS_TRACK_X = Math.abs(POS_TRACK_X) * -1;
-        obelisk = false;
-    }
-
-    public void trackBlueAlliance() {
-        setPipeline(0);
-//        POS_TRACK_X = Math.abs(POS_TRACK_X);
-        obelisk = false;
-    }
-
-    public void trackObelisk() {
-        setPipeline(2);
-        obelisk = true;
     }
 
     public void enableFullAuto(boolean on) {
@@ -317,35 +262,6 @@ public class Turret {
             shooter.setPower(0);
         }
 
-        if (!obelisk) {
-            // LIMELIGHT RELOCALIZATION
-
-            limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
-            LLResult result = limelight.getLatestResult();
-            if (result != null) {
-                if (result.isValid()) {
-                    llBotPose = result.getBotpose_MT2();
-                }
-                //odom x = llx + 120
-                //odom y = lly + 105
-            }
-        } else {
-            if (llResult != null && llResult.isValid() && llResult.getFiducialResults() != null && !llResult.getFiducialResults().isEmpty()) {
-                int id = llResult.getFiducialResults().get(0).getFiducialId();
-                if (id == 21) {
-                    motif = Motif.GPP;
-                    Indexer.motifPattern="GPP";
-                } else if (id == 22) {
-                    motif = Motif.PGP;
-                    Indexer.motifPattern="PGP";
-                } else if (id == 23) {
-                    motif = Motif.PPG;
-                    Indexer.motifPattern="PPG";
-                }
-            }
-        }
-
-
         motor.set(power);
     }
 
@@ -355,10 +271,6 @@ public class Turret {
 
     public void setShooterOverride(boolean override) {
         shooterOverride = override;
-    }
-
-    public void relocalizeBotPose() {
-        Bot.drive.localizer.setPose(new Pose2d(llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset, llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset, Math.toRadians(llBotPose.getOrientation().getYaw())));
     }
 
     public void resetEncoder() {
