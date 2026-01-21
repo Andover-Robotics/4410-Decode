@@ -163,7 +163,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                 case 0:
                     break;
                 case 1:
-                    cfg.runPreload = !cfg.runPreload;
+                    cfg.runPreload = true;
                     break;
                 case 2:
                     cfg.runMid = !cfg.runMid;
@@ -230,7 +230,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
 
     private int clampDelay(int d) {
         if (d < 0) return 0;
-        if (d > 20) return 20;
+        if (d > 28) return 28;
         return d;
     }
 
@@ -250,6 +250,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
     // ---------------- BUILDER: BUILD BLUE/RED CLOSE AUTO ----------------
 
     private Action buildCloseAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
+        cfg.runPreload = true;
         builder = isBlue
                 ? drive.actionBuilderBlue(Pos.initialCloseBluePose)
                 : drive.actionBuilderRed(Pos.initialCloseBluePose);
