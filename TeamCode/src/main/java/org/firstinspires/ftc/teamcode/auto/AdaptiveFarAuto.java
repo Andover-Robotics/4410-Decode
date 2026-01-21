@@ -331,7 +331,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .afterTime(0.4, (() -> bot.intake.reverse()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -351,7 +351,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .afterTime(0.4, (() -> bot.intake.reverse()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
 
             if (cfg.delayAfterFar > 0) {
@@ -370,7 +370,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.intake.reverse()))
                     .afterTime(0.1, bot.enableShooter())
                     .splineTo(Pos.closeShoot, Math.toRadians(155))
-                    .stopAndAdd(bot.indexer.shootRapidFire());
+                    .stopAndAdd(bot.indexer.shootMotif());
 
             if (cfg.delayAfterHp > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));

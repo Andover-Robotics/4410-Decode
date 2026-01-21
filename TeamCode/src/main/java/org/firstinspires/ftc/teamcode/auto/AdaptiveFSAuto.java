@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.auto;
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -22,32 +20,32 @@ import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 @Config
-@Autonomous(name = "Adaptive Close Auto", group = "Competition")
-public class AdaptiveCloseAuto extends LinearOpMode {
+@Autonomous(name = "Adaptive FS Auto", group = "Competition")
+public class AdaptiveFSAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
     // ---------------- CONFIG STRUCT ----------------
     public static class AutoConfig {
+        public boolean startFar = false;
         public boolean runPreload = true;
         public boolean runMid     = true;
-        public int gateCycles = 1;
-        public boolean runClose   = true;
+        public int gateCycles = 2;
+        public boolean runClose   = false;
         public boolean runFar     = true;
         public boolean runHp      = true;
 
-        public int startDelay = 0;
-        public int delayAfterPreload = 0;
-        public int delayAfterGate    = 0;
-        public int delayAfterClose   = 0;
-        public int delayAfterMid     = 0;
-        public int delayAfterFar     = 0;
-        public int delayAfterHp      = 0;
+        public int delayPreload = 0;
+        public int delayGate    = 0;
+        public int delayClose   = 0;
+        public int delayMid     = 0;
+        public int delayFar     = 0;
+        public int delayHp      = 0;
     }
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = start delay, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = far, 6 = hp
+    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = far, 6 = hp
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -64,41 +62,37 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         bot.enableFullAuto(true);
         bot.enableShooter(false);
         bot.setAllianceBlue();
-        bot.setClose();
+        applyStartingPosition(drive);
         bot.intake.storage();
         bot.setTargetGoalPose();
         Bot.drive.localizer.recalibrateIMU();
 
-        builtAuto = buildCloseAuto(Bot.drive, Bot.isBlue(), cfg);
+        builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
 
         // ------------- INIT LOOP: CONFIGURE AUTO -------------
         while (opModeInInit() && !isStopRequested() && !isStarted()) {
             handleConfigInput();
+            applyStartingPosition(drive);
 
-            if (Bot.isBlue()) {
-                drive.localizer.setPose(Pos.initialCloseBluePose);
+            telemetry.addData("ALLIANCE (A)", "<big><b>%s</b></big>", Bot.getAlliance());
+            addSegmentLine(0, "STARTING POSITION (X)", "%s", cfg.startFar ? "Far" : "Close");
+            addSegmentLine(1, "Preload: run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runPreload, cfg.delayPreload);
+            addSegmentLine(2, "Mid:     run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runMid, cfg.delayMid);
+            addSegmentLine(3, "Gate:    cycles (X) / delay (L/R)", "%d / %ds",
+                    cfg.gateCycles, cfg.delayGate);
+            addSegmentLine(4, "Close:   run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runClose, cfg.delayClose);
+            addSegmentLine(5, "Far:     run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runFar, cfg.delayFar);
+            addSegmentLine(6, "HP:      run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runHp, cfg.delayHp);
+            if (builtAuto == null) {
+                telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
             } else {
-                drive.localizer.setPose(Pos.initialCloseRedPose);
+                telemetry.addLine("<big><b><font color='green'> Built! (Y to build again)</font></b></big>");
             }
-
-            telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
-            telemetry.addData("STARTING POSITION", Bot.getStartingPos());
-//            telemetry.addData("DETECTED MOTIF", Turret.motif);
-            telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
-            telemetry.addData("Start: delay (L/R)", "%ds", cfg.startDelay);
-            telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runPreload, cfg.delayAfterPreload);
-            telemetry.addData("Mid:     run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runMid, cfg.delayAfterMid);
-            telemetry.addData("Gate:    cycles (X) / delay (L/R)", "%d / %ds",
-                    cfg.gateCycles, cfg.delayAfterGate);
-            telemetry.addData("Close:   run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runClose, cfg.delayAfterClose);
-            telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runFar, cfg.delayAfterFar);
-            telemetry.addData("HP:      run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runHp, cfg.delayAfterHp);
-            telemetry.addData("Built? (Y to build)", builtAuto != null);
             if (builtAuto != null) {
                 telemetry.addData("build", builtAuto);
             }
@@ -110,7 +104,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
         if (builtAuto == null) {
-            builtAuto = buildCloseAuto(Bot.drive, Bot.isBlue(), cfg);
+            builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
@@ -118,11 +112,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                 cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runFar, cfg.runHp);
         telemetry.update();
 
-        if (Bot.isBlue()) {
-            drive.localizer.setPose(Pos.initialCloseBluePose);
-        } else {
-            drive.localizer.setPose(Pos.initialCloseRedPose);
-        }
+        applyStartingPosition(drive);
 
         if (builtAuto == null) {
             telemetry.addData("Auto", "Build failed, nothing to run");
@@ -133,13 +123,30 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             telemetry.update();
         }
 
-
         Actions.runBlocking(
                 new ActionHelper.RaceParallelCommand(
                         bot.actionPeriodic(),
                         new SequentialAction(builtAuto)
                 )
         );
+    }
+
+    private void applyStartingPosition(MecanumDrive drive) {
+        if (cfg.startFar) {
+            bot.setFar();
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(Pos.initialFarBluePose);
+            } else {
+                drive.localizer.setPose(Pos.initialFarRedPose);
+            }
+        } else {
+            bot.setClose();
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(Pos.initialCloseBluePose);
+            } else {
+                drive.localizer.setPose(Pos.initialCloseRedPose);
+            }
+        }
     }
 
     // ---------------- CONFIG INPUT HANDLING ----------------
@@ -161,9 +168,11 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
             switch (selectedSegment) {
                 case 0:
+                    cfg.startFar = !cfg.startFar;
+                    builtAuto = null;
                     break;
                 case 1:
-                    cfg.runPreload = true;
+                    cfg.runPreload = !cfg.runPreload;
                     break;
                 case 2:
                     cfg.runMid = !cfg.runMid;
@@ -194,37 +203,36 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         if (delta != 0) {
             switch (selectedSegment) {
                 case 0:
-                    cfg.startDelay = clampDelay(cfg.startDelay + delta);
                     break;
                 case 1:
-                    cfg.delayAfterPreload =
-                            clampDelay(cfg.delayAfterPreload + delta);
+                    cfg.delayPreload =
+                            clampDelay(cfg.delayPreload + delta);
                     break;
                 case 2:
-                    cfg.delayAfterMid =
-                            clampDelay(cfg.delayAfterMid + delta);
+                    cfg.delayMid =
+                            clampDelay(cfg.delayMid + delta);
                     break;
                 case 3:
-                    cfg.delayAfterGate =
-                            clampDelay(cfg.delayAfterGate + delta);
+                    cfg.delayGate =
+                            clampDelay(cfg.delayGate + delta);
                     break;
                 case 4:
-                    cfg.delayAfterClose =
-                            clampDelay(cfg.delayAfterClose + delta);
+                    cfg.delayClose =
+                            clampDelay(cfg.delayClose + delta);
                     break;
                 case 5:
-                    cfg.delayAfterFar =
-                            clampDelay(cfg.delayAfterFar + delta);
+                    cfg.delayFar =
+                            clampDelay(cfg.delayFar + delta);
                     break;
                 case 6:
-                    cfg.delayAfterHp =
-                            clampDelay(cfg.delayAfterHp + delta);
+                    cfg.delayHp =
+                            clampDelay(cfg.delayHp + delta);
                     break;
             }
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-            builtAuto = buildCloseAuto(Bot.drive, Bot.isBlue(), cfg);
+            builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
         }
     }
 
@@ -234,51 +242,46 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         return d;
     }
 
-    private String segmentName(int idx) {
-        switch (idx) {
-            case 0: return "Start Delay";
-            case 1: return "Preload";
-            case 2: return "Mid";
-            case 3: return "Gate";
-            case 4: return "Close";
-            case 5: return "Far";
-            case 6: return "HP";
-            default: return "?";
+    private void addSegmentLine(int segmentIndex, String label, String format, Object... args) {
+        if (selectedSegment == segmentIndex) {
+            String value = String.format(format, args);
+            telemetry.addData("", "<b>%s %s</b>", label, value);
+        } else {
+            telemetry.addData(label, format, args);
         }
     }
 
-    // ---------------- BUILDER: BUILD BLUE/RED CLOSE AUTO ----------------
+    // ---------------- BUILDER: BUILD BLUE/RED AUTO ----------------
 
-    private Action buildCloseAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
-        cfg.runPreload = true;
+    private Action buildAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
+        Pose2d startPose = cfg.startFar ? Pos.initialFarBluePose : Pos.initialCloseBluePose;
         builder = isBlue
-                ? drive.actionBuilderBlue(Pos.initialCloseBluePose)
-                : drive.actionBuilderRed(Pos.initialCloseBluePose);
+                ? drive.actionBuilderBlue(startPose)
+                : drive.actionBuilderRed(startPose);
 
         boolean addedAction = false;
         int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
 
-        if (cfg.startDelay > 0) {
-            builder = builder.stopAndAdd(new SleepAction(cfg.startDelay));
-            addedAction = true;
-        }
-
         if (cfg.runPreload) {
+            if (cfg.delayPreload > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayPreload));
+                addedAction = true;
+            }
             builder = builder
                     .stopAndAdd(bot.enableShooter())
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0))
+                    .waitSeconds(0.8)
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
-
-            if (cfg.delayAfterPreload > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
-            }
             addedAction = true;
         }
 
         if (cfg.runMid) {
+            if (cfg.delayMid > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayMid));
+                addedAction = true;
+            }
             builder = builder
                     .stopAndAdd((() -> bot.intake.intake()))
                     .turnTo(Math.toRadians(135))
@@ -292,15 +295,15 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
-
-            if (cfg.delayAfterMid > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
-            }
             addedAction = true;
         }
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackAlliance());
 
+        if (cfg.delayGate > 0 && gateCycles > 0) {
+            builder = builder.stopAndAdd(new SleepAction(cfg.delayGate));
+            addedAction = true;
+        }
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading) //TODO try spline heading
@@ -310,17 +313,24 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .waitSeconds(1)
                     .stopAndAdd((() -> bot.intake.reverse()))
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-135))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter()));
-
-            if (cfg.delayAfterGate > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterGate));
+                    .splineTo(Pos.closeShoot, Math.toRadians(-135));
+            if (cfg.runClose && cfg.runFar && cfg.runHp) {
+                builder = builder
+                        .stopAndAdd(bot.indexer.shootRapidFire())
+                        .stopAndAdd((() -> bot.disableShooter()));
+            } else {
+                builder = builder
+                        .stopAndAdd(bot.indexer.shootMotif())
+                        .stopAndAdd((() -> bot.disableShooter()));
             }
             addedAction = true;
         }
 
         if (cfg.runClose) {
+            if (cfg.delayClose > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayClose));
+                addedAction = true;
+            }
             builder = builder
                     .stopAndAdd((() -> bot.intake.intake()))
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
@@ -336,11 +346,11 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             addedAction = true;
         }
 
-        if (cfg.delayAfterClose > 0 && cfg.runClose) {
-            builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
-        }
-
         if (cfg.runFar) {
+            if (cfg.delayFar > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
+                addedAction = true;
+            }
             builder = builder
 
                     .stopAndAdd((() -> bot.intake.intake()))
@@ -353,14 +363,14 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
-
-            if (cfg.delayAfterFar > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
-            }
             addedAction = true;
         }
 
         if (cfg.runHp) {
+            if (cfg.delayHp > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
+                addedAction = true;
+            }
             builder = builder
                     .stopAndAdd((() -> bot.intake.intake()))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
@@ -371,10 +381,6 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     .afterTime(0.1, bot.enableShooter())
                     .splineTo(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.indexer.shootMotif());
-
-            if (cfg.delayAfterHp > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
-            }
             addedAction = true;
         }
         builder = builder.strafeToConstantHeading(Pos.park);
