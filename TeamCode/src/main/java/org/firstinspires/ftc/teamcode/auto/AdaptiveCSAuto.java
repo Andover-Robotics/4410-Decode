@@ -1,0 +1,400 @@
+package org.firstinspires.ftc.teamcode.auto;
+
+// RR-specific imports
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
+import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+
+@Config
+@Autonomous(name = "Adaptive CS Auto", group = "Competition")
+public class AdaptiveCSAuto extends LinearOpMode {
+    Bot bot;
+    private GamepadEx gp1;
+
+    // ---------------- CONFIG STRUCT ----------------
+    public static class AutoConfig {
+        public boolean startFar = false;
+        public boolean runPreload = true;
+        public boolean runMid     = true;
+        public int gateCycles = 1;
+        public boolean runClose   = true;
+        public boolean runFar     = true;
+        public boolean runHp      = true;
+
+        public int startDelay = 0;
+        public int delayAfterPreload = 0;
+        public int delayAfterGate    = 0;
+        public int delayAfterClose   = 0;
+        public int delayAfterMid     = 0;
+        public int delayAfterFar     = 0;
+        public int delayAfterHp      = 0;
+    }
+
+    private AutoConfig cfg = new AutoConfig();
+
+    // 0 = starting position, 1 = start delay, 2 = preload, 3 = mid,
+    // 4 = gate, 5 = close, 6 = far, 7 = hp
+    private int selectedSegment = 0;
+
+    private Action builtAuto = null;
+    private TrajectoryActionBuilder builder;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        Bot.instance = null;
+        bot = Bot.getInstance(this);
+        gp1 = new GamepadEx(gamepad1);
+
+        MecanumDrive drive = Bot.drive;
+
+        bot.enableFullAuto(true);
+        bot.enableShooter(false);
+        bot.setAllianceBlue();
+        applyStartingPosition(drive);
+        bot.intake.storage();
+        bot.setTargetGoalPose();
+        Bot.drive.localizer.recalibrateIMU();
+
+        builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
+
+        // ------------- INIT LOOP: CONFIGURE AUTO -------------
+        while (opModeInInit() && !isStopRequested() && !isStarted()) {
+            handleConfigInput();
+            applyStartingPosition(drive);
+
+            telemetry.addData("ALLIANCE (A)", "<big><b>%s</b></big>", Bot.getAlliance());
+            addSegmentLine(0, "STARTING POSITION (X)", "%s", cfg.startFar ? "Far" : "Close");
+            addSegmentLine(1, "Start: delay (L/R)", "%ds", cfg.startDelay);
+            addSegmentLine(2, "Preload: run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runPreload, cfg.delayAfterPreload);
+            addSegmentLine(3, "Mid:     run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runMid, cfg.delayAfterMid);
+            addSegmentLine(4, "Gate:    cycles (X) / delay (L/R)", "%d / %ds",
+                    cfg.gateCycles, cfg.delayAfterGate);
+            addSegmentLine(5, "Close:   run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runClose, cfg.delayAfterClose);
+            addSegmentLine(6, "Far:     run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runFar, cfg.delayAfterFar);
+            addSegmentLine(7, "HP:      run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runHp, cfg.delayAfterHp);
+            if (builtAuto == null) {
+                telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
+            } else {
+                telemetry.addLine("<big><b><font color='green'> Built! (Y to build again)</font></b></big>");
+            }
+            if (builtAuto != null) {
+                telemetry.addData("build", builtAuto);
+            }
+            telemetry.update();
+
+            bot.periodic();
+        }
+
+        waitForStart();
+        if (isStopRequested()) return;
+        if (builtAuto == null) {
+            builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
+        }
+
+        telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
+        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b far:%b hp:%b",
+                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runFar, cfg.runHp);
+        telemetry.update();
+
+        applyStartingPosition(drive);
+
+        if (builtAuto == null) {
+            telemetry.addData("Auto", "Build failed, nothing to run");
+            telemetry.update();
+            return;
+        } else {
+            telemetry.addData("build", builtAuto.toString());
+            telemetry.update();
+        }
+
+        Actions.runBlocking(
+                new ActionHelper.RaceParallelCommand(
+                        bot.actionPeriodic(),
+                        new SequentialAction(builtAuto)
+                )
+        );
+    }
+
+    private void applyStartingPosition(MecanumDrive drive) {
+        if (cfg.startFar) {
+            bot.setFar();
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(Pos.initialFarBluePose);
+            } else {
+                drive.localizer.setPose(Pos.initialFarRedPose);
+            }
+        } else {
+            bot.setClose();
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(Pos.initialCloseBluePose);
+            } else {
+                drive.localizer.setPose(Pos.initialCloseRedPose);
+            }
+        }
+    }
+
+    // ---------------- CONFIG INPUT HANDLING ----------------
+
+    private void handleConfigInput() {
+        gp1.readButtons();
+
+        if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            bot.switchAlliance();
+        }
+
+        if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            selectedSegment = (selectedSegment + 8 - 1) % 8;
+        }
+        if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+            selectedSegment = (selectedSegment + 1) % 8;
+        }
+
+        if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+            switch (selectedSegment) {
+                case 0:
+                    cfg.startFar = !cfg.startFar;
+                    builtAuto = null;
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    cfg.runPreload = true;
+                    break;
+                case 3:
+                    cfg.runMid = !cfg.runMid;
+                    break;
+                case 4:
+                    cfg.gateCycles = (cfg.gateCycles + 1) % 4;
+                    break;
+                case 5:
+                    cfg.runClose = !cfg.runClose;
+                    break;
+                case 6:
+                    cfg.runFar = !cfg.runFar;
+                    break;
+                case 7:
+                    cfg.runHp = !cfg.runHp;
+                    break;
+            }
+        }
+
+        int delta = 0;
+        if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+            delta = +1;
+        }
+        if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+            delta = -1;
+        }
+
+        if (delta != 0) {
+            switch (selectedSegment) {
+                case 0:
+                    break;
+                case 1:
+                    cfg.startDelay = clampDelay(cfg.startDelay + delta);
+                    break;
+                case 2:
+                    cfg.delayAfterPreload =
+                            clampDelay(cfg.delayAfterPreload + delta);
+                    break;
+                case 3:
+                    cfg.delayAfterMid =
+                            clampDelay(cfg.delayAfterMid + delta);
+                    break;
+                case 4:
+                    cfg.delayAfterGate =
+                            clampDelay(cfg.delayAfterGate + delta);
+                    break;
+                case 5:
+                    cfg.delayAfterClose =
+                            clampDelay(cfg.delayAfterClose + delta);
+                    break;
+                case 6:
+                    cfg.delayAfterFar =
+                            clampDelay(cfg.delayAfterFar + delta);
+                    break;
+                case 7:
+                    cfg.delayAfterHp =
+                            clampDelay(cfg.delayAfterHp + delta);
+                    break;
+            }
+        }
+
+        if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
+            builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
+        }
+    }
+
+    private int clampDelay(int d) {
+        if (d < 0) return 0;
+        if (d > 28) return 28;
+        return d;
+    }
+
+    private void addSegmentLine(int segmentIndex, String label, String format, Object... args) {
+        if (selectedSegment == segmentIndex) {
+            String value = String.format(format, args);
+            telemetry.addData("", "<b>%s %s</b>", label, value);
+        } else {
+            telemetry.addData(label, format, args);
+        }
+    }
+
+    // ---------------- BUILDER: BUILD BLUE/RED AUTO ----------------
+
+    private Action buildAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
+        cfg.runPreload = true;
+        Pose2d startPose = cfg.startFar ? Pos.initialFarBluePose : Pos.initialCloseBluePose;
+        builder = isBlue
+                ? drive.actionBuilderBlue(startPose)
+                : drive.actionBuilderRed(startPose);
+
+        boolean addedAction = false;
+        int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
+
+        builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
+
+        if (cfg.startDelay > 0) {
+            builder = builder.stopAndAdd(new SleepAction(cfg.startDelay));
+            addedAction = true;
+        }
+
+        if (cfg.runPreload) {
+            builder = builder
+                    .stopAndAdd(bot.enableShooter())
+                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
+
+            if (cfg.delayAfterPreload > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
+            }
+            addedAction = true;
+        }
+
+        if (cfg.runMid) {
+            builder = builder
+                    .stopAndAdd((() -> bot.intake.intake()))
+                    .turnTo(Math.toRadians(135))
+                    .setTangent(Math.toRadians(135))
+                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
+                            Pos.blueMidIntake.position.y + 18))
+                    .stopAndAdd(bot.enableShooter())
+                    .afterTime(0.4, (() -> bot.intake.reverse()))
+                    .setReversed(true)
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
+
+            if (cfg.delayAfterMid > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterMid));
+            }
+            addedAction = true;
+        }
+
+        builder = builder.stopAndAdd(() -> bot.limelight.trackAlliance());
+
+        for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
+            builder = builder
+                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading) //TODO try spline heading
+                    .stopAndAdd((() -> bot.intake.intake()))
+                    .waitSeconds(1)
+                    .stopAndAdd(bot.enableShooter())
+                    .waitSeconds(1)
+                    .stopAndAdd((() -> bot.intake.reverse()))
+                    .setReversed(true)
+                    .splineTo(Pos.closeShoot, Math.toRadians(-135))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
+
+            if (cfg.delayAfterGate > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterGate));
+            }
+            addedAction = true;
+        }
+
+        if (cfg.runClose) {
+            builder = builder
+                    .stopAndAdd((() -> bot.intake.intake()))
+                    .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
+                            drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
+                            Pos.blueCloseIntake.position.y + 18))
+                    .stopAndAdd(bot.enableShooter())
+                    .afterTime(0.4, (() -> bot.intake.reverse()))
+                    .setReversed(true)
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
+            addedAction = true;
+        }
+
+        if (cfg.delayAfterClose > 0 && cfg.runClose) {
+            builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterClose));
+        }
+
+        if (cfg.runFar) {
+            builder = builder
+
+                    .stopAndAdd((() -> bot.intake.intake()))
+                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
+                            Pos.blueFarIntake.position.y + 18))
+                    .stopAndAdd(bot.enableShooter())
+                    .afterTime(0.4, (() -> bot.intake.reverse()))
+                    .setReversed(true)
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
+
+            if (cfg.delayAfterFar > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterFar));
+            }
+            addedAction = true;
+        }
+
+        if (cfg.runHp) {
+            builder = builder
+                    .stopAndAdd((() -> bot.intake.intake()))
+                    .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
+                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y))
+
+                    .setReversed(true)
+                    .stopAndAdd((() -> bot.intake.reverse()))
+                    .afterTime(0.1, bot.enableShooter())
+                    .splineTo(Pos.closeShoot, Math.toRadians(155))
+                    .stopAndAdd(bot.indexer.shootRapidFire());
+
+            if (cfg.delayAfterHp > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
+            }
+            addedAction = true;
+        }
+        builder = builder.strafeToConstantHeading(Pos.park);
+
+        if (!addedAction) {
+            builder = builder.stopAndAdd((() -> telemetry.addData("Auto", "No segments enabled")));
+        }
+        return builder.build();
+    }
+}
