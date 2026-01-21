@@ -83,7 +83,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
             telemetry.addData("STARTING POSITION", Bot.getStartingPos());
-//            telemetry.addData("DETECTED MOTIF", Turret.motif);
+            telemetry.addData("DETECTED MOTIF", Bot.motif);
             telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
             telemetry.addData("Start: delay (L/R)", "%ds", cfg.startDelay);
             telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",

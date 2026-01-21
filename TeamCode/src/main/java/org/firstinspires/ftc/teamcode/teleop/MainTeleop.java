@@ -136,13 +136,22 @@ public class MainTeleop extends LinearOpMode {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                     if (bot.indexer.countBalls()==3) {
                         bot.intake.reverse();
+                        gp1.gamepad.rumble(-1);
                     } else {
                         bot.intake.intake();
+                        gp1.gamepad.stopRumble();
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.intake.reverse();
+                    if (bot.indexer.countBalls()==3) {
+                        gp1.gamepad.rumble(-1);
+                    } else {
+                        bot.intake.reverse();
+                        gp1.gamepad.stopRumble();
+                    }
                 } else {
                     bot.intake.stop();
+                    gp1.gamepad.stopRumble();
                 }
             }
 
@@ -229,6 +238,7 @@ public class MainTeleop extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetEncoder();
             }
+
 
             bot.periodic();
             Bot.drive.localizer.update();
