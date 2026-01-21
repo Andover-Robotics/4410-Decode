@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
-@Autonomous(name = "Adaptive Far Auto", group = "Competition")
+@Autonomous(name = "Old Adaptive Far Auto", group = "Old")
 public class OldAdaptiveFarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
