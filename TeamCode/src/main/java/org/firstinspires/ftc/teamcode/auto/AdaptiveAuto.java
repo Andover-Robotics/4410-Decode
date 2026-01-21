@@ -77,20 +77,19 @@ public class AdaptiveAuto extends LinearOpMode {
             applyStartingPosition(drive);
 
             telemetry.addData("ALLIANCE (A)", "<big><b>%s</b></big>", Bot.getAlliance());
-            telemetry.addData("STARTING POSITION (X)", "<big><b>%s</b></big>", cfg.startFar ? "Far" : "Close");
-            telemetry.addData("", "<b>Selected segment (UP/DOWN): %s</b>", segmentName(selectedSegment));
-            telemetry.addData("Start: delay (L/R)", "%ds", cfg.startDelay);
-            telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(0, "STARTING POSITION (X)", "%s", cfg.startFar ? "Far" : "Close");
+            addSegmentLine(1, "Start: delay (L/R)", "%ds", cfg.startDelay);
+            addSegmentLine(2, "Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
-            telemetry.addData("Mid:     run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(3, "Mid:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runMid, cfg.delayAfterMid);
-            telemetry.addData("Gate:    cycles (X) / delay (L/R)", "%d / %ds",
+            addSegmentLine(4, "Gate:    cycles (X) / delay (L/R)", "%d / %ds",
                     cfg.gateCycles, cfg.delayAfterGate);
-            telemetry.addData("Close:   run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(5, "Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayAfterClose);
-            telemetry.addData("Far:     run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(6, "Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayAfterFar);
-            telemetry.addData("HP:      run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(7, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayAfterHp);
             telemetry.addData("Built? (Y to build)", builtAuto != null);
             if (builtAuto != null) {
@@ -247,17 +246,12 @@ public class AdaptiveAuto extends LinearOpMode {
         return d;
     }
 
-    private String segmentName(int idx) {
-        switch (idx) {
-            case 0: return "Starting Position";
-            case 1: return "Start Delay";
-            case 2: return "Preload";
-            case 3: return "Mid";
-            case 4: return "Gate";
-            case 5: return "Close";
-            case 6: return "Far";
-            case 7: return "HP";
-            default: return "?";
+    private void addSegmentLine(int segmentIndex, String label, String format, Object... args) {
+        if (selectedSegment == segmentIndex) {
+            String value = String.format(format, args);
+            telemetry.addData("", "<b>%s %s</b>", label, value);
+        } else {
+            telemetry.addData(label, format, args);
         }
     }
 
