@@ -91,7 +91,11 @@ public class AdaptiveAuto extends LinearOpMode {
                     cfg.runFar, cfg.delayAfterFar);
             addSegmentLine(7, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayAfterHp);
-            telemetry.addData("Built? (Y to build)", builtAuto != null);
+            if (builtAuto == null) {
+                telemetry.addData("", "<big><b><font color='red'>Auto not built (Y to build)</font></b></big>");
+            } else {
+                telemetry.addData("Built? (Y to build)", true);
+            }
             if (builtAuto != null) {
                 telemetry.addData("build", builtAuto);
             }
