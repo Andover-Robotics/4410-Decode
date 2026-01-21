@@ -37,8 +37,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
-import org.firstinspires.ftc.teamcode.auto.MecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.PinpointLocalizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auto.Drawing;
-import org.firstinspires.ftc.teamcode.auto.Pos;
+import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
+import org.firstinspires.ftc.teamcode.auto.OldPoses;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
@@ -109,15 +109,15 @@ public class BotTester extends LinearOpMode {
         if (!useStoredPose) {
             if (Bot.isFar()) {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(Pos.initialFarBluePose);
+                    Bot.drive.localizer.setPose(OldPoses.initialFarBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(Pos.initialFarRedPose);
+                    Bot.drive.localizer.setPose(OldPoses.initialFarRedPose);
                 }
             } else {
                 if (Bot.isBlue()) {
-                    Bot.drive.localizer.setPose(Pos.initialCloseBluePose);
+                    Bot.drive.localizer.setPose(OldPoses.initialCloseBluePose);
                 } else {
-                    Bot.drive.localizer.setPose(Pos.initialCloseRedPose);
+                    Bot.drive.localizer.setPose(OldPoses.initialCloseRedPose);
                 }
             }
         } else {

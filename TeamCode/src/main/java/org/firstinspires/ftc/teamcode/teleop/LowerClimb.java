@@ -11,13 +11,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
-import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
 import java.util.List;

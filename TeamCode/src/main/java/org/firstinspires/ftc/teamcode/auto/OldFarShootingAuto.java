@@ -12,10 +12,13 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
+import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
 @Autonomous(name = "Far Shooting Auto", group = "Competition")
-public class FarShootingAuto extends LinearOpMode {
+public class OldFarShootingAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
     public void runOpMode() throws InterruptedException {
@@ -29,7 +32,7 @@ public class FarShootingAuto extends LinearOpMode {
         bot.setTargetGoalPose();
         Bot.drive.localizer.recalibrateIMU();
 
-        Action blueFarAutoOnlyHpPreFar = drive.actionBuilderBlue(Pos.initialFarBluePose)
+        Action blueFarAutoOnlyHpPreFar = drive.actionBuilderBlue(OldPoses.initialFarBluePose)
 
                 .stopAndAdd(new SequentialAction(
                         new InstantAction(() -> bot.enableShooter(true)),
@@ -40,31 +43,31 @@ public class FarShootingAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(() -> bot.disableShooter()))
 
                 .setTangent(Math.toRadians(90))
-                .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(80))
-                .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y - 2))
+                .splineToSplineHeading(OldPoses.blueHpIntake, Math.toRadians(80))
+                .strafeToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y - 2))
                 .setTangent(Math.toRadians(-90))
-                .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 5, Pos.blueHpIntake.position.y - 7), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
+                .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 5, OldPoses.blueHpIntake.position.y - 7), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y), Math.toRadians(170))
                 .afterTime(0.1, bot.enableShooter())
-                .strafeToLinearHeading(Pos.farShoot, Math.toRadians(0))
+                .strafeToLinearHeading(OldPoses.farShoot, Math.toRadians(0))
 //                .stopAndAdd(bot.shootThreeAutoFar())
                 .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
 
                 .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(Pos.blueFarIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
+                .splineToConstantHeading(OldPoses.blueFarIntake.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(OldPoses.blueFarIntake.position.x, OldPoses.blueFarIntake.position.y + 18))
                 .setReversed(true)
-                .splineTo(Pos.farShoot, Math.toRadians(-160))
+                .splineTo(OldPoses.farShoot, Math.toRadians(-160))
 //                .stopAndAdd(bot.shootThreeAutoFar())
 
-                .splineTo(Pos.blueMidIntakeFar.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.position.x,Pos.blueMidIntakeFar.position.y + 18))
-                .strafeToLinearHeading(Pos.farShoot, Math.toRadians(0))
+                .splineTo(OldPoses.blueMidIntakeFar.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(OldPoses.blueMidIntakeFar.position.x, OldPoses.blueMidIntakeFar.position.y + 18))
+                .strafeToLinearHeading(OldPoses.farShoot, Math.toRadians(0))
 //                .stopAndAdd(bot.shootThreeAutoFar())
 
                 .build();
 
-        Action redFarAutoOnlyHpPreFar = drive.actionBuilderRed(Pos.initialFarBluePose)
+        Action redFarAutoOnlyHpPreFar = drive.actionBuilderRed(OldPoses.initialFarBluePose)
 
                 .stopAndAdd(new SequentialAction(
                         new InstantAction(() -> bot.enableShooter(true)),
@@ -75,26 +78,26 @@ public class FarShootingAuto extends LinearOpMode {
                 .stopAndAdd(new InstantAction(() -> bot.disableShooter()))
 
                 .setTangent(Math.toRadians(90))
-                .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(80))
-                .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y - 2))
+                .splineToSplineHeading(OldPoses.blueHpIntake, Math.toRadians(80))
+                .strafeToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y - 2))
                 .setTangent(Math.toRadians(-90))
-                .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 5, Pos.blueHpIntake.position.y - 7), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
+                .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 5, OldPoses.blueHpIntake.position.y - 7), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y), Math.toRadians(170))
                 .afterTime(0.1, bot.enableShooter())
-                .strafeToLinearHeading(Pos.farShoot, Math.toRadians(0))
+                .strafeToLinearHeading(OldPoses.farShoot, Math.toRadians(0))
 //                .stopAndAdd(bot.shootThreeAutoFar())
                 .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
 
                 .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(Pos.blueFarIntake.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
+                .splineToConstantHeading(OldPoses.blueFarIntake.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(OldPoses.blueFarIntake.position.x, OldPoses.blueFarIntake.position.y + 18))
                 .setReversed(true)
-                .splineTo(Pos.farShoot, Math.toRadians(-160))
+                .splineTo(OldPoses.farShoot, Math.toRadians(-160))
 //                .stopAndAdd(bot.shootThreeAutoFar())
 
-                .splineTo(Pos.blueMidIntakeFar.position, Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.position.x,Pos.blueMidIntakeFar.position.y + 18))
-                .strafeToLinearHeading(Pos.farShoot, Math.toRadians(0))
+                .splineTo(OldPoses.blueMidIntakeFar.position, Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(OldPoses.blueMidIntakeFar.position.x, OldPoses.blueMidIntakeFar.position.y + 18))
+                .strafeToLinearHeading(OldPoses.farShoot, Math.toRadians(0))
 //                .stopAndAdd(bot.shootThreeAutoFar())
                 .build();
 
@@ -115,9 +118,9 @@ public class FarShootingAuto extends LinearOpMode {
                 bot.switchAlliance();
             }
             if (Bot.isBlue()) {
-                drive.localizer.setPose(Pos.initialFarBluePose);
+                drive.localizer.setPose(OldPoses.initialFarBluePose);
             } else {
-                drive.localizer.setPose(Pos.initialFarRedPose);
+                drive.localizer.setPose(OldPoses.initialFarRedPose);
             }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
@@ -126,7 +129,7 @@ public class FarShootingAuto extends LinearOpMode {
             telemetry.update();
         }
         if (Bot.isBlue()) {
-            drive.localizer.setPose(Pos.initialFarBluePose);
+            drive.localizer.setPose(OldPoses.initialFarBluePose);
             Actions.runBlocking(
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),
@@ -136,7 +139,7 @@ public class FarShootingAuto extends LinearOpMode {
                     )
             );
         } else {
-            drive.localizer.setPose(Pos.initialFarRedPose);
+            drive.localizer.setPose(OldPoses.initialFarRedPose);
             Actions.runBlocking(
                     new ActionHelper.RaceParallelCommand(
                             bot.actionPeriodic(),

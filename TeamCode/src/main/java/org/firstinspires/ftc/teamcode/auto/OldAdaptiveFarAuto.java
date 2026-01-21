@@ -16,10 +16,13 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
+import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
 @Autonomous(name = "Adaptive Far Auto", group = "Competition")
-public class AdaptiveFarAuto extends LinearOpMode {
+public class OldAdaptiveFarAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
@@ -92,10 +95,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
             // keep pose synced to chosen alliance
             if (Bot.isBlue()) {
-                drive.localizer.setPose(Pos.initialFarBluePose);
+                drive.localizer.setPose(OldPoses.initialFarBluePose);
                 bot.setTargetGoalPose();
             } else {
-                drive.localizer.setPose(Pos.initialFarRedPose);
+                drive.localizer.setPose(OldPoses.initialFarRedPose);
                 bot.setTargetGoalPose();
             }
 
@@ -144,9 +147,9 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
         // Set starting pose again at start
         if (Bot.isBlue()) {
-            drive.localizer.setPose(Pos.initialFarBluePose);
+            drive.localizer.setPose(OldPoses.initialFarBluePose);
         } else {
-            drive.localizer.setPose(Pos.initialFarRedPose);
+            drive.localizer.setPose(OldPoses.initialFarRedPose);
         }
 
         // ------------- RUN AUTO -------------
@@ -276,7 +279,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         }
 //
         if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-            TrajectoryActionBuilder tester = Bot.drive.actionBuilderBlue(Pos.initialFarBluePose)
+            TrajectoryActionBuilder tester = Bot.drive.actionBuilderBlue(OldPoses.initialFarBluePose)
                     .stopAndAdd(new SleepAction(6.7));
 //            tester = tester.stopAndAdd(bot.shootThreeAutoClose());
             builtAuto = tester.build();
@@ -325,8 +328,8 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
     private Action buildFarAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
         builder = isBlue
-                ? drive.actionBuilderBlue(Pos.initialFarBluePose)
-                : drive.actionBuilderRed(Pos.initialFarBluePose);
+                ? drive.actionBuilderBlue(OldPoses.initialFarBluePose)
+                : drive.actionBuilderRed(OldPoses.initialFarBluePose);
 
         boolean addedAction = false;
 
@@ -340,7 +343,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (cfg.runPreload) {
             builder = builder
                     .afterTime(0.1, bot.enableShooter())
-                    .strafeToConstantHeading(Pos.closeShoot)
+                    .strafeToConstantHeading(OldPoses.closeShoot)
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -354,26 +357,26 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(160))
-                    .splineTo(Pos.blueHpIntakeInter, Math.toRadians(180))
+                    .splineTo(OldPoses.blueHpIntakeInter, Math.toRadians(180))
                     .setTangent(Math.toRadians(93))
-                    .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(80))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y - 2))
+                    .splineToSplineHeading(OldPoses.blueHpIntake, Math.toRadians(80))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y - 2))
 
                     .setTangent(Math.toRadians(-90))
-                    .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 5, Pos.blueHpIntake.position.y - 7), Math.toRadians(90))
-                    .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
+                    .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 5, OldPoses.blueHpIntake.position.y - 7), Math.toRadians(90))
+                    .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y), Math.toRadians(170))
 
                     .setReversed(true)
                     .setTangent(Math.toRadians(-90));
             if (cfg.runClose) {
                 builder = builder
                         .afterTime(0.1, bot.enableShooter())
-                        .splineToSplineHeading(new Pose2d(Pos.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0));
+                        .splineToSplineHeading(new Pose2d(OldPoses.closeFirstShoot, Math.toRadians(90)), Math.toRadians(0));
 //                        .stopAndAdd(bot.shootThreeAutoClose());
             } else {
                 builder = builder
                         .afterTime(0.1, bot.enableShooter())
-                        .splineToSplineHeading(new Pose2d(Pos.closeShoot, Math.toRadians(90)), Math.toRadians(0));
+                        .splineToSplineHeading(new Pose2d(OldPoses.closeShoot, Math.toRadians(90)), Math.toRadians(0));
 //                        .stopAndAdd(bot.shootThreeAutoClose());
             }
 
@@ -386,12 +389,12 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (cfg.runClose) {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,Pos.blueCloseIntake.position.y + 18));
+                    .splineTo(OldPoses.blueCloseIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueCloseIntake.position.x, OldPoses.blueCloseIntake.position.y + 18));
 
             if (cfg.pushFieldGate) {
                 builder = builder
-                        .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
+                        .strafeToLinearHeading(OldPoses.gate.position, OldPoses.gate.heading)
                         .waitSeconds(1);
 
                 if (cfg.delayAfterGate > 0) {
@@ -402,7 +405,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 
             builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .strafeToSplineHeading(OldPoses.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -417,11 +420,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(135))
-                    .splineToSplineHeading(Pos.blueMidIntakeFar, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntakeFar.position.x,Pos.blueMidIntakeFar.position.y + 18))
+                    .splineToSplineHeading(OldPoses.blueMidIntakeFar, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueMidIntakeFar.position.x, OldPoses.blueMidIntakeFar.position.y + 18))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-60))
+                    .splineTo(OldPoses.closeShoot, Math.toRadians(-60))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -435,10 +438,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
         if (cfg.runFar) {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
+                    .splineTo(OldPoses.blueFarIntake.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueFarIntake.position.x, OldPoses.blueFarIntake.position.y + 18))
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 70))
+                    .splineTo(OldPoses.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 70))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -453,11 +456,11 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(125))
-                    .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
+                    .splineToSplineHeading(OldPoses.blueSecretTunnel, Math.toRadians(179))
                     .setTangent(Math.toRadians(180))
-                    .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(180))
+                    .splineToSplineHeading(OldPoses.blueHpIntake, Math.toRadians(180))
                     .setTangent(Math.toRadians(179))
-                    .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10));
+                    .splineToConstantHeading(OldPoses.closeShoot, Math.toRadians(-10));
 //                    .stopAndAdd(bot.indexer.shootRapidFire());
 //            if (!cfg.runClose || !cfg.runFar || !cfg.)
 //                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
@@ -476,7 +479,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             addedAction = true;
         }
 
-        builder = builder.strafeToConstantHeading(Pos.park);
+        builder = builder.strafeToConstantHeading(OldPoses.park);
 
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));

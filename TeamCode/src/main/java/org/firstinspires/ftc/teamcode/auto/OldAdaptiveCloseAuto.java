@@ -21,23 +21,22 @@ import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 @Config
-@Autonomous(name = "Adaptive Close Auto", group = "Competition")
-public class AdaptiveCloseAuto extends LinearOpMode {
+@Autonomous(name = "Old Adaptive Close Auto", group = "Competition")
+public class OldAdaptiveCloseAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
     // ---------------- CONFIG STRUCT ----------------
     public static class AutoConfig {
         public boolean runPreload = true;
-        public boolean runMid     = true;
-        public boolean runGate1 = true;;
-        public boolean runGate2 = false;;
-        public boolean runGate3 = false;
+        public boolean runGate    = true;
         public boolean runClose   = true;
+        public boolean runMid     = true;
         public boolean runFar     = true;
         public boolean runHp      = true;
 
         public int startDelay = 0;
+
         public int delayAfterPreload = 0;
         public int delayAfterGate    = 0;
         public int delayAfterClose   = 0;
@@ -78,9 +77,9 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             handleConfigInput();
 
             if (Bot.isBlue()) {
-                drive.localizer.setPose(Pos.initialCloseBluePose);
+                drive.localizer.setPose(OldPoses.initialCloseBluePose);
             } else {
-                drive.localizer.setPose(Pos.initialCloseRedPose);
+                drive.localizer.setPose(OldPoses.initialCloseRedPose);
             }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
@@ -91,7 +90,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
             telemetry.addData("Gate:    run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runGate1, cfg.delayAfterGate);
+                    cfg.runGate, cfg.delayAfterGate);
             telemetry.addData("Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayAfterClose);
             telemetry.addData("Mid:     run (X) / delay (L/R)", "%b / %ds",
@@ -117,13 +116,13 @@ public class AdaptiveCloseAuto extends LinearOpMode {
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
         telemetry.addData("Segments", "preload:%b gate:%b close:%b mid:%b far:%b hp:%b",
-                cfg.runPreload, cfg.runGate1, cfg.runClose, cfg.runMid, cfg.runFar, cfg.runHp);
+                cfg.runPreload, cfg.runGate, cfg.runClose, cfg.runMid, cfg.runFar, cfg.runHp);
         telemetry.update();
 
         if (Bot.isBlue()) {
-            drive.localizer.setPose(Pos.initialCloseBluePose);
+            drive.localizer.setPose(OldPoses.initialCloseBluePose);
         } else {
-            drive.localizer.setPose(Pos.initialCloseRedPose);
+            drive.localizer.setPose(OldPoses.initialCloseRedPose);
         }
 
         if (builtAuto == null) {
@@ -167,7 +166,7 @@ public class AdaptiveCloseAuto extends LinearOpMode {
                     cfg.runPreload = !cfg.runPreload;
                     break;
                 case 2:
-                    cfg.runGate1 = !cfg.runGate1;
+                    cfg.runGate = !cfg.runGate;
                     break;
                 case 3:
                     cfg.runClose = !cfg.runClose;
@@ -252,8 +251,8 @@ public class AdaptiveCloseAuto extends LinearOpMode {
 
     private Action buildCloseAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
         builder = isBlue
-                ? drive.actionBuilderBlue(Pos.initialCloseBluePose)
-                : drive.actionBuilderRed(Pos.initialCloseBluePose);
+                ? drive.actionBuilderBlue(OldPoses.initialCloseBluePose)
+                : drive.actionBuilderRed(OldPoses.initialCloseBluePose);
 
         boolean addedAction = false;
 
@@ -265,18 +264,18 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         if (cfg.runPreload) {
             builder = builder
                     .stopAndAdd(bot.enableShooter());
-            if (cfg.runClose) {
-                builder = builder
-                        .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(90));
-//                                .stopAndAdd(bot.indexer.shootRapidFire())
-            } else {
-                builder = builder
-                        .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(90));
-//                                .stopAndAdd(bot.indexer.shootRapidFire())
-            }
-            builder = builder
-                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
+                    if (cfg.runClose) {
+                        builder = builder
+                                .strafeToLinearHeading(OldPoses.closeFirstShoot, Math.toRadians(90));
+//                                .stopAndAdd(bot.shootThreeAutoClose());
+                    } else {
+                        builder = builder
+                                .strafeToLinearHeading(OldPoses.closeShoot, Math.toRadians(90));
+//                                .stopAndAdd(bot.shootThreeAutoClose());
+                    }
+                    builder = builder
+                        .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
+                        .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
 
             if (cfg.delayAfterPreload > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterPreload));
@@ -287,16 +286,16 @@ public class AdaptiveCloseAuto extends LinearOpMode {
         if (cfg.runClose) {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
+                    .splineTo(OldPoses.blueCloseIntake.position, Math.toRadians(90),
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + 18));
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueCloseIntake.position.x,
+                            OldPoses.blueCloseIntake.position.y + 18));
             addedAction = true;
         }
 
-        if (cfg.runGate1) {
+        if (cfg.runGate) {
             builder = builder
-                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)
+                    .strafeToLinearHeading(OldPoses.gate.position, OldPoses.gate.heading)
                     .waitSeconds(1.4);
 
             if (cfg.delayAfterGate > 0) {
@@ -305,10 +304,10 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             addedAction = true;
         }
 
-        if (cfg.runClose || cfg.runGate1) {
+        if (cfg.runClose || cfg.runGate) {
             builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .strafeToSplineHeading(OldPoses.closeShoot, Math.toRadians(135))
 //                    .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -322,12 +321,12 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(135))
-                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + 18))
+                    .splineTo(OldPoses.blueMidIntakeClose.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueMidIntakeClose.position.x,
+                            OldPoses.blueMidIntakeClose.position.y + 18))
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .strafeToSplineHeading(OldPoses.closeShoot, Math.toRadians(135))
 //                    .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -342,11 +341,11 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             builder = builder
 
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
-                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + 18))
+                    .splineTo(OldPoses.blueFarIntake.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueFarIntake.position.x,
+                            OldPoses.blueFarIntake.position.y + 18))
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
+                    .strafeToSplineHeading(OldPoses.closeShoot, Math.toRadians(155))
 //                    .stopAndAdd(bot.shootThreeAutoClose())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
@@ -361,27 +360,27 @@ public class AdaptiveCloseAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .setTangent(Math.toRadians(160))
-                    .splineTo(Pos.blueHpIntakeInter, Math.toRadians(180))
+                    .splineTo(OldPoses.blueHpIntakeInter, Math.toRadians(180))
                     .setTangent(Math.toRadians(93))
-                    .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(80))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y - 2))
+                    .splineToSplineHeading(OldPoses.blueHpIntake, Math.toRadians(80))
+                    .strafeToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y - 2))
 
                     .setTangent(Math.toRadians(-90))
-                    .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 5, Pos.blueHpIntake.position.y - 7), Math.toRadians(90))
-                    .splineToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(170))
+                    .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 5, OldPoses.blueHpIntake.position.y - 7), Math.toRadians(90))
+                    .splineToConstantHeading(new Vector2d(OldPoses.blueHpIntake.position.x - 11.5, OldPoses.blueHpIntake.position.y), Math.toRadians(170))
 
                     .setReversed(true)
                     .setTangent(Math.toRadians(-90))
                     .afterTime(0.1, bot.enableShooter())
-                    .splineToSplineHeading(new Pose2d(Pos.closeShoot, Math.toRadians(90)), Math.toRadians(0));
-//                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .splineToSplineHeading(new Pose2d(OldPoses.closeAutoLastShoot, Math.toRadians(90)), Math.toRadians(0));
+//                    .stopAndAdd(bot.shootThreeAutoClose());
 
             if (cfg.delayAfterHp > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayAfterHp));
             }
             addedAction = true;
         }
-        builder = builder.strafeToConstantHeading(Pos.park);
+        builder = builder.strafeToConstantHeading(OldPoses.park);
 
         if (!addedAction) {
             builder = builder.stopAndAdd(new InstantAction(() -> telemetry.addData("Auto", "No segments enabled")));
