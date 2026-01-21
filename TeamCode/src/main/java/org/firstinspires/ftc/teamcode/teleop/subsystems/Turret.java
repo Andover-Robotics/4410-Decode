@@ -31,17 +31,15 @@ public class Turret {
     public PIDController activeController;
     private final ElapsedTime timer = new ElapsedTime();
 
-    private IMU imu;
-
-    //    private Limelight3A limelight; TODO
+    private Limelight3A limelight;
     public LLResult llResult;
     public static Pose3D llBotPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0));
 
     public Shooter shooter;
 
-    public static boolean aprilTracking = true, imuFollow = true, shooterActive = true, obelisk = false, positionTracking = true;
-    public static double goalX = 62;
-    public static double goalY = 60;
+    public static boolean shooterActive = true, obelisk = false, positionTracking = true;
+//    public static double goalX = 62;
+//    public static double goalY = 60;
 
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
@@ -50,20 +48,18 @@ public class Turret {
     public static double
             largeP = 0.006, largeI = 0, largeD = 0.0003,
             smallP = 0.0125, smallI = 0, smallD = 0.0004,
-            errorThresholdDeg = 4, manualPower = 0, dA = 149, wraparoundTime = 0.35, timerTolerance = 0.15, distanceOffset = 3, llRearOffsetInches = 14;
+            errorThresholdDeg = 4, manualPower = 0;
 
-    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-4096.01855, shooterG = -0.00809392, shooterH = 1.81342, shooterI = 7854.91759;
+    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-2175.59803, shooterG = -0.0112301, shooterH = 1.70272, shooterI = 5397.98826;
 
-    public double txAvg, tyAvg, power, lastTime, setPoint = 0, pos = 0, highLimit = 225, lowLimit = -145, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 225, lowLimit = -145, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
-    public static double tx, ty, distance, tAngle, tOffset, shooterRpm = 0, avgCount = 8, trackingDistance, pureDistance;
-    public static YawPitchRollAngles orientation;
+    public static double shooterRpm = 0, trackingDistance, pureDistance;
 
     public int startingOffset = 0;
 
     public ArrayList<Double> txArr, tyArr;
 
-    private boolean isManual = false, wraparound = false;
     private boolean velComp = true, shooterOverride = false;
 
     public Pose2d pose;
@@ -72,10 +68,11 @@ public class Turret {
     public enum Motif {
         GPP,
         PGP,
-        PPG
+        PPG,
+        UNKNOWN //TODO Remove
     }
 
-    public static Motif motif;
+    public static Motif motif; //TODO Remove initial value, should save between opmodes
 
     public Turret(OpMode opMode) {
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
@@ -89,20 +86,10 @@ public class Turret {
         motor.setRunMode(Motor.RunMode.RawPower);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        imu = opMode.hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
-                )
-        );
-        imu.initialize(parameters);
-        imu.resetYaw();
-
         // initialize limelight
-//        limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight"); TODO
-//        limelight.setPollRateHz(100);TODO
-//        limelight.start();TODO
+        limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.setPollRateHz(100);
+        limelight.start();
 
         shooter = new Shooter(opMode);
 
@@ -114,7 +101,7 @@ public class Turret {
     }
 
     public void setPipeline(int i) {
-//        limelight.pipelineSwitch(i); TODO
+        limelight.pipelineSwitch(i);
         /*
             0 is blue alliance
             1 is red alliance
@@ -159,12 +146,8 @@ public class Turret {
     public void runToAngle(double angle) {
         if (angle > highLimit) {
             angle = angle - 360;
-            wraparound = true;
         } else if (angle < lowLimit) {
             angle = angle + 360;
-            wraparound = true;
-        } else {
-            wraparound = false;
         }
         angle = Math.min(Math.max(lowLimit, angle), highLimit);
         int t = (int) ((angle) / degsPerTick);
@@ -179,11 +162,9 @@ public class Turret {
 
     public void runManual(double manual) {
         if (manual > powerMin || manual < -powerMin) {
-            isManual = true;
             manualPower = manual;
         } else {
             manualPower = 0;
-            isManual = false;
         }
     }
 
@@ -244,7 +225,7 @@ public class Turret {
     }
 
     public void velocityCompensation(double dx, double dy) {
-        if (getPositionDegs() < 175 && getPositionDegs() > -175) {
+        if (getPositionDegs() < highLimit - 10 && getPositionDegs() > lowLimit + 10) {
             double time = calculateTime(dx, dy);
             velocity = Bot.drive.localizer.update();
 //        double dispX = velocity.linearVel.x * time;
@@ -278,8 +259,8 @@ public class Turret {
     public double calculateTime(double dx, double dy) {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
-        final double heightDisplacement = 23.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 51.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double heightDisplacement = 26.0;  // inches (Δz)
+        final double launchAngleAboveHorizDeg = 48.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
@@ -301,46 +282,44 @@ public class Turret {
     public void periodic() {
         power = 0;
         pos = getPosition();
-        orientation = imu.getRobotYawPitchRollAngles();
+        // Early-out: position tracking mode
+        if (positionTracking) {
+            runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
+//            runToAngle(aimAtGlobalPoint(goalX, goalY));
+            double errorDeg = Math.abs((setPoint - pos) * degsPerTick);
+            activeController = errorDeg > errorThresholdDeg ? largeErrorController : smallErrorController;
+            if (activeController == largeErrorController) {
+                activeController.setPID(largeP, largeI, largeD);
+            } else {
+                activeController.setPID(smallP, smallI, smallD);
+            }
+            activeController.setSetPoint(setPoint);
+            power = activeController.calculate(pos);
+        } else {
+            power = manualPower;
+        }
+
+        double maxPower = 1;
+        power = Math.max(-maxPower, Math.min(maxPower, power));
+
+        shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+
+        if (MainTeleop.manualTurret) {
+            shooterRpm = 3000;
+        }
+
+        if (shooterActive) {
+            shooter.periodic();
+            if (!shooterOverride) {
+                shooter.setVelocity(shooterRpm);
+            }
+        } else {
+            shooter.setPower(0);
+        }
 
         if (!obelisk) {
-            // Early-out: position tracking mode
-            if (positionTracking) {
-//                runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
-                runToAngle(aimAtGlobalPoint(goalX, goalY));
-                double errorDeg = Math.abs((setPoint - pos) * degsPerTick);
-                activeController = errorDeg > errorThresholdDeg ? largeErrorController : smallErrorController;
-                if (activeController == largeErrorController) {
-                    activeController.setPID(largeP, largeI, largeD);
-                } else {
-                    activeController.setPID(smallP, smallI, smallD);
-                }
-                activeController.setSetPoint(setPoint);
-                power = activeController.calculate(pos);
-            } else {
-                power = manualPower;
-            }
-
-            double maxPower = 1;
-            power = Math.max(-maxPower, Math.min(maxPower, power));
-
-            shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
-
-            if (MainTeleop.manualTurret) {
-                shooterRpm = 3000;
-            }
-
-            if (shooterActive) {
-                shooter.periodic();
-                if (!shooterOverride) {
-                    shooter.setVelocity(shooterRpm);
-                }
-            } else {
-                shooter.setPower(0);
-            }
-
             // LIMELIGHT RELOCALIZATION
-            /*
+
             limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
             LLResult result = limelight.getLatestResult();
             if (result != null) {
@@ -350,21 +329,22 @@ public class Turret {
                 //odom x = llx + 120
                 //odom y = lly + 105
             }
-
-             */
-        } /*else {
+        } else {
             if (llResult != null && llResult.isValid() && llResult.getFiducialResults() != null && !llResult.getFiducialResults().isEmpty()) {
                 int id = llResult.getFiducialResults().get(0).getFiducialId();
                 if (id == 21) {
                     motif = Motif.GPP;
+                    Indexer.motifPattern="GPP";
                 } else if (id == 22) {
                     motif = Motif.PGP;
+                    Indexer.motifPattern="PGP";
                 } else if (id == 23) {
                     motif = Motif.PPG;
+                    Indexer.motifPattern="PPG";
                 }
             }
         }
-        */
+
 
         motor.set(power);
     }

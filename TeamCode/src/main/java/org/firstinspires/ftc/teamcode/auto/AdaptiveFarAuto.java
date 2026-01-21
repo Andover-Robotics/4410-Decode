@@ -93,11 +93,10 @@ public class AdaptiveFarAuto extends LinearOpMode {
             // keep pose synced to chosen alliance
             if (Bot.isBlue()) {
                 drive.localizer.setPose(Pos.initialFarBluePose);
-                bot.setTargetGoalBlueFarAuto();
+                bot.setTargetGoalPose();
             } else {
                 drive.localizer.setPose(Pos.initialFarRedPose);
-
-                bot.setTargetGoalRedFarAuto();
+                bot.setTargetGoalPose();
             }
 
             // Telemetry for configuration
@@ -342,7 +341,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder
                     .afterTime(0.1, bot.enableShooter())
                     .strafeToConstantHeading(Pos.closeShoot)
-//                    .stopAndAdd(bot.shootThreeAutoClose())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
             if (cfg.delayAfterPreload > 0) {
@@ -404,7 +403,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
             builder = builder.stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-//                    .stopAndAdd(bot.shootThreeAutoClose())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
 
@@ -423,7 +422,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-60))
-//                    .stopAndAdd(bot.shootThreeAutoClose())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
 
@@ -440,7 +439,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,Pos.blueFarIntake.position.y + 18))
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 70))
-//                    .stopAndAdd(bot.shootThreeAutoClose())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
                     .stopAndAdd(new InstantAction(() -> bot.disableShooter()));
 
@@ -459,7 +458,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
                     .splineToSplineHeading(Pos.blueHpIntake, Math.toRadians(180))
                     .setTangent(Math.toRadians(179))
                     .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10));
-//                    .stopAndAdd(bot.shootThreeAutoClose());
+//                    .stopAndAdd(bot.indexer.shootRapidFire());
 //            if (!cfg.runClose || !cfg.runFar || !cfg.)
 //                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()))
 //
@@ -468,7 +467,7 @@ public class AdaptiveFarAuto extends LinearOpMode {
 //                    .splineToSplineHeading(Pos.blueSecretTunnel, Math.toRadians(179))
 //                    .setTangent(Math.toRadians(179))
 //                    .splineToConstantHeading(Pos.closeShoot, Math.toRadians(-10))
-//                    .stopAndAdd(bot.shootThreeAutoClose())
+//                    .stopAndAdd(bot.indexer.shootRapidFire())
 //                    .stopAndAdd(new InstantAction(() -> bot.intake.intake()));
 
             if (cfg.delayAfterCycles > 0) {

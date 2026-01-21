@@ -106,15 +106,6 @@ public class Lift {
         setBothTargetDeg(lower);
     }
 
-    public void balance() {
-        offset = -360 * liftWidth * Math.toRadians(Turret.orientation.getRoll(AngleUnit.DEGREES)) / (2 * Math.PI * spoolRad);
-        if (offset > 0) {
-                setLeftTargetDeg(leftTargetDeg + offset);
-        } else {
-                setRightTargetDeg(rightTargetDeg - offset);
-        }
-    }
-
     /** Call this from your parent loop. Runs PIDF only when enabled. */
     public void periodic() {
 

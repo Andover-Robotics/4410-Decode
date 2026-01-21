@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "V2 Main Teleop", group = "Competition")
+@TeleOp(name = "Main Teleop", group = "Competition")
 public class MainTeleop extends LinearOpMode {
 
     private Bot bot;

@@ -20,7 +20,7 @@ public class Indexer {
 
     /* ================= CONFIG ================= */
 
-    public String motifPattern = "PPG";
+    public static String motifPattern = "PPG";
 
     public static double kickerLeftDown  = 0.705;
     public static double kickerLeftUp    = 0.45;

@@ -29,11 +29,9 @@ public class Bot {
     public Screen screen;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
-    public static Pose2d resetPose = new Pose2d(-63, -62, Math.toRadians(-90));
-    public static Vector2d goalPose = new Vector2d(65, 67); //initializes with blue, switches based on alliance
+    public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
+    public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     // 65, 60
-    public static Vector2d blueFarAutoGoalPose = new Vector2d(59, 66); //AHHHHH DIH BEHIND MEEEE
-    public static Vector2d redFarAutoGoalPose = new Vector2d(65, -55); //DIH
     public static Vector2d farAutoGoalPose = new Vector2d(61, 64); //TODO DO NOT USE
     public static Vector2d targetPose = goalPose;
     public static double shootTime = 0.3, autoFarShootDeley = 0.4, shootDelay = 0.4, shootDelayCF = 0.02, shootDelayDihThreshold = 100;
@@ -75,12 +73,6 @@ public class Bot {
         }
     }
 
-    public void setTargetGoalRedFarAuto() {
-        targetPose = redFarAutoGoalPose;
-    }
-    public void setTargetGoalBlueFarAuto() {
-        targetPose = blueFarAutoGoalPose;
-    }
 
     public void setAllianceBlue() {
         alliance = allianceOptions.BLUE_ALLIANCE;
