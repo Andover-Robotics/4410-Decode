@@ -76,9 +76,9 @@ public class AdaptiveAuto extends LinearOpMode {
             handleConfigInput();
             applyStartingPosition(drive);
 
-            telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
-            telemetry.addData("STARTING POSITION (X)", cfg.startFar ? "Far" : "Close");
-            telemetry.addData("Selected segment (UP/DOWN)", segmentName(selectedSegment));
+            telemetry.addData("ALLIANCE (A)", "<big><b>%s</b></big>", Bot.getAlliance());
+            telemetry.addData("STARTING POSITION (X)", "<big><b>%s</b></big>", cfg.startFar ? "Far" : "Close");
+            telemetry.addData("Selected segment (UP/DOWN)", "<b>%s</b>", segmentName(selectedSegment));
             telemetry.addData("Start: delay (L/R)", "%ds", cfg.startDelay);
             telemetry.addData("Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayAfterPreload);
