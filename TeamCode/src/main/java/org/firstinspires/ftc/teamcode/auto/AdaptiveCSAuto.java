@@ -300,7 +300,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
 //                    .splineTo(new Vector2d(10, 19), Math.toRadians(90))
-                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
+//                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
+                    .setTangent(Math.toRadians(180))
+                    .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
                             Pos.blueMidIntake.position.y + 26))
                     .stopAndAdd(bot.enableShooter())
