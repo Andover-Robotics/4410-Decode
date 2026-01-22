@@ -29,7 +29,7 @@ public class Bot {
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
-    public boolean shooting = false;
+    public boolean shooting = false, sensorIntaking;
 
     public static MecanumDrive drive;
 
@@ -156,6 +156,25 @@ public class Bot {
         }
     }
 
+    public void sensorIntake(boolean on) {
+        sensorIntaking = on;
+    }
+
+    public void reverseIntake() {
+        intake.reverse();
+        sensorIntaking = false;
+    }
+
+    public void intake() {
+        intake.intake();
+        sensorIntaking = false;
+    }
+
+    public void stopIntake() {
+        intake.stop();
+        sensorIntaking = false;
+    }
+
     public void enableFullAuto(boolean on) {
         turret.enableFullAuto(on);
     }
@@ -178,6 +197,13 @@ public class Bot {
         turret.periodic();
         lift.periodic();
         screen.periodic();
+        if (sensorIntaking) {
+            if (indexer.countBalls()==3) {
+                intake.reverse();
+            } else {
+                intake.intake();
+            }
+        }
     }
 
     public Action actionPeriodic() {

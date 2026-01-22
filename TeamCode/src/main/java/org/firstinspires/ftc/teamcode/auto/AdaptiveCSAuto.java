@@ -290,7 +290,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 addedAction = true;
             }
             builder = builder
-                    .stopAndAdd((() -> bot.intake.intake()))
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
 //                    .turnTo(Math.toRadians(135))
 //                    .setTangent(Math.toRadians(135))
                     .splineTo(new Vector2d(10, 19), Math.toRadians(90))
@@ -298,7 +298,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
                             Pos.blueMidIntake.position.y + 22))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, (() -> bot.intake.reverse()))
+                    .afterTime(0.4, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
@@ -315,11 +315,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading) //TODO try spline heading
-                    .stopAndAdd((() -> bot.intake.intake()))
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
                     .waitSeconds(1)
                     .stopAndAdd(bot.enableShooter())
                     .waitSeconds(1)
-                    .stopAndAdd((() -> bot.intake.reverse()))
+                    .stopAndAdd((() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
@@ -333,13 +333,13 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 addedAction = true;
             }
             builder = builder
-                    .stopAndAdd((() -> bot.intake.intake()))
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
                             Pos.blueCloseIntake.position.y + 22))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, (() -> bot.intake.reverse()))
+                    .afterTime(0.4, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootMotif())
@@ -354,12 +354,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             builder = builder
 
-                    .stopAndAdd((() -> bot.intake.intake()))
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
                             Pos.blueFarIntake.position.y + 22))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, (() -> bot.intake.reverse()))
+                    .afterTime(0.4, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.indexer.shootMotif())
@@ -373,11 +373,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 addedAction = true;
             }
             builder = builder
-                    .stopAndAdd((() -> bot.intake.intake()))
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
 //                    .strafeToConstantHeading(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y))
 
-                    .stopAndAdd((() -> bot.intake.reverse()))
+                    .stopAndAdd((() -> bot.reverseIntake()))
                     .setReversed(true)
                     .afterTime(0.1, bot.enableShooter())
                     .splineTo(Pos.closeShoot, Math.toRadians(155))

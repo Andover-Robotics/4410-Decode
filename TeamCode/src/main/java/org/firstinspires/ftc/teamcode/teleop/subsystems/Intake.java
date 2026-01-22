@@ -101,7 +101,7 @@ public class Intake {
 
 
 
-    public void intake() {
+    protected void intake() {
         motor.set(intakePower);
         currentMode = IntakeMode.INTAKING;
     }
@@ -111,13 +111,13 @@ public class Intake {
         currentMode = IntakeMode.REVERSINGSLOW;
     }
 
-    public void reverse() {
+    protected void reverse() {
         motor.set(reversePower);
 //        resetFilters();
         currentMode = IntakeMode.REVERSINGFULL;
     }
 
-    public void stop() {
+    protected void stop() {
         motor.set(0);
         currentMode = IntakeMode.STOPPED;
     }
