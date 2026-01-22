@@ -28,10 +28,10 @@ public class Indexer {
     public static double kickerBackDown  = 0.60;
     public static double kickerBackUp    = 0.34;
 
-    public static double kickerSleep = 0.28;
+    public static double kickerSleep = 0.18;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.12;
+    public static double rapidShootSleep = 0.07;
 
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.4;
@@ -48,7 +48,7 @@ public class Indexer {
 
     public final Holder[] holders;
     private int nextSensorIndex = 0;
-    private SensorTarget[] sensorReadOrder;
+    private final SensorTarget[] sensorReadOrder;
 
     /* ================= INIT ================= */
 
@@ -86,7 +86,6 @@ public class Indexer {
                 new SensorTarget(rightHolder, false),
                 new SensorTarget(backHolder, false)
         };
-
         resetIndexer();
     }
 

@@ -278,10 +278,17 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 addedAction = true;
             }
             builder = builder
-                    .stopAndAdd(bot.enableShooter())
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter()));
+                    .stopAndAdd(bot.enableShooter());
+            builder = cfg.startFar ?
+                    builder
+                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0)) //shoot once we've entered close zone
+                            .stopAndAdd(bot.indexer.shootRapidFire())
+                            .stopAndAdd((() -> bot.disableShooter()))
+                            :
+                    builder
+                            .afterTime(0.6, bot.indexer.shootRapidFire()) //shoot AS we get to close shooting position
+                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0)) //don't want to shoot while spinning bc turret lag
+                            .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
 
@@ -292,14 +299,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-//                    .turnTo(Math.toRadians(135))
-//                    .setTangent(Math.toRadians(135))
-                    .splineTo(new Vector2d(10, 19), Math.toRadians(90))
+//                    .splineTo(new Vector2d(10, 19), Math.toRadians(90))
                     .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + 22))
+                            Pos.blueMidIntake.position.y + 26))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, (() -> bot.reverseIntake()))
+                    .afterTime(0.5, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
@@ -338,9 +343,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + 22))
+                            Pos.blueCloseIntake.position.y + 24))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, (() -> bot.reverseIntake()))
+                    .afterTime(0.5, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootMotif())
@@ -358,9 +363,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + 22))
+                            Pos.blueFarIntake.position.y + 26))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, (() -> bot.reverseIntake()))
+                    .afterTime(0.5, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .stopAndAdd(bot.indexer.shootMotif())
