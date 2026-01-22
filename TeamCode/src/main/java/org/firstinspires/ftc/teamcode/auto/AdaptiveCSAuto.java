@@ -51,6 +51,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
     private Action builtAuto = null;
     private TrajectoryActionBuilder builder;
+    private boolean addedAction = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -93,7 +94,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     cfg.runFar, cfg.delayFar);
             addSegmentLine(6, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayHp);
-            if (builtAuto == null) {
+            if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
             } else {
                 telemetry.addLine("<big><b><font color='green'> Built! (Y to build again)</font></b></big>");
@@ -108,7 +109,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        if (builtAuto == null) {
+        if (builtAuto == null || addedAction) {
             builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
         }
 
@@ -266,7 +267,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
 
-        boolean addedAction = false;
+        addedAction = false;
         int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
@@ -389,6 +390,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
         if (!addedAction) {
             builder = builder.stopAndAdd((() -> telemetry.addData("Auto", "No segments enabled")));
         }
+
+        addedAction = false;
         return builder.build();
     }
 }

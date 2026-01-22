@@ -140,18 +140,23 @@ public class SoloTeleop extends LinearOpMode {
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                     if (bot.indexer.countBalls()==3) {
-                        bot.intake.reverse();
+                        bot.reverseIntake();
+                        gp1.gamepad.rumble(0, 1, -1);
                     } else {
-                        bot.intake.intake();
+                        bot.intake();
+                        gp1.gamepad.stopRumble();
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-                    bot.intake.reverse();
-//                } else if (bot.indexer.countBalls()==3){
-//                    bot.intake.reverse();
-//                } else if (stallIntake){
-//                    bot.intake.storage();
+                    bot.reverseIntake();
+                    if (bot.indexer.countBalls()==3) {
+                        gp1.gamepad.rumble(-1);
+                    } else {
+                        bot.reverseIntake();
+                        gp1.gamepad.stopRumble();
+                    }
                 } else {
-                    bot.intake.stop();
+                    bot.stopIntake();
+                    gp1.gamepad.stopRumble();
                 }
             }
 

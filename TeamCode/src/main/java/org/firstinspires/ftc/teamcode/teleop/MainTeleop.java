@@ -136,22 +136,22 @@ public class MainTeleop extends LinearOpMode {
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                     if (bot.indexer.countBalls()==3) {
-                        bot.intake.reverse();
+                        bot.reverseIntake();
                         gp1.gamepad.rumble(0, 1, -1);
                     } else {
-                        bot.intake.intake();
+                        bot.intake();
                         gp1.gamepad.stopRumble();
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-                    bot.intake.reverse();
+                    bot.reverseIntake();
                     if (bot.indexer.countBalls()==3) {
                         gp1.gamepad.rumble(-1);
                     } else {
-                        bot.intake.reverse();
+                        bot.reverseIntake();
                         gp1.gamepad.stopRumble();
                     }
                 } else {
-                    bot.intake.stop();
+                    bot.stopIntake();
                     gp1.gamepad.stopRumble();
                 }
             }
@@ -255,12 +255,47 @@ public class MainTeleop extends LinearOpMode {
             runningActions = newActions;
 
             telemetry.addLine("=== BALL COLORS ===");
-            telemetry.addData("Right Spot", bot.indexer.getRightColor());
-            telemetry.addData("Left Spot", bot.indexer.getLeftColor());
-            telemetry.addData("Back Spot", bot.indexer.getBackColor());
+//            telemetry.addData("Right", bot.indexer.getRightColor());
+//            telemetry.addData("Left", bot.indexer.getLeftColor());
+//            telemetry.addData("Back", bot.indexer.getBackColor());
+            String right = bot.indexer.getRightColor();
+            String left  = bot.indexer.getLeftColor();
+            String back  = bot.indexer.getBackColor();
 
-            telemetry.addData("Motif:", Indexer.getMotifPattern());
+            String rightColor = right.equals("GREEN") ? "green"
+                    : right.equals("PURPLE") ? "#f000c3"
+                    : right.equals("UNKNOWN") ? "#ff0000"
+                    : right.equals("EMPTY") ? "#ffffff"
+                    : null;
 
+            String leftColor = left.equals("GREEN") ? "green"
+                    : left.equals("PURPLE") ? "#f000c3"
+                    : left.equals("UNKNOWN") ? "#ff0000"
+                    : left.equals("EMPTY") ? "#ffffff"
+                    : null;
+
+            String backColor = back.equals("GREEN") ? "green"
+                    : back.equals("PURPLE") ? "#f000c3"
+                    : back.equals("UNKNOWN") ? "#ff0000"
+                    : back.equals("EMPTY") ? "#ffffff"
+                    : null;
+
+            telemetry.addData("<big>Right</big>",
+                    rightColor != null
+                            ? "<big><font color=\"" + rightColor + "\"><b>" + right + "</b></font></big>"
+                            : right);
+
+            telemetry.addData("<big>Left</big>",
+                    leftColor != null
+                            ? "<big><font color=\"" + leftColor + "\"><b>" + left + "</b></font></big>"
+                            : left);
+
+            telemetry.addData("<big>Back</big>",
+                    backColor != null
+                            ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
+                            : back);
+
+            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 
             telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
 //            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
