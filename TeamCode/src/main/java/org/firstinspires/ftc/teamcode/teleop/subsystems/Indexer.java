@@ -34,7 +34,7 @@ public class Indexer {
     public static double rapidShootSleep = 0.07;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.4;
+    public static double motifShootSleep = 0.3;
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
