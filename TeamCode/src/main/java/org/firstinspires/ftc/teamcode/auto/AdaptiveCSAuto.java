@@ -308,7 +308,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.5, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-45))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
@@ -322,14 +322,15 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
-                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading) //TODO try spline heading
+//                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading) //TODO try spline heading
+                    .splineToSplineHeading(Pos.gate, Math.toRadians(105))
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .waitSeconds(1)
                     .stopAndAdd(bot.enableShooter())
                     .waitSeconds(1)
                     .stopAndAdd((() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-135))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-45))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
@@ -349,7 +350,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.5, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-15))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
@@ -369,7 +370,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.5, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
+//                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-15))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
@@ -388,7 +390,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.reverseIntake()))
                     .setReversed(true)
                     .afterTime(0.1, bot.enableShooter())
-                    .splineTo(Pos.closeShoot, Math.toRadians(155))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-15))
                     .stopAndAdd(bot.indexer.shootMotif());
             addedAction = true;
         }
