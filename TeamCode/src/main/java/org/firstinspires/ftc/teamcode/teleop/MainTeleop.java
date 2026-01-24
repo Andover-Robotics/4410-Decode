@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
@@ -39,7 +40,7 @@ public class MainTeleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
         Bot.instance = null;
         bot = Bot.getInstance(this);
@@ -137,7 +138,7 @@ public class MainTeleop extends LinearOpMode {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
                     if (bot.indexer.countBalls()==3) {
                         bot.reverseIntake();
-                        gp1.gamepad.rumble(0, 1, -1);
+                        gp1.gamepad.rumble(1, 1, -1);
                     } else {
                         bot.intake();
                         gp1.gamepad.stopRumble();

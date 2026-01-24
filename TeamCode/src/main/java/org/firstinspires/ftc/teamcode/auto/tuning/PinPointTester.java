@@ -23,6 +23,7 @@
 package org.firstinspires.ftc.teamcode.auto.tuning;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -59,7 +60,7 @@ For support, contact tech@gobilda.com
 -Ethan Doak
  */
 
-//@Disabled
+@Disabled
 @Autonomous(name = "sussyvhuwjl Auto", group = "Competition")
 
 public class PinPointTester extends LinearOpMode {
