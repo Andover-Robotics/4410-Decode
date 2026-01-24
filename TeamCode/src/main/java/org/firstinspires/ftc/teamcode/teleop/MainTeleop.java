@@ -146,7 +146,7 @@ public class MainTeleop extends LinearOpMode {
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
                     bot.reverseIntake();
                     if (bot.indexer.countBalls()==3) {
-                        gp1.gamepad.rumble(-1);
+                        gp1.gamepad.rumble(1, 1, -1);
                     } else {
                         bot.reverseIntake();
                         gp1.gamepad.stopRumble();
@@ -157,6 +157,11 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
 
+            if (bot.turret.shooterInRange()) {
+                gp2.gamepad.rumble(1, 1, -1);
+            } else {
+                gp2.gamepad.stopRumble();
+            }
 
             // TURRET
 

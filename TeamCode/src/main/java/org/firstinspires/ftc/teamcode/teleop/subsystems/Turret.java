@@ -88,6 +88,10 @@ public class Turret {
         positionTracking = enable;
     }
 
+    public boolean shooterInRange() {
+        return shooterActive && shooter.inRange();
+    }
+
     public void runToAngle(double angle) {
         if (angle > highLimit) {
             angle = angle - 360;
