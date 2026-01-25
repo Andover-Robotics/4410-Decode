@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -234,7 +237,54 @@ public class Indexer {
 
         return new SequentialAction(actions.toArray(new Action[0]));
     }
-
+//
+//    public class AutoShootMotifAction implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket packet) {
+//            String motifPattern = getMotifPattern();
+//
+//            List<Integer> purple = new ArrayList<>();
+//            List<Integer> green = new ArrayList<>();
+//
+//            for (int i = 0; i < holders.length; i++) {
+//                String color = holders[i].getColor();
+//                if ("PURPLE".equals(color)) purple.add(i);
+//                else if ("GREEN".equals(color)) green.add(i);
+//            }
+//
+//            for (int i = 0; i < motifPattern.length(); i++) {
+//                char target = motifPattern.charAt(i);
+//
+//                Holder h = null;
+//
+//                if (target == 'P') {
+//                    if (!purple.isEmpty()) h = holders[purple.remove(0)];
+//                    else if (!green.isEmpty()) h = holders[green.remove(0)];   // substitute
+//                } else if (target == 'G') {
+//                    if (!green.isEmpty()) h = holders[green.remove(0)];
+//                    else if (!purple.isEmpty()) h = holders[purple.remove(0)];  // substitute
+//                } else {
+//                    // Unknown char: just shoot anything available
+//                    if (!purple.isEmpty()) h = holders[purple.remove(0)];
+//                    else if (!green.isEmpty()) h = holders[green.remove(0)];
+//                }
+//
+//                if (h != null) {
+//                    try {
+//                        h.kickReset();
+//                        wait((long) motifShootSleep);
+//                    } catch (InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//            }
+//            return false;
+//        }
+//    }
+//
+//    public AutoShootMotifAction autoShootMotifAction() {
+//        return new AutoShootMotifAction();
+//    }
 
     public static String getMotifPattern() {
         if (Bot.motif == null) {
@@ -318,6 +368,12 @@ public class Indexer {
                     new InstantAction(this::reset)
             );
         }
+
+//        public void kickReset() throws InterruptedException {
+//            kick();
+//            wait((long) kickerSleep);
+//            reset();
+//        }
 
         public Action jiggleResetAction(double delta, double sleepSeconds) {
             return new SequentialAction(

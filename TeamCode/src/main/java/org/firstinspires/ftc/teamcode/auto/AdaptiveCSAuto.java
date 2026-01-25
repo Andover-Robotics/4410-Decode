@@ -385,7 +385,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.75, (() -> bot.reverseIntake()))
                     .setReversed(true)
-//                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
                     .splineTo(Pos.closeShoot, Math.toRadians(-25))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
