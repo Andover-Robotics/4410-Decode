@@ -6,13 +6,12 @@ import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 
-import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
+import org.firstinspires.ftc.teamcode.util.SRSHub;
 
 import java.util.*;
 
@@ -37,8 +36,7 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.28;
 
-    static final double DISTANCE_THRESHOLD_MM = 28.0;
-    public int gain = 20;
+    public static double proximityThreshold = 140.0;
     public static boolean staggerSensorUpdates = true;
 
     public static double jiggleKickerDelta = 0.025;
@@ -51,56 +49,77 @@ public class Indexer {
     public final Holder backHolder;
 
     public final Holder[] holders;
-    private int nextSensorIndex = 0;
-    private final SensorTarget[] sensorReadOrder;
+    private final SRSHub srsHubLeft;
+    private final SRSHub srsHubRight;
+    private boolean updateLeftNext = true;
 
     /* ================= INIT ================= */
 
     public Indexer(OpMode opMode) {
+        SRSHub leftHub = opMode.hardwareMap.get(SRSHub.class, "srshubLeft");
+        SRSHub rightHub = opMode.hardwareMap.get(SRSHub.class, "srshubRight");
+
+        SRSHub.APDS9151 rightFront = new SRSHub.APDS9151();
+        SRSHub.APDS9151 rightBack = new SRSHub.APDS9151();
+        SRSHub.APDS9151 backBottom = new SRSHub.APDS9151();
+        SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
+        SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
+        SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
+
+        SRSHub.Config leftConfig = new SRSHub.Config();
+        leftConfig.addI2CDevice(1, rightFront);
+        leftConfig.addI2CDevice(2, rightBack);
+        leftConfig.addI2CDevice(3, backBottom);
+        leftHub.init(leftConfig);
+
+        SRSHub.Config rightConfig = new SRSHub.Config();
+        rightConfig.addI2CDevice(1, leftFront);
+        rightConfig.addI2CDevice(2, leftBack);
+        rightConfig.addI2CDevice(3, backRight);
+        rightHub.init(rightConfig);
+
+        srsHubLeft = leftHub;
+        srsHubRight = rightHub;
+
         rightHolder = new Holder(
                 opMode,
                 "rightKicker",
-                "colorRR", "colorRL",
+                rightFront,
+                rightBack,
                 kickerRightUp, kickerRightDown,
-                gain
+                proximityThreshold
         );
 
         leftHolder = new Holder(
                 opMode,
                 "leftKicker",
-                "colorLL", "colorLR",
+                leftFront,
+                leftBack,
                 kickerLeftUp, kickerLeftDown,
-                gain
+                proximityThreshold
         );
 
         backHolder = new Holder(
                 opMode,
                 "backKicker",
-                "colorBR", "colorBL",
+                backRight,
+                backBottom,
                 kickerBackUp, kickerBackDown,
-                gain
+                proximityThreshold
         );
 
         holders = new Holder[]{ rightHolder, backHolder, leftHolder};
-        sensorReadOrder = new SensorTarget[] {
-                new SensorTarget(leftHolder, true),
-                new SensorTarget(rightHolder, true),
-                new SensorTarget(backHolder, true),
-                new SensorTarget(leftHolder, false),
-                new SensorTarget(rightHolder, false),
-                new SensorTarget(backHolder, false)
-        };
         resetIndexer();
     }
 
     /* ================= SENSOR GETTERS (TELEMETRY) ================= */
 
-    public RevColorSensorV3 colorRR() { return rightHolder.sensorA; }
-    public RevColorSensorV3 colorRL() { return rightHolder.sensorB; }
-    public RevColorSensorV3 colorLL() { return leftHolder.sensorA; }
-    public RevColorSensorV3 colorLR() { return leftHolder.sensorB; }
-    public RevColorSensorV3 colorBR() { return backHolder.sensorA; }
-    public RevColorSensorV3 colorBL() { return backHolder.sensorB; }
+    public RevColorSensorV3 colorRR() { return null; }
+    public RevColorSensorV3 colorRL() { return null; }
+    public RevColorSensorV3 colorLL() { return null; }
+    public RevColorSensorV3 colorLR() { return null; }
+    public RevColorSensorV3 colorBR() { return null; }
+    public RevColorSensorV3 colorBL() { return null; }
 
     /* ================= INDEXER-LEVEL ================= */
 
@@ -116,15 +135,24 @@ public class Indexer {
 
     public void updateSensorCache() {
         if (!staggerSensorUpdates) {
+            srsHubLeft.update();
+            srsHubRight.update();
             for (Holder h : holders) {
                 h.updateSensorCache();
             }
             return;
         }
 
-        SensorTarget target = sensorReadOrder[nextSensorIndex];
-        target.holder.updateSensorCache(target.isSensorA);
-        nextSensorIndex = (nextSensorIndex + 1) % sensorReadOrder.length;
+        if (updateLeftNext) {
+            srsHubLeft.update();
+            rightHolder.updateSensorCache(true, true);
+            backHolder.updateSensorCache(false, true);
+        } else {
+            srsHubRight.update();
+            leftHolder.updateSensorCache(true, true);
+            backHolder.updateSensorCache(true, false);
+        }
+        updateLeftNext = !updateLeftNext;
     }
 
     /* ================= ACTIONS ================= */
@@ -261,11 +289,12 @@ public class Indexer {
     public static class Holder {
 
         final Servo kicker;
-        final RevColorSensorV3 sensorA;
-        final RevColorSensorV3 sensorB;
+        final SRSHub.APDS9151 sensorA;
+        final SRSHub.APDS9151 sensorB;
 
         private final double upPos;
         private final double downPos;
+        private final double distanceThreshold;
 
         private final float[] hsv = new float[3];
         private double distanceA = -1;
@@ -278,31 +307,18 @@ public class Indexer {
         public Holder(
                 OpMode opMode,
                 String kickerServoName,
-                String leftSensorName,
-                String rightSensorName,
+                SRSHub.APDS9151 sensorA,
+                SRSHub.APDS9151 sensorB,
                 double upPos,
                 double downPos,
-                int gain
+                double distanceThreshold
         ) {
             kicker = opMode.hardwareMap.servo.get(kickerServoName);
-
-            sensorA = opMode.hardwareMap.get(RevColorSensorV3.class, leftSensorName);
-            sensorB = opMode.hardwareMap.get(RevColorSensorV3.class, rightSensorName);
-
+            this.sensorA = sensorA;
+            this.sensorB = sensorB;
             this.upPos = upPos;
             this.downPos = downPos;
-
-            setFastMode(sensorA);
-            setFastMode(sensorB);
-            sensorA.setGain(gain);
-            sensorB.setGain(gain);
-        }
-
-        private void setFastMode(RevColorSensorV3 sensor) {
-            if (sensor.getDeviceClient() instanceof LynxI2cDeviceSynch) {
-                ((LynxI2cDeviceSynch) sensor.getDeviceClient())
-                        .setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-            }
+            this.distanceThreshold = distanceThreshold;
         }
 
         public void up()   { kicker.setPosition(upPos); }
@@ -336,27 +352,35 @@ public class Indexer {
             return Math.max(0.0, Math.min(1.0, position));
         }
 
-        private double safeDistance(RevColorSensorV3 s) {
-            double d = s.getDistance(DistanceUnit.MM);
-            return (Double.isNaN(d) || Double.isInfinite(d)) ? -1 : d;
-        }
-
         public void updateSensorCache() {
-            updateSensorCache(true);
-            updateSensorCache(false);
+            updateSensorCache(true, true);
         }
 
         public void updateSensorCache(boolean updateSensorA) {
+            updateSensorCache(updateSensorA, !updateSensorA);
+        }
+
+        public void updateSensorCache(boolean updateSensorA, boolean updateSensorB) {
             if (updateSensorA) {
-                distanceA = safeDistance(sensorA);
-                hueA = hueFromSensor(sensorA);
-            } else {
-                distanceB = safeDistance(sensorB);
-                hueB = hueFromSensor(sensorB);
+                distanceA = sensorA.proximity;
+                int r = Math.max(0, sensorA.red);
+                int g = Math.max(0, sensorA.green);
+                int b = Math.max(0, sensorA.blue);
+                android.graphics.Color.RGBToHSV(r, g, b, hsv);
+                hueA = hsv[0];
             }
 
-            boolean presentA = distanceA > 0 && distanceA < DISTANCE_THRESHOLD_MM;
-            boolean presentB = distanceB > 0 && distanceB < DISTANCE_THRESHOLD_MM;
+            if (updateSensorB) {
+                distanceB = sensorB.proximity;
+                int r = Math.max(0, sensorB.red);
+                int g = Math.max(0, sensorB.green);
+                int b = Math.max(0, sensorB.blue);
+                android.graphics.Color.RGBToHSV(r, g, b, hsv);
+                hueB = hsv[0];
+            }
+
+            boolean presentA = distanceA > 0 && distanceA < distanceThreshold;
+            boolean presentB = distanceB > 0 && distanceB < distanceThreshold;
 
             cachedBallPresent = presentA || presentB;
 
@@ -376,13 +400,6 @@ public class Indexer {
 
         public boolean ballPresent() {
             return cachedBallPresent;
-        }
-
-        private float getHue(RevColorSensorV3 sensor) {
-            android.graphics.Color.RGBToHSV(
-                    sensor.red(), sensor.green(), sensor.blue(), hsv
-            );
-            return hsv[0];
         }
 
         private boolean isGreenHue(float h)  { return h > 153 && h < 185; }
@@ -411,13 +428,4 @@ public class Indexer {
         }
     }
 
-    private static final class SensorTarget {
-        private final Holder holder;
-        private final boolean isSensorA;
-
-        private SensorTarget(Holder holder, boolean isSensorA) {
-            this.holder = holder;
-            this.isSensorA = isSensorA;
-        }
-    }
 }
