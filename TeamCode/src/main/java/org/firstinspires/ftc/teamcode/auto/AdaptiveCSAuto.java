@@ -311,13 +311,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
                             Pos.blueMidIntake.position.y + Pos.midIntake))
 
-                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)// TODO make this a config
-                    .waitSeconds(1.3)// TODO make this a config
-
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.75, (() -> bot.reverseIntake()))
-                    .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-45))
+//                    .setReversed(true)
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
@@ -356,6 +353,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
                             Pos.blueCloseIntake.position.y + Pos.closeIntake))
+
+//                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)// TODO make this a config
+                    .setReversed(true)
+                    .splineToLinearHeading(Pos.gate, Math.toRadians(90))
+                    .waitSeconds(1)// TODO make this a config
+
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.75, (() -> bot.reverseIntake()))
 //                    .setReversed(true)
@@ -363,6 +366,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
+
+
             addedAction = true;
         }
 
