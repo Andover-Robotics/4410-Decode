@@ -16,23 +16,25 @@ public class Pos {
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueMidIntake = new Pose2d(-14, 29, Math.toRadians(90));
+    public static Pose2d blueMidIntake = new Pose2d(-19, 29, Math.toRadians(90));
+    public static int midIntake = 31;
 
-    public static Pose2d gate = new Pose2d(-14.5, 61, GATE_INTAKE_ANGLE);
+    public static Pose2d gate = new Pose2d(-12, 62.5, GATE_INTAKE_ANGLE);
+
     public static Pose2d gateIntake = new Pose2d(-12, 60, GATE_INTAKE_ANGLE);
+    public static Pose2d gateSideOpen = new Pose2d(3, 57, Math.toRadians(0));
 
-    public static Pose2d blueCloseIntake = new Pose2d(13, 29, Math.toRadians(90));
+    public static Pose2d blueCloseIntake = new Pose2d(11, 29, Math.toRadians(90));
+    public static int closeIntake = 20;
 
     public static Pose2d blueFarIntake = new Pose2d(-35, 29, Math.toRadians(90));
+    public static int farIntake = 31;
 
-    public static Pose2d blueHpIntake = new Pose2d(-63, 60.5, Math.toRadians(179));
+    public static Pose2d blueHpIntake = new Pose2d(-50, 67, Math.toRadians(179));
 
-    public static Vector2d blueHpIntakeInter = new Vector2d(-58, 24);
-
-    public static Pose2d blueSecretTunnel = new Pose2d(-40, 59, Math.toRadians(135));
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
-    public static Vector2d closeShoot = new Vector2d(7, 15);
+    public static Vector2d closeShoot = new Vector2d(7, 16);
     public static Vector2d park = new Vector2d(-1, 21);
     public static Vector2d farShoot = new Vector2d(-59, 9);
 

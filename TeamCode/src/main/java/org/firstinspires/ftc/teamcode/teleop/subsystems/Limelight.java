@@ -95,10 +95,10 @@ public class Limelight {
     }
 
     public void relocalizeBotPose() {
-        Bot.drive.localizer.setPose(new Pose2d(
-                llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset,
-                llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset,
-                Math.toRadians(llBotPose.getOrientation().getYaw())
-        ));
+//        Bot.drive.localizer.setPose(new Pose2d(
+//                llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset,
+//                llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset,
+//                Math.toRadians(llBotPose.getOrientation().getYaw())
+//        ));
     }
 }

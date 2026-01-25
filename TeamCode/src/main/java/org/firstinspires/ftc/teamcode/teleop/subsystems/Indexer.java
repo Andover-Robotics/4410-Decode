@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot.DeferredAction;
 
 import java.util.*;
 
@@ -28,13 +30,13 @@ public class Indexer {
     public static double kickerBackDown  = 0.60;
     public static double kickerBackUp    = 0.29;
 
-    public static double kickerSleep = 0.18;
+    public static double kickerSleep = 0.20;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.035;
+    public static double rapidShootSleep = 0.04;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.3;
+    public static double motifShootSleep = 0.28;
 
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
@@ -77,7 +79,7 @@ public class Indexer {
                 gain
         );
 
-        holders = new Holder[]{ rightHolder, leftHolder, backHolder };
+        holders = new Holder[]{ rightHolder, backHolder, leftHolder};
         sensorReadOrder = new SensorTarget[] {
                 new SensorTarget(leftHolder, true),
                 new SensorTarget(rightHolder, true),
@@ -141,6 +143,8 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
+
+
     public Action shootRapidFireSensor() {
         List<Action> actions = new ArrayList<>();
         for (Holder h : holders) {
@@ -184,33 +188,45 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
-        String motifPattern = getMotifPattern();
-        List<Integer> purple = new ArrayList<>();
-        List<Integer> green = new ArrayList<>();
+        return new DeferredAction(() -> {
+            String motifPattern = getMotifPattern();
 
-        for (int i = 0; i < holders.length; i++) {
-            String color = holders[i].getColor();
-            if ("PURPLE".equals(color)) {
-                purple.add(i);
-            } else if ("GREEN".equals(color)) {
-                green.add(i);
-            }
-        }
+            List<Integer> purple = new ArrayList<>();
+            List<Integer> green  = new ArrayList<>();
 
-        List<Action> actions = new ArrayList<>();
-        for (int i = 0; i < motifPattern.length(); i++) {
-            char target = motifPattern.charAt(i);
-            Holder h = null;
-            if (target == 'P') {
-                h = purple.isEmpty() ? null : holders[purple.remove(0)];
-            } else if (target == 'G') {
-                h = green.isEmpty() ? null : holders[green.remove(0)];
+            for (int i = 0; i < holders.length; i++) {
+                String color = holders[i].getColor();
+                if ("PURPLE".equals(color)) purple.add(i);
+                else if ("GREEN".equals(color)) green.add(i);
             }
-            actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
-            actions.add(new SleepAction(motifShootSleep));
-        }
-        return new SequentialAction(actions.toArray(new Action[0]));
+
+            List<Action> actions = new ArrayList<>();
+
+            for (int i = 0; i < motifPattern.length(); i++) {
+                char target = motifPattern.charAt(i);
+
+                Holder h = null;
+
+                if (target == 'P') {
+                    if (!purple.isEmpty())      h = holders[purple.remove(0)];
+                    else if (!green.isEmpty())  h = holders[green.remove(0)];   // substitute
+                } else if (target == 'G') {
+                    if (!green.isEmpty())       h = holders[green.remove(0)];
+                    else if (!purple.isEmpty()) h = holders[purple.remove(0)];  // substitute
+                } else {
+                    // Unknown char: just shoot anything available
+                    if (!purple.isEmpty())      h = holders[purple.remove(0)];
+                    else if (!green.isEmpty())  h = holders[green.remove(0)];
+                }
+
+                actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
+                actions.add(new SleepAction(motifShootSleep));
+            }
+
+            return new SequentialAction(actions.toArray(new Action[0]));
+        });
     }
+
 
     public static String getMotifPattern() {
         if (Bot.motif == null) {

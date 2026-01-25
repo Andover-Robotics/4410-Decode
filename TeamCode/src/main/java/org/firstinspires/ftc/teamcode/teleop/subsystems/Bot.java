@@ -6,12 +6,17 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Config
 public class Bot {
@@ -66,6 +71,24 @@ public class Bot {
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
         updatePoses();
+    }
+
+    public Action shootAutoRapidFire() {
+        List<Action> actions = new ArrayList<>();
+        actions.add(indexer.shootRapidFire());
+        actions.add(new Bot.DeferredAction(() -> {
+            // this runs AFTER the loop actions have executed, when the sequence reaches here
+            if (indexer.countBalls() != 0) return
+                    new SequentialAction(
+                            new InstantAction(this::intake),
+                            new SleepAction(0.5),
+                            new InstantAction(this::reverseIntake),
+                            indexer.shootRapidFire()
+                    );  // try once
+            return new SleepAction(0);                       // no-op
+        }));
+
+        return new SequentialAction(actions.toArray(new Action[0]));
     }
 
     public void switchAlliance() {
@@ -236,5 +259,19 @@ public class Bot {
         }
         instance.opMode = opMode;
         return instance;
+    }
+    public static class DeferredAction implements Action {
+        private final java.util.function.Supplier<Action> supplier;
+        private Action inner;
+
+        public DeferredAction(java.util.function.Supplier<Action> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public boolean run(com.acmerobotics.dashboard.telemetry.TelemetryPacket p) {
+            if (inner == null) inner = supplier.get();  // decide at runtime
+            return inner.run(p);
+        }
     }
 }
