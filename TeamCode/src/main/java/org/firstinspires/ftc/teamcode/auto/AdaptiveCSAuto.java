@@ -280,7 +280,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd(bot.enableShooter())
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0)) //shoot once we've entered close zone
+                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-15)) //shoot once we've entered close zone
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
 
