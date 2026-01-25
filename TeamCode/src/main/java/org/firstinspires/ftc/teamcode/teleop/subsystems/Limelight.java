@@ -74,7 +74,7 @@ public class Limelight {
         llResult = limelight.getLatestResult();
 
         if (!obelisk) {
-            limelight.updateRobotOrientation(Math.toDegrees(Bot.drive.localizer.getPose().heading.log()));
+            limelight.updateRobotOrientation(Math.toDegrees(Bot.storedPose.heading.log()));
             if (llResult != null && llResult.isValid()) {
                 llBotPose = llResult.getBotpose_MT2();
             }

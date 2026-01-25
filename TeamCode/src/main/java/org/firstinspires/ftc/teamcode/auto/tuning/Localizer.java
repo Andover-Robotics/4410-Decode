@@ -25,7 +25,8 @@ public interface Localizer {
 
     void recalibrateIMU();
 
-    default void updateOffsets() {
-
+    default void updateOffsets() {}
+    default PoseVelocity2d getPoseVelocity() {
+        return null;
     }
 }
