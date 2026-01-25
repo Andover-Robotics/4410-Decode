@@ -22,7 +22,7 @@ public class Shooter {
     private final ElapsedTime timer = new ElapsedTime();
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.0016, i = 0.0, d = 0.0, f = 0.000183;
+    public static double p = 0.002, i = 0.0, d = 0.0, f = 0.000185;
     public static boolean inverted = false;
 
     // targeting and behavior
@@ -64,7 +64,7 @@ public class Shooter {
         closedLoopEnabled = true;
     }
 
-    public boolean inRange() {
+    protected boolean inRange() {
         return (filteredRPM > targetRPM - toleranceRPM && filteredRPM < targetRPM + toleranceRPM);
     }
 

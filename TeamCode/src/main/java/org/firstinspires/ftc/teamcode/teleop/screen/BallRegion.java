@@ -65,28 +65,6 @@ public class BallRegion extends DisplayRegion {
                     circle.setColor(Color.BLACK);
                 }
             }
-//            if (Lift.closedLoopEnabled) {
-//                outline.setColor(Color.PINK);
-//            } else {
-//                outline.setColor(Color.BLACK);
-//            }
-//            if (bot.intake.holdingTop()) {
-//                circle1.setColor(Color.GREEN);
-//            } else {
-//                circle1.setColor(Color.BLACK);
-//            }
-//
-//            if (bot.intake.holdingMiddle()) {
-//                circle2.setColor(Color.GREEN);
-//            } else {
-//                circle2.setColor(Color.BLACK);
-//            }
-//
-//            if (bot.intake.holdingBottom()) {
-//                circle3.setColor(Color.GREEN);
-//            } else {
-//                circle3.setColor(Color.BLACK);
-//            }
 
         } else if (ScreenTester.changed) {
             for (int i = 0; i < 3; i++) {
