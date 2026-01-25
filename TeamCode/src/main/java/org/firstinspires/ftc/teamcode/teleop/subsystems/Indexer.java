@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
@@ -15,8 +16,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
-
 import java.util.*;
 
 @Config
@@ -201,15 +200,39 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
+        return new Action() {
+            private Action builtAction;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket t) {
+                if (builtAction == null) {
+                    builtAction = buildMotifAction();
+                }
+                return builtAction.run(t);
+            }
+
+            @Override
+            public void preview(@NonNull Canvas canvas) {
+                if (builtAction != null) {
+                    builtAction.preview(canvas);
+                }
+            }
+        };
+    }
+
+    private Action buildMotifAction() {
         String motifPattern = getMotifPattern();
 
         List<Integer> purple = new ArrayList<>();
-        List<Integer> green  = new ArrayList<>();
+        List<Integer> green = new ArrayList<>();
 
         for (int i = 0; i < holders.length; i++) {
             String color = holders[i].getColor();
-            if ("PURPLE".equals(color)) purple.add(i);
-            else if ("GREEN".equals(color)) green.add(i);
+            if ("PURPLE".equals(color)) {
+                purple.add(i);
+            } else if ("GREEN".equals(color)) {
+                green.add(i);
+            }
         }
 
         List<Action> actions = new ArrayList<>();
@@ -220,15 +243,23 @@ public class Indexer {
             Holder h = null;
 
             if (target == 'P') {
-                if (!purple.isEmpty())      h = holders[purple.remove(0)];
-                else if (!green.isEmpty())  h = holders[green.remove(0)];   // substitute
+                if (!purple.isEmpty()) {
+                    h = holders[purple.remove(0)];
+                } else if (!green.isEmpty()) {
+                    h = holders[green.remove(0)];
+                }
             } else if (target == 'G') {
-                if (!green.isEmpty())       h = holders[green.remove(0)];
-                else if (!purple.isEmpty()) h = holders[purple.remove(0)];  // substitute
+                if (!green.isEmpty()) {
+                    h = holders[green.remove(0)];
+                } else if (!purple.isEmpty()) {
+                    h = holders[purple.remove(0)];
+                }
             } else {
-                // Unknown char: just shoot anything available
-                if (!purple.isEmpty())      h = holders[purple.remove(0)];
-                else if (!green.isEmpty())  h = holders[green.remove(0)];
+                if (!purple.isEmpty()) {
+                    h = holders[purple.remove(0)];
+                } else if (!green.isEmpty()) {
+                    h = holders[green.remove(0)];
+                }
             }
 
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
@@ -237,54 +268,7 @@ public class Indexer {
 
         return new SequentialAction(actions.toArray(new Action[0]));
     }
-//
-//    public class AutoShootMotifAction implements Action {
-//        @Override
-//        public boolean run(@NonNull TelemetryPacket packet) {
-//            String motifPattern = getMotifPattern();
-//
-//            List<Integer> purple = new ArrayList<>();
-//            List<Integer> green = new ArrayList<>();
-//
-//            for (int i = 0; i < holders.length; i++) {
-//                String color = holders[i].getColor();
-//                if ("PURPLE".equals(color)) purple.add(i);
-//                else if ("GREEN".equals(color)) green.add(i);
-//            }
-//
-//            for (int i = 0; i < motifPattern.length(); i++) {
-//                char target = motifPattern.charAt(i);
-//
-//                Holder h = null;
-//
-//                if (target == 'P') {
-//                    if (!purple.isEmpty()) h = holders[purple.remove(0)];
-//                    else if (!green.isEmpty()) h = holders[green.remove(0)];   // substitute
-//                } else if (target == 'G') {
-//                    if (!green.isEmpty()) h = holders[green.remove(0)];
-//                    else if (!purple.isEmpty()) h = holders[purple.remove(0)];  // substitute
-//                } else {
-//                    // Unknown char: just shoot anything available
-//                    if (!purple.isEmpty()) h = holders[purple.remove(0)];
-//                    else if (!green.isEmpty()) h = holders[green.remove(0)];
-//                }
-//
-//                if (h != null) {
-//                    try {
-//                        h.kickReset();
-//                        wait((long) motifShootSleep);
-//                    } catch (InterruptedException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//            }
-//            return false;
-//        }
-//    }
-//
-//    public AutoShootMotifAction autoShootMotifAction() {
-//        return new AutoShootMotifAction();
-//    }
+
 
     public static String getMotifPattern() {
         if (Bot.motif == null) {
@@ -368,12 +352,6 @@ public class Indexer {
                     new InstantAction(this::reset)
             );
         }
-
-//        public void kickReset() throws InterruptedException {
-//            kick();
-//            wait((long) kickerSleep);
-//            reset();
-//        }
 
         public Action jiggleResetAction(double delta, double sleepSeconds) {
             return new SequentialAction(
