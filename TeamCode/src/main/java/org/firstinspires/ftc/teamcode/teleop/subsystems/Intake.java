@@ -8,9 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 @Config
 public class Intake {
 
-    public static double intakePower = -1, storagePower = 0.32, reversePower = 0.8;
-    public static int filterWindowSize = 7;
-    public static double beamThreshold = 0.2, colorThreshold = 0.30;
+    public static double intakePower = -1, storagePower = 0.32, reversePower = 1;
 
     private final MotorEx motor;
 

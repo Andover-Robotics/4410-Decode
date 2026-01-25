@@ -21,11 +21,10 @@ public class Pos {
 
     public static Pose2d gate = new Pose2d(-12, 62.5, GATE_INTAKE_ANGLE);
 
-    public static Pose2d gateIntake = new Pose2d(-12, 60, GATE_INTAKE_ANGLE);
-    public static Pose2d gateSideOpen = new Pose2d(3, 57, Math.toRadians(0));
+    public static Pose2d gateSideOpen = new Pose2d(3, 60, Math.toRadians(0));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 29, Math.toRadians(90));
-    public static int closeIntake = 20;
+    public static int closeIntake = 22;
 
     public static Pose2d blueFarIntake = new Pose2d(-35, 29, Math.toRadians(90));
     public static int farIntake = 31;

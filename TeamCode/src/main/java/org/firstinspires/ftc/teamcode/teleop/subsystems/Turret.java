@@ -134,7 +134,7 @@ public class Turret {
      *  3) turretTargetCW = -relToRobotCCW + TURRET_ZERO_CW_OFFSET
      */
     private double aimAtGlobalPoint(double targetX, double targetY) {
-        pose = Bot.drive.localizer.getPose();
+        pose = Bot.storedPose;
 
         // Robot heading in radians (CCW+)
         double headingRad = pose.heading.log();
@@ -176,7 +176,7 @@ public class Turret {
     public void velocityCompensation(double dx, double dy) {
         if (getPositionDegs() < highLimit - 10 && getPositionDegs() > lowLimit + 10) {
             double time = calculateTime(dx, dy);
-            velocity = Bot.drive.localizer.update();
+            velocity = Bot.drive.localizer.getPoseVelocity();
 //        double dispX = velocity.linearVel.x * time;
 //        double dispY = velocity.linearVel.y * time;
 //        POS_TRACK_X = dx + dispX;
