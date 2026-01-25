@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
-import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot.DeferredAction;
+//import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot.FreshDeferredAction;
 
 import java.util.*;
 
@@ -41,6 +41,9 @@ public class Indexer {
     static final double DISTANCE_THRESHOLD_MM = 28.0;
     public int gain = 20;
     public static boolean staggerSensorUpdates = true;
+
+    public static double jiggleKickerDelta = 0.025;
+    public static double jiggleKickerSleep = 0.05;
 
     /* ================= HOLDERS ================= */
 
@@ -131,6 +134,14 @@ public class Indexer {
     public Action shootLeft()  { return leftHolder.kickResetAction(); }
     public Action shootBack()  { return backHolder.kickResetAction(); }
 
+    public Action jiggleKickers() {
+        List<Action> actions = new ArrayList<>();
+        for (Holder h : holders) {
+            actions.add(h.jiggleResetAction(jiggleKickerDelta, jiggleKickerSleep));
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
     /**
      * Rapid-fire all present holders, using rapidShootSleep between shots.
      */
@@ -188,43 +199,41 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
-        return new DeferredAction(() -> {
-            String motifPattern = getMotifPattern();
+        String motifPattern = getMotifPattern();
 
-            List<Integer> purple = new ArrayList<>();
-            List<Integer> green  = new ArrayList<>();
+        List<Integer> purple = new ArrayList<>();
+        List<Integer> green  = new ArrayList<>();
 
-            for (int i = 0; i < holders.length; i++) {
-                String color = holders[i].getColor();
-                if ("PURPLE".equals(color)) purple.add(i);
-                else if ("GREEN".equals(color)) green.add(i);
+        for (int i = 0; i < holders.length; i++) {
+            String color = holders[i].getColor();
+            if ("PURPLE".equals(color)) purple.add(i);
+            else if ("GREEN".equals(color)) green.add(i);
+        }
+
+        List<Action> actions = new ArrayList<>();
+
+        for (int i = 0; i < motifPattern.length(); i++) {
+            char target = motifPattern.charAt(i);
+
+            Holder h = null;
+
+            if (target == 'P') {
+                if (!purple.isEmpty())      h = holders[purple.remove(0)];
+                else if (!green.isEmpty())  h = holders[green.remove(0)];   // substitute
+            } else if (target == 'G') {
+                if (!green.isEmpty())       h = holders[green.remove(0)];
+                else if (!purple.isEmpty()) h = holders[purple.remove(0)];  // substitute
+            } else {
+                // Unknown char: just shoot anything available
+                if (!purple.isEmpty())      h = holders[purple.remove(0)];
+                else if (!green.isEmpty())  h = holders[green.remove(0)];
             }
 
-            List<Action> actions = new ArrayList<>();
+            actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
+            actions.add(new SleepAction(motifShootSleep));
+        }
 
-            for (int i = 0; i < motifPattern.length(); i++) {
-                char target = motifPattern.charAt(i);
-
-                Holder h = null;
-
-                if (target == 'P') {
-                    if (!purple.isEmpty())      h = holders[purple.remove(0)];
-                    else if (!green.isEmpty())  h = holders[green.remove(0)];   // substitute
-                } else if (target == 'G') {
-                    if (!green.isEmpty())       h = holders[green.remove(0)];
-                    else if (!purple.isEmpty()) h = holders[purple.remove(0)];  // substitute
-                } else {
-                    // Unknown char: just shoot anything available
-                    if (!purple.isEmpty())      h = holders[purple.remove(0)];
-                    else if (!green.isEmpty())  h = holders[green.remove(0)];
-                }
-
-                actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
-                actions.add(new SleepAction(motifShootSleep));
-            }
-
-            return new SequentialAction(actions.toArray(new Action[0]));
-        });
+        return new SequentialAction(actions.toArray(new Action[0]));
     }
 
 
@@ -309,6 +318,23 @@ public class Indexer {
                     new SleepAction(Indexer.kickerSleep),
                     new InstantAction(this::reset)
             );
+        }
+
+        public Action jiggleResetAction(double delta, double sleepSeconds) {
+            return new SequentialAction(
+                    new InstantAction(() -> jiggle(delta)),
+                    new SleepAction(sleepSeconds),
+                    new InstantAction(this::reset)
+            );
+        }
+
+        private void jiggle(double delta) {
+            double target = downPos - delta;
+            kicker.setPosition(clampPosition(target));
+        }
+
+        private double clampPosition(double position) {
+            return Math.max(0.0, Math.min(1.0, position));
         }
 
         private double safeDistance(RevColorSensorV3 s) {
