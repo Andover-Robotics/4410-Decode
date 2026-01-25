@@ -41,8 +41,6 @@ public class Turret {
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
-    public int startingOffset = 0;
-
     public ArrayList<Double> txArr, tyArr;
 
     private boolean velComp = true, shooterOverride = false;
@@ -66,7 +64,6 @@ public class Turret {
 
         timer.reset();
         lastTime = timer.seconds();
-        startingOffset = 45 * ((Bot.isBlue())? -1 : 1);
         txArr = new ArrayList<>(0);
         tyArr = new ArrayList<>(0);
     }

@@ -141,7 +141,6 @@ public class BotTester extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
                 shooting = !shooting;
-                Bot.drive.localizer.updateOffsets();
             }
 
             if (!bot.shooting) {
@@ -254,7 +253,7 @@ public class BotTester extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetEncoder();
             }
-            
+
             bot.periodic();
             drive();
 

@@ -19,7 +19,6 @@ public class Shooter {
 
     // basic control objects
     private final PIDController controller;
-    private final ElapsedTime timer = new ElapsedTime();
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
     public static double p = 0.002, i = 0.0, d = 0.0, f = 0.000185;
@@ -32,13 +31,9 @@ public class Shooter {
 
     // state estimation and data
     private double targetRPM = 0.0;
-    private double measuredRPM = 0.0;
     private double filteredRPM = 0.0;
     private double power = 0.0;
-    private double lastPos = 0.0;
-    private double lastTime = 0.0;
     private boolean closedLoopEnabled = true;
-    private boolean firstLoop = true;
 
 
     public Shooter(OpMode opMode) {
@@ -53,10 +48,6 @@ public class Shooter {
 
 
         controller = new PIDController(p, i, d);
-
-        timer.reset();
-        lastPos = motor1.getCurrentPosition();
-        lastTime = timer.seconds();
     }
 
     public void setVelocity(double rpm) {
@@ -82,16 +73,7 @@ public class Shooter {
     }
 
     public void periodic() {
-        // Update measurement
-        double now = timer.seconds();
-        double dt = now - lastTime;
-        if (dt <= 0) dt = 1e-3;
-
-        double pos = motor1.getCurrentPosition();
         filteredRPM = motor1.getVelocity() * 60 / 28;
-
-        lastPos = pos;
-        lastTime = now;
 
         controller.setPID(p, i, d);
 

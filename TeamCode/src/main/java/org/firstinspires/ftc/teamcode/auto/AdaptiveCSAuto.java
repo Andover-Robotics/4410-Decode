@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.auto;
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -354,8 +355,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
                             Pos.blueCloseIntake.position.y + Pos.closeIntake))
-
-//                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading)// TODO make this a config
                     .setReversed(true)
                     .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
                     .waitSeconds(1)// TODO make this a config
@@ -363,8 +362,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.75, (() -> bot.reverseIntake()))
-//                    .setReversed(true)
-//                    .splineTo(Pos.closeShoot, Math.toRadians(-15))
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
@@ -405,9 +402,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
                     .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
                     .waitSeconds(1)
-                    .stopAndAdd((() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .afterTime(0.1, bot.enableShooter())
+                    .afterTime(0.01, new SequentialAction(
+                            bot.enableShooter(),
+                            new SleepAction(0.5),
+                            new InstantAction((() -> bot.reverseIntake()))
+                    ))
                     .splineTo(Pos.closeShoot, Math.toRadians(-15))
                     .stopAndAdd(bot.indexer.shootMotif());
             addedAction = true;
