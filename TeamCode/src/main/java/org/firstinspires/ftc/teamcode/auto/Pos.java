@@ -16,7 +16,7 @@ public class Pos {
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueMidIntake = new Pose2d(-19, 29, Math.toRadians(90));
+    public static Pose2d blueMidIntake = new Pose2d(-16, 29, Math.toRadians(90));
     public static int midIntake = 31;
 
     public static Pose2d gate = new Pose2d(-12, 62.5, GATE_INTAKE_ANGLE);
