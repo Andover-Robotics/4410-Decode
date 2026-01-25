@@ -36,7 +36,7 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.28;
 
-    public static double proximityThreshold = 140.0;
+    public static double proximityThreshold = 28.0;
     public static boolean staggerSensorUpdates = true;
 
     public static double jiggleKickerDelta = 0.025;
@@ -407,6 +407,22 @@ public class Indexer {
 
         public String getColor() {
             return cachedColor;
+        }
+
+        public double getDistanceA() {
+            return distanceA;
+        }
+
+        public double getDistanceB() {
+            return distanceB;
+        }
+
+        public float getHueA() {
+            return hueA;
+        }
+
+        public float getHueB() {
+            return hueB;
         }
 
         public float hueFromSensor(RevColorSensorV3 sensor) {
