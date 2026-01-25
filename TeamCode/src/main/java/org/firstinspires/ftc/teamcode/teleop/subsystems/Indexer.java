@@ -362,7 +362,7 @@ public class Indexer {
 
         public void updateSensorCache(boolean updateSensorA, boolean updateSensorB) {
             if (updateSensorA) {
-                distanceA = sensorA.proximity;
+                distanceA = sensorA.distanceMm();
                 int r = Math.max(0, sensorA.red);
                 int g = Math.max(0, sensorA.green);
                 int b = Math.max(0, sensorA.blue);
@@ -371,7 +371,7 @@ public class Indexer {
             }
 
             if (updateSensorB) {
-                distanceB = sensorB.proximity;
+                distanceB = sensorB.distanceMm();
                 int r = Math.max(0, sensorB.red);
                 int g = Math.max(0, sensorB.green);
                 int b = Math.max(0, sensorB.blue);
