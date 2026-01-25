@@ -254,11 +254,8 @@ public class BotTester extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetEncoder();
             }
-
-
-
+            
             bot.periodic();
-            Bot.drive.localizer.update();
             drive();
 
             List<Action> newActions = new ArrayList<>();
@@ -342,8 +339,8 @@ public class BotTester extends LinearOpMode {
 
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             packet.fieldOverlay().setStroke("#3F51B5");
-            Drawing.drawRobot(packet.fieldOverlay(), Bot.drive.localizer.getPose());
-            telemetry.addData("Odom Pose", Bot.drive.localizer.getPose().position.x + " " + Bot.drive.localizer.getPose().position.y + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
+            Drawing.drawRobot(packet.fieldOverlay(), Bot.storedPose);
+            telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
 //
             FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
