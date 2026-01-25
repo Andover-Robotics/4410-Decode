@@ -60,6 +60,7 @@ public class BotTester extends LinearOpMode {
         bot.limelight.trackObelisk();
 
         while (!isStarted()) {
+            bot.clearBulkCache();
             bot.indexer.updateSensorCache();
 
             gp1.readButtons();

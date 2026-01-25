@@ -118,6 +118,7 @@ public final class MecanumDrive {
 
     public final Localizer localizer;
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
+    private final List<LynxModule> hubs;
 
     private final DownsampledWriter estimatedPoseWriter = new DownsampledWriter("ESTIMATED_POSE", 50_000_000);
     private final DownsampledWriter targetPoseWriter = new DownsampledWriter("TARGET_POSE", 50_000_000);
@@ -227,8 +228,9 @@ public final class MecanumDrive {
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        hubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule module : hubs) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
         // TODO: make sure your config has motors with these names (or change them)
@@ -458,6 +460,7 @@ public final class MecanumDrive {
     }
 
     public PoseVelocity2d updatePoseEstimate() {
+        clearBulkCache();
         PoseVelocity2d vel = localizer.update();
         poseHistory.add(localizer.getPose());
         Bot.storedPose = localizer.getPose();
@@ -470,6 +473,12 @@ public final class MecanumDrive {
         
         
         return vel;
+    }
+
+    public void clearBulkCache() {
+        for (LynxModule module : hubs) {
+            module.clearBulkCache();
+        }
     }
 
     private void drawPoseHistory(Canvas c) {

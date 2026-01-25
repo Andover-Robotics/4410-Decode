@@ -215,6 +215,7 @@ public class Bot {
     }
 
     public void periodic() {
+        clearBulkCache();
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
@@ -227,6 +228,10 @@ public class Bot {
                 intake.intake();
             }
         }
+    }
+
+    public void clearBulkCache() {
+        drive.clearBulkCache();
     }
 
     public Action actionPeriodic() {
