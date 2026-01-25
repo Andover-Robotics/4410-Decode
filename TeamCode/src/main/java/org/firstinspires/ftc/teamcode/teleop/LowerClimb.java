@@ -46,6 +46,7 @@ public class LowerClimb extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
+            bot.clearBulkCache();
             TelemetryPacket packet = new TelemetryPacket();
 
             gp1.readButtons();

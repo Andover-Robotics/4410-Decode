@@ -58,6 +58,7 @@ public class MainTeleop extends LinearOpMode {
 //        waitForStart();
 
         while (!isStarted()) {
+            bot.clearBulkCache();
             bot.indexer.updateSensorCache();
 
             gp1.readButtons();
