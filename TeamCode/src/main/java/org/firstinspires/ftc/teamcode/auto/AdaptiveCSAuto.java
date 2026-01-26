@@ -164,6 +164,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
             bot.switchAlliance();
             bot.limelight.trackObelisk();
+            addedAction = true;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
@@ -174,6 +175,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+            addedAction = true;
             switch (selectedSegment) {
                 case 0:
                     cfg.startFar = !cfg.startFar;
@@ -202,9 +204,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
         int delta = 0;
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+            addedAction = true;
             delta = +1;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+            addedAction = true;
             delta = -1;
         }
 
@@ -268,7 +272,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
 
-        addedAction = false;
         int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
@@ -280,20 +283,23 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd(bot.enableShooter())
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-15)) //shoot once we've entered close zone
+                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
 
 //            builder = cfg.startFar ?
 //                    builder
+//                            .stopAndAdd(bot.enableShooter())
 //                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0)) //shoot once we've entered close zone
 //                            .stopAndAdd(bot.indexer.shootRapidFire())
 //                            .stopAndAdd((() -> bot.disableShooter()))
 //                            :
 //                    builder
-//                            .waitSeconds(0.3)
-//                            .afterTime(0.8, bot.indexer.shootRapidFire()) //shoot AS we get to close shooting position
-//                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0)) //don't want to shoot while spinning bc turret lag
+//                            .stopAndAdd(bot.enableShooter())
+//                            .waitSeconds(0.35)
+//                            .afterTime(0.85, bot.indexer.shootRapidFire()) //shoot AS we get to close shooting position
+//                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-8)) //don't want to shoot while spinning bc turret lag
+//                            .waitSeconds(0.2)
 //                            .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -314,7 +320,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
-//                    .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
@@ -332,10 +337,13 @@ public class AdaptiveCSAuto extends LinearOpMode {
 //                    .strafeToLinearHeading(Pos.gate.position, Pos.gate.heading) //TODO try spline heading
                     .splineToSplineHeading(Pos.gate, Math.toRadians(105))
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .waitSeconds(1)
+                    .waitSeconds(0.3)
+                    .strafeToConstantHeading(Pos.gateIntaking.position)
+                    .waitSeconds(0.3)
                     .stopAndAdd(bot.enableShooter())
-                    .waitSeconds(1)
+                    .waitSeconds(0.5)
                     .stopAndAdd((() -> bot.reverseIntake()))
+                    .afterTime(0.2, bot.indexer.jiggleKickers())
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-45))
                     .stopAndAdd(bot.indexer.shootRapidFire())
@@ -354,13 +362,14 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
                             Pos.blueCloseIntake.position.y + Pos.closeIntake))
+
                     .setReversed(true)
                     .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
-                    .waitSeconds(0.75)// TODO make this a config
+                    .waitSeconds(0.65)// TODO make this a config
 
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.1, bot.indexer.jiggleKickers())
-                    .afterTime(0.75, (() -> bot.reverseIntake()))
+                    .afterTime(0.4, bot.indexer.jiggleKickers())
+                    .afterTime(1.1, (() -> bot.reverseIntake()))
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
@@ -381,8 +390,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
                             Pos.blueFarIntake.position.y + Pos.farIntake))
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.1, bot.indexer.jiggleKickers())
-                    .afterTime(0.75, (() -> bot.reverseIntake()))
+                    .afterTime(0.4, bot.indexer.jiggleKickers())
+                    .afterTime(1.00, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineTo(Pos.closeShoot, Math.toRadians(-25))
                     .stopAndAdd(bot.indexer.shootMotif())
@@ -398,15 +407,15 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 11.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
-                    .waitSeconds(1)
+                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 8.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
+                    .waitSeconds(0.75)
                     .setReversed(true)
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
-                            new SleepAction(0.5),
+                            new SleepAction(0.4),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-                    .splineTo(Pos.closeShoot, Math.toRadians(-15))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-45))
                     .stopAndAdd(bot.indexer.shootMotif());
             addedAction = true;
         }
