@@ -98,15 +98,23 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
     }
 
     public static class APDS9151 extends I2CDevice {
+        private static final int COLOR_COMPONENT_MAX = 255;
+
         private final BitSet config = new BitSet(getInitLength());
 
         public boolean disconnected = false;
 
         public short proximity;
+        public int rawInfrared;
+        public int rawRed;
+        public int rawGreen;
+        public int rawBlue;
+
         public int infrared;
         public int red;
         public int green;
         public int blue;
+        public int alpha;
 
         protected int getValue() {
             return 0;
@@ -126,6 +134,38 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
 
         protected BitSet getConfig() {
             return config;
+        }
+
+        private void postProcessColors() {
+            int correctedRed = rawRed - rawInfrared;
+            int correctedGreen = rawGreen - rawInfrared;
+            int correctedBlue = rawBlue - rawInfrared;
+
+            correctedRed = Math.max(0, correctedRed);
+            correctedGreen = Math.max(0, correctedGreen);
+            correctedBlue = Math.max(0, correctedBlue);
+
+            int maxChannel = Math.max(correctedRed, Math.max(correctedGreen, correctedBlue));
+
+            if (maxChannel <= 0) {
+                red = 0;
+                green = 0;
+                blue = 0;
+                alpha = 0;
+                infrared = 0;
+                return;
+            }
+
+            float scale = COLOR_COMPONENT_MAX / (float) maxChannel;
+
+            red = Math.min(COLOR_COMPONENT_MAX, Math.round(correctedRed * scale));
+            green = Math.min(COLOR_COMPONENT_MAX, Math.round(correctedGreen * scale));
+            blue = Math.min(COLOR_COMPONENT_MAX, Math.round(correctedBlue * scale));
+            alpha = Math.min(
+                    COLOR_COMPONENT_MAX,
+                    Math.round((correctedRed + correctedGreen + correctedBlue) / 3f * scale)
+            );
+            infrared = Math.min(COLOR_COMPONENT_MAX, Math.round(rawInfrared * scale));
         }
 
         protected void parseUpdate(BitSet data, int start) {
@@ -174,7 +214,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     infraredChunk.length
             );
 
-            infrared = ByteBuffer
+            rawInfrared = ByteBuffer
                     .wrap(paddedInfraredChunk)
                     .order(BYTE_ORDER)
                     .getInt();
@@ -198,7 +238,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     redChunk.length
             );
 
-            red = ByteBuffer
+            rawRed = ByteBuffer
                     .wrap(paddedRedChunk)
                     .order(BYTE_ORDER)
                     .getInt();
@@ -222,7 +262,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     greenChunk.length
             );
 
-            green = ByteBuffer
+            rawGreen = ByteBuffer
                     .wrap(paddedGreenChunk)
                     .order(BYTE_ORDER)
                     .getInt();
@@ -246,10 +286,12 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     blueChunk.length
             );
 
-            blue = ByteBuffer
+            rawBlue = ByteBuffer
                     .wrap(paddedBlueChunk)
                     .order(BYTE_ORDER)
                     .getInt();
+
+            postProcessColors();
         }
     }
 
