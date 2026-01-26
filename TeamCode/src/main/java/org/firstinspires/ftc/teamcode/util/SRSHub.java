@@ -102,11 +102,18 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
 
         public boolean disconnected = false;
 
+        public int rawInfrared;
+        public int rawRed;
+        public int rawGreen;
+        public int rawBlue;
+
         public short proximity;
         public int infrared;
         public int red;
         public int green;
         public int blue;
+        private static final int COLOR_MAX_VALUE = 0xFFFF;
+        private static final int COLOR_ROUNDING = 0x80;
         private static final double A_PARAM = 325.961;
         private static final double B_INV_PARAM = -0.75934;
         private static final double C_PARAM = 26.980;
@@ -183,6 +190,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     .order(BYTE_ORDER)
                     .getInt();
 
+            rawInfrared = infrared;
             index += 16;
 
             byte[] redChunk = data
@@ -207,6 +215,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     .order(BYTE_ORDER)
                     .getInt();
 
+            rawRed = red;
             index += 16;
 
             byte[] greenChunk = data
@@ -231,6 +240,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     .order(BYTE_ORDER)
                     .getInt();
 
+            rawGreen = green;
             index += 16;
 
             byte[] blueChunk = data
@@ -254,6 +264,22 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     .wrap(paddedBlueChunk)
                     .order(BYTE_ORDER)
                     .getInt();
+
+            rawBlue = blue;
+
+            applyColorPostprocessing();
+        }
+
+        private void applyColorPostprocessing() {
+            infrared = postProcessColor(rawInfrared);
+            red = postProcessColor(rawRed);
+            green = postProcessColor(rawGreen);
+            blue = postProcessColor(rawBlue);
+        }
+
+        private int postProcessColor(int color) {
+            int clamped = Math.max(0, Math.min(COLOR_MAX_VALUE, color));
+            return (clamped + COLOR_ROUNDING) >> 8;
         }
 
         public double distanceMm() {
