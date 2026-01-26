@@ -107,6 +107,10 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
         public int red;
         public int green;
         public int blue;
+        private static final double A_PARAM = 325.961;
+        private static final double B_INV_PARAM = -0.75934;
+        private static final double C_PARAM = 26.980;
+        private static final double MAX_DIST_IN = 6.0;
 
         protected int getValue() {
             return 0;
@@ -250,6 +254,19 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     .wrap(paddedBlueChunk)
                     .order(BYTE_ORDER)
                     .getInt();
+        }
+
+        public double distanceMm() {
+            double inches = inFromOptical(proximity);
+            return inches * 25.4;
+        }
+
+        private double inFromOptical(int rawOptical) {
+            if (rawOptical <= C_PARAM) {
+                return MAX_DIST_IN;
+            }
+            double dist = Math.pow((rawOptical - C_PARAM) / A_PARAM, B_INV_PARAM);
+            return Math.min(dist, MAX_DIST_IN);
         }
     }
 
