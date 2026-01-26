@@ -34,12 +34,14 @@ public class AdaptiveCSAuto extends LinearOpMode {
         public boolean runMid     = true;
         public int gateCycles = 0;
         public boolean runClose   = true;
+        public boolean runOpenGate = true;
         public boolean runFar     = true;
         public boolean runHp      = true;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
         public int delayClose   = 0;
+        public int delayOpenGate = 0;
         public int delayMid     = 0;
         public int delayFar     = 0;
         public int delayHp      = 0;
@@ -47,7 +49,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = far, 6 = hp
+    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = open gate, 6 = far, 7 = hp
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -91,9 +93,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     cfg.gateCycles, cfg.delayGate);
             addSegmentLine(4, "Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayClose);
-            addSegmentLine(5, "Far:     run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(5, "Open Gate: run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runOpenGate, cfg.delayOpenGate);
+            addSegmentLine(6, "Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayFar);
-            addSegmentLine(6, "HP:      run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(7, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayHp);
             if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
@@ -115,8 +119,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
-        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b far:%b hp:%b",
-                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runFar, cfg.runHp);
+        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b openGate:%b far:%b hp:%b",
+                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runOpenGate, cfg.runFar, cfg.runHp);
         telemetry.update();
 
         applyStartingPosition(drive);
@@ -168,10 +172,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 7 - 1) % 7;
+            selectedSegment = (selectedSegment + 8 - 1) % 8;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 7;
+            selectedSegment = (selectedSegment + 1) % 8;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
@@ -194,9 +198,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     cfg.runClose = !cfg.runClose;
                     break;
                 case 5:
-                    cfg.runFar = !cfg.runFar;
+                    cfg.runOpenGate = !cfg.runOpenGate;
                     break;
                 case 6:
+                    cfg.runFar = !cfg.runFar;
+                    break;
+                case 7:
                     cfg.runHp = !cfg.runHp;
                     break;
             }
@@ -233,10 +240,14 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             clampDelay(cfg.delayClose + delta);
                     break;
                 case 5:
+                    cfg.delayOpenGate =
+                            clampDelay(cfg.delayOpenGate + delta);
+                    break;
+                case 6:
                     cfg.delayFar =
                             clampDelay(cfg.delayFar + delta);
                     break;
-                case 6:
+                case 7:
                     cfg.delayHp =
                             clampDelay(cfg.delayHp + delta);
                     break;
@@ -361,20 +372,30 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90),
                             drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 65))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + Pos.closeIntake))
+                            Pos.blueCloseIntake.position.y + Pos.closeIntake));
+            addedAction = true;
+        }
 
+        if (cfg.runOpenGate) {
+            if (cfg.delayOpenGate > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayOpenGate));
+                addedAction = true;
+            }
+            builder = builder
                     .setReversed(true)
                     .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
-                    .waitSeconds(0.65)// TODO make this a config
+                    .waitSeconds(0.65);// TODO make this a config
+            addedAction = true;
+        }
 
+        if (cfg.runClose) {
+            builder = builder
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.1, (() -> bot.reverseIntake()))
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165))
                     .stopAndAdd(bot.indexer.shootMotif())
                     .stopAndAdd((() -> bot.disableShooter()));
-
-
             addedAction = true;
         }
 

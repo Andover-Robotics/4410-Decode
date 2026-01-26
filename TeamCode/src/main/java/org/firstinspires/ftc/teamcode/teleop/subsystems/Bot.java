@@ -55,7 +55,7 @@ public class Bot {
         UNKNOWN //TODO Remove
     }
 
-    public static Motif motif = Motif.PPG; //TODO Remove this so it doesn't reset every time we run an opmode, and stores it (currently initialized just for testing)
+    public static Motif motif = Motif.PPG;
 
     private static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     private static startingPosition startingPos = startingPosition.FAR;
