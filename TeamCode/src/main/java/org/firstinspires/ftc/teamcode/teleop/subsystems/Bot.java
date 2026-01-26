@@ -227,6 +227,17 @@ public class Bot {
             return true;
         }
     }
+//
+//    public Action actionNoScreenPeriodic() {
+//        return new actionPeriodic();
+//    }
+//    public class actionNoScreenPeriodic implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket packet) {
+//            periodic();
+//            return true;
+//        }
+//    }
 
     // get bot instance
     public static Bot getInstance() {

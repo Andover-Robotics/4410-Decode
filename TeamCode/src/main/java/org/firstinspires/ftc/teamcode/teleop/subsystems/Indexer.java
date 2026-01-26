@@ -36,11 +36,18 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.28;
 
-    public static double proximityThreshold = 28.0;
+    public static double proximityThreshold = 28;
     public static boolean staggerSensorUpdates = true;
 
     public static double jiggleKickerDelta = 0.025;
     public static double jiggleKickerSleep = 0.05;
+
+    public static double
+            greenHueLow = 131,
+            greenHueHigh = 139.5,
+            purpleHueLow = 139.6,
+            purpleHueHigh = 210;
+    
 
     /* ================= HOLDERS ================= */
 
@@ -402,8 +409,8 @@ public class Indexer {
             return cachedBallPresent;
         }
 
-        private boolean isGreenHue(float h)  { return h > 153 && h < 185; }
-        private boolean isPurpleHue(float h) { return h > 185 && h < 235; }
+        private boolean isGreenHue(float h)  { return h > greenHueLow && h < greenHueHigh; }
+        private boolean isPurpleHue(float h) { return h > purpleHueLow && h < purpleHueHigh; }
 
         public String getColor() {
             return cachedColor;
