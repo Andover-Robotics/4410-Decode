@@ -305,5 +305,4 @@ public class Turret {
     public double getPower() {
         return power;
     }
-
 }

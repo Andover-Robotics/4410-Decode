@@ -4,13 +4,18 @@ import static java.lang.Thread.sleep;
 
 import androidx.annotation.NonNull;
 
+import com.qualcomm.hardware.broadcom.BroadcomColorSensor;
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
+import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.qualcomm.robotcore.util.TypeConversion;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -111,6 +116,9 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
         private static final double B_INV_PARAM = -0.75934;
         private static final double C_PARAM = 26.980;
         private static final double MAX_DIST_IN = 6.0;
+        private int softwareGain = 20;
+        private int saturation = 65535;
+        NormalizedRGBA colors = new NormalizedRGBA();
 
         protected int getValue() {
             return 0;
@@ -133,6 +141,21 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
         }
 
         protected void parseUpdate(BitSet data, int start) {
+//                final int dib = 0;
+//                this.green = TypeConversion.unsignedShortToInt(TypeConversion.byteArrayToShort(data, dib, ByteOrder.LITTLE_ENDIAN));
+//                this.blue = Range.clip((int) (1.55 * TypeConversion.unsignedShortToInt(TypeConversion.byteArrayToShort(
+//                        data, dib + 3, ByteOrder.LITTLE_ENDIAN))), 0, 65535);
+//                this.red = Range.clip((int) (1.07 * TypeConversion.unsignedShortToInt(TypeConversion.byteArrayToShort(
+//                        data, dib + 6, ByteOrder.LITTLE_ENDIAN))), 0, 65535);
+//
+//
+//                // normalize to [0, 1]
+//                this.red = Range.clip(((float)this.red * this.softwareGain) / parameters.colorSaturation, 0f, 1f);
+//                this.green = Range.clip(((float)this.green * this.softwareGain) / parameters.colorSaturation, 0f, 1f);
+//                this.blue = Range.clip(((float)this.blue * this.softwareGain) / parameters.colorSaturation, 0f, 1f);
+//
+//            //testing stuf from v3 rev class for post processing
+
             int index = start;
 
             disconnected = data.get(index++);
@@ -253,7 +276,40 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
             blue = ByteBuffer
                     .wrap(paddedBlueChunk)
                     .order(BYTE_ORDER)
-                    .getInt();
+                    .getInt();//so srshub should be giving 255 but the code below thinks its getting it from 65535
+
+            this.colors.red = Range.clip(((float)this.red * (float)1.07 * this.softwareGain) / saturation, 0f, 1f);
+            this.colors.green = Range.clip(((float)this.green * this.softwareGain) / saturation, 0f, 1f);
+            this.colors.blue = Range.clip(((float)this.blue * (float)1.55 * this.softwareGain) / saturation, 0f, 1f);
+        }
+
+        public NormalizedRGBA getNormalizedColors() {return this.colors;}
+
+        public float hue() {
+            final float[] hsv = new float[3];
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return hsv[0];
+        }
+
+        public float saturation() {
+            final float[] hsv = new float[3];
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return hsv[1];
+        }
+
+        public float value() {
+            final float[] hsv = new float[3];
+            int r = Math.round(colors.red * 255f);
+            int g = Math.round(colors.green * 255f);
+            int b = Math.round(colors.blue * 255f);
+            android.graphics.Color.RGBToHSV(r, g, b, hsv);
+            return hsv[2];
         }
 
         public double distanceMm() {

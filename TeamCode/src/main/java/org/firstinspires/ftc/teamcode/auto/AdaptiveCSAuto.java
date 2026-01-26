@@ -314,7 +314,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
-                    .afterTime(1.25, (() -> bot.reverseIntake()))
 //                    .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
                     .stopAndAdd(bot.indexer.shootRapidFire())
@@ -357,7 +356,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             Pos.blueCloseIntake.position.y + Pos.closeIntake))
                     .setReversed(true)
                     .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
-                    .waitSeconds(1)// TODO make this a config
+                    .waitSeconds(0.75)// TODO make this a config
 
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())

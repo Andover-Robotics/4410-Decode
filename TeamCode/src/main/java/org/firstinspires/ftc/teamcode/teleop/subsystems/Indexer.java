@@ -45,14 +45,19 @@ public class Indexer {
     public static double proximityThreshold = 28;
     public static boolean staggerSensorUpdates = true;
 
-    public static double jiggleKickerDelta = 0.025;
+    public static double jiggleKickerDelta = 0.015;
     public static double jiggleKickerSleep = 0.05;
 
+//    public static double //srshub values
+//            greenHueLow = 131,
+//            greenHueHigh = 139.5,
+//            purpleHueLow = 139.6,
+//            purpleHueHigh = 210;
     public static double
-            greenHueLow = 131,
-            greenHueHigh = 139.5,
-            purpleHueLow = 139.6,
-            purpleHueHigh = 210;
+            greenHueLow = 153,
+            greenHueHigh = 185,
+            purpleHueLow = 185,
+            purpleHueHigh = 235;
 
 
     /* ================= HOLDERS ================= */
@@ -334,7 +339,7 @@ public class Indexer {
     public static class Holder {
 
         final Servo kicker;
-        final SRSHub.APDS9151 sensorA;
+        public final SRSHub.APDS9151 sensorA;
         final SRSHub.APDS9151 sensorB;
 
         private final double upPos;
@@ -408,20 +413,23 @@ public class Indexer {
         public void updateSensorCache(boolean updateSensorA, boolean updateSensorB) {
             if (updateSensorA) {
                 distanceA = sensorA.distanceMm();
-                int r = Math.max(0, sensorA.red);
-                int g = Math.max(0, sensorA.green);
-                int b = Math.max(0, sensorA.blue);
-                android.graphics.Color.RGBToHSV(r, g, b, hsv);
-                hueA = hsv[0];
+
+//                int r = Math.max(0, sensorA.red);
+//                int g = Math.max(0, sensorA.green);
+//                int b = Math.max(0, sensorA.blue);
+//                android.graphics.Color.RGBToHSV(r, g, b, hsv);
+//                hueA = hsv[0];
+                hueA = sensorA.hue();
             }
 
             if (updateSensorB) {
                 distanceB = sensorB.distanceMm();
-                int r = Math.max(0, sensorB.red);
-                int g = Math.max(0, sensorB.green);
-                int b = Math.max(0, sensorB.blue);
-                android.graphics.Color.RGBToHSV(r, g, b, hsv);
-                hueB = hsv[0];
+//                int r = Math.max(0, sensorB.red);
+//                int g = Math.max(0, sensorB.green);
+//                int b = Math.max(0, sensorB.blue);
+//                android.graphics.Color.RGBToHSV(r, g, b, hsv);
+//                hueB = hsv[0];
+                hueB = sensorB.hue();
             }
 
             boolean presentA = distanceA > 0 && distanceA < distanceThreshold;
@@ -488,5 +496,4 @@ public class Indexer {
             return Arrays.toString(hsv);
         }
     }
-
 }

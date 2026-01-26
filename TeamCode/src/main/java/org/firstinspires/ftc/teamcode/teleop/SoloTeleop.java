@@ -180,9 +180,9 @@ public class SoloTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                runningActions.add(bot.indexer.shootRapidFireSensor());
+//                runningActions.add(bot.indexer.shootRapidFireSensor());
 //                runningActions.add(bot.shootAutoRapidFire());
-//                bot.indexer.holders[0].kickReset();
+                runningActions.add(bot.indexer.jiggleKickers());
 //                wait((long) 0.4);
             }
 
