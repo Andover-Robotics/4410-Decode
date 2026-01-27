@@ -180,31 +180,40 @@ public class SoloTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-//                runningActions.add(bot.indexer.shootRapidFireSensor());
+                runningActions.add(bot.indexer.shootRapidFireSensor());
 //                runningActions.add(bot.shootAutoRapidFire());
-                runningActions.add(bot.indexer.jiggleKickers());
+//                runningActions.add(bot.indexer.jiggleKickers());
 //                wait((long) 0.4);
             }
 
+//            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
+//                runningActions.add(bot.indexer.shootRight());
+//            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
+//                runningActions.add(bot.indexer.shootLeft());
+//            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.Y) && !bot.shooting) {
+//                runningActions.add(bot.indexer.shootBack());
+//            }
+//
             if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
-                runningActions.add(bot.indexer.shootRight());
+                runningActions.add(bot.indexer.shootGreen());
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
-                runningActions.add(bot.indexer.shootLeft());
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.Y) && !bot.shooting) {
-                runningActions.add(bot.indexer.shootBack());
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && !bot.shooting && gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.1) {
                 runningActions.add(bot.indexer.shootPurple());
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
-                runningActions.add(bot.indexer.shootGreen());
-            }
+
+//            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) && !bot.shooting && gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.1) {
+//                runningActions.add(bot.indexer.shootPurple());
+//            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
+//                runningActions.add(bot.indexer.shootGreen());
+//            }
 
 
             // CLIMB
@@ -372,7 +381,7 @@ public class SoloTeleop extends LinearOpMode {
 
     // Driving
     private void drive() { // Robot centric, drive multiplier default 1
-        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        driveSpeed = driveMultiplier; // - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
 //        bot.fixMotors();
         com.arcrobotics.ftclib.geometry.Vector2d driveVector = new com.arcrobotics.ftclib.geometry.Vector2d(-gp1.getLeftX(), -gp1.getLeftY());

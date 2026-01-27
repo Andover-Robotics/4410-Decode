@@ -245,6 +245,10 @@ public class MainTeleop extends LinearOpMode {
                 bot.turret.resetEncoder();
             }
 
+            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.indexer.jiggleKickers();
+            }
+
 
             bot.periodic();
             drive();

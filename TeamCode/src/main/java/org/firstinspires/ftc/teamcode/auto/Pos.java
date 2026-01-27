@@ -16,19 +16,19 @@ public class Pos {
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueMidIntake = new Pose2d(-16, 29, Math.toRadians(90));
-    public static int midIntake = 31;
+    public static Pose2d blueMidIntake = new Pose2d(-16, 32, Math.toRadians(90));
+    public static int midIntake = 32;
 
     public static Pose2d gate = new Pose2d(-12, 62.5, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-15, 62.5, GATE_INTAKE_ANGLE);
+    public static Pose2d gateIntaking = new Pose2d(-14, 62.5, GATE_INTAKE_ANGLE);
 
-    public static Pose2d gateSideOpen = new Pose2d(3, 61, Math.toRadians(0));
+    public static Pose2d gateSideOpen = new Pose2d(3, 61, Math.toRadians(-10));
 
-    public static Pose2d blueCloseIntake = new Pose2d(11, 29, Math.toRadians(90));
-    public static int closeIntake = 25;
+    public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
+    public static int closeIntake = 22;
 
-    public static Pose2d blueFarIntake = new Pose2d(-35, 29, Math.toRadians(90));
-    public static int farIntake = 31;
+    public static Pose2d blueFarIntake = new Pose2d(-35, 32, Math.toRadians(90));
+    public static int farIntake = 32;
 
     public static Pose2d blueHpIntake = new Pose2d(-53, 67, Math.toRadians(179));
 

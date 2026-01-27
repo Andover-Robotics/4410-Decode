@@ -27,14 +27,14 @@ public class Indexer {
     /* ================= CONFIG ================= */
 
 
-    public static double kickerLeftDown  = 0.705;
+    public static double kickerLeftDown  = 0.697;
     public static double kickerLeftUp    = 0.39;
     public static double kickerRightDown = 0.635;
     public static double kickerRightUp   = 0.325;
     public static double kickerBackDown  = 0.60;
     public static double kickerBackUp    = 0.29;
 
-    public static double kickerSleep = 0.195;
+    public static double kickerSleep = 0.198;
 
     // Rapid fire between shots (normal)
     public static double rapidShootSleep = 0.04;
@@ -67,37 +67,37 @@ public class Indexer {
     public final Holder backHolder;
 
     public final Holder[] holders;
-    private final SRSHub srsHubLeft;
-    private final SRSHub srsHubRight;
+    private static SRSHub srsHubLeft;
+    private static SRSHub srsHubRight;
     private boolean updateLeftNext = true;
+    private static boolean srsInit = false;
+    static SRSHub.APDS9151 rightFront = new SRSHub.APDS9151();
+    static SRSHub.APDS9151 rightBack = new SRSHub.APDS9151();
+    static SRSHub.APDS9151 backBottom = new SRSHub.APDS9151();
+    static SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
+    static SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
+    static SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
 
     /* ================= INIT ================= */
 
     public Indexer(OpMode opMode) {
-        SRSHub leftHub = opMode.hardwareMap.get(SRSHub.class, "srshubLeft");
-        SRSHub rightHub = opMode.hardwareMap.get(SRSHub.class, "srshubRight");
+        srsHubLeft = opMode.hardwareMap.get(SRSHub.class, "srshubLeft");
+        srsHubRight = opMode.hardwareMap.get(SRSHub.class, "srshubRight");
 
-        SRSHub.APDS9151 rightFront = new SRSHub.APDS9151();
-        SRSHub.APDS9151 rightBack = new SRSHub.APDS9151();
-        SRSHub.APDS9151 backBottom = new SRSHub.APDS9151();
-        SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
-        SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
-        SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
+        if (!srsInit) {
+            SRSHub.Config leftConfig = new SRSHub.Config();
+            leftConfig.addI2CDevice(1, rightFront);
+            leftConfig.addI2CDevice(2, rightBack);
+            leftConfig.addI2CDevice(3, backBottom);
 
-        SRSHub.Config leftConfig = new SRSHub.Config();
-        leftConfig.addI2CDevice(1, rightFront);
-        leftConfig.addI2CDevice(2, rightBack);
-        leftConfig.addI2CDevice(3, backBottom);
-        leftHub.init(leftConfig);
-
-        SRSHub.Config rightConfig = new SRSHub.Config();
-        rightConfig.addI2CDevice(1, leftFront);
-        rightConfig.addI2CDevice(2, leftBack);
-        rightConfig.addI2CDevice(3, backRight);
-        rightHub.init(rightConfig);
-
-        srsHubLeft = leftHub;
-        srsHubRight = rightHub;
+            SRSHub.Config rightConfig = new SRSHub.Config();
+            rightConfig.addI2CDevice(1, leftFront);
+            rightConfig.addI2CDevice(2, leftBack);
+            rightConfig.addI2CDevice(3, backRight);
+            srsHubLeft.init(leftConfig);
+            srsHubRight.init(rightConfig);
+            srsInit = true;
+        }
 
         rightHolder = new Holder(
                 opMode,
