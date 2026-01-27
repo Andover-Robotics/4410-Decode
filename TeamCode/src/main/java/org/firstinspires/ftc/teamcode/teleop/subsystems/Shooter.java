@@ -21,7 +21,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.003, i = 0.0, d = 0.0, f = 0.000192;
+    public static double p = 0.003, i = 0.0, d = 0.0, f = 0.000233;
     public static boolean inverted = false;
 
     // targeting and behavior

@@ -315,7 +315,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Target RPM", Turret.shooterRpm);
-            telemetry.addData("Current", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
