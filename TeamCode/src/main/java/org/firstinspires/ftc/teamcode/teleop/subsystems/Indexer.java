@@ -192,9 +192,10 @@ public class Indexer {
      */
     public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
+        double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
         for (Holder h : holders) {
             actions.add(h.kickResetAction());
-            actions.add(new SleepAction(rapidShootSleep));
+            actions.add(new SleepAction(sleepSeconds));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
@@ -203,10 +204,11 @@ public class Indexer {
 
     public Action shootRapidFireSensor() {
         List<Action> actions = new ArrayList<>();
+        double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
         for (Holder h : holders) {
             if (h.ballPresent()) {
                 actions.add(h.kickResetAction());
-                actions.add(new SleepAction(rapidShootSleep));
+                actions.add(new SleepAction(sleepSeconds));
             }
         }
         return new SequentialAction(actions.toArray(new Action[0]));
