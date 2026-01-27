@@ -30,8 +30,8 @@ public class Turret {
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
-    public static double rapidFireDistanceThresholdIn = 72;
-    public static double rapidFireSleepScalePerIn = 0.002;
+    public static double rapidFireDistanceThresholdIn = 87;
+    public static double rapidFireSleepScalePerIn = 0.01 ;
     public static double
             largeP = 0.006, largeI = 0, largeD = 0.0003,
             smallP = 0.0125, smallI = 0, smallD = 0.0004,
