@@ -321,7 +321,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                         .stopAndAdd((() -> bot.disableShooter()));
             } else {
                 builder = builder
-                        .stopAndAdd(bot.indexer.shootMotif())
+                        .stopAndAdd(bot.indexer.shootMotifAuto())
                         .stopAndAdd((() -> bot.disableShooter()));
             }
             addedAction = true;
@@ -342,7 +342,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(0.4, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(135))
-                    .stopAndAdd(bot.indexer.shootMotif())
+                    .stopAndAdd(bot.indexer.shootMotifAuto())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -362,7 +362,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(0.4, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(155))
-                    .stopAndAdd(bot.indexer.shootMotif())
+                    .stopAndAdd(bot.indexer.shootMotifAuto())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -381,7 +381,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.reverseIntake()))
                     .afterTime(0.1, bot.enableShooter())
                     .splineTo(Pos.closeShoot, Math.toRadians(155))
-                    .stopAndAdd(bot.indexer.shootMotif());
+                    .stopAndAdd(bot.indexer.shootMotifAuto());
             addedAction = true;
         }
         builder = builder.strafeToConstantHeading(Pos.park);
