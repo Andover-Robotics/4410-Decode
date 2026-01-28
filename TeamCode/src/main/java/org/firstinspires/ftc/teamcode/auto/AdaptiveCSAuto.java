@@ -391,7 +391,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .setReversed(true)
                     .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
-                    .waitSeconds(0.8);
+                    .waitSeconds(1.25);
             addedAction = true;
         }
 
@@ -443,12 +443,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 8.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
-                    .waitSeconds(0.5)
+                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
+                    .waitSeconds(0.2)
                     .setReversed(true)
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
-                            new SleepAction(0.4),
+                            new SleepAction(0.5),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
                     .splineTo(Pos.closeShoot, Math.toRadians(-45))

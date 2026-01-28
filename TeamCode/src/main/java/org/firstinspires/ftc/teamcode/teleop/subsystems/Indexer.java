@@ -40,7 +40,7 @@ public class Indexer {
     public static double rapidShootSleep = 0.04;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.26;
+    public static double motifShootSleep = 0.35;
 
     public static double proximityThreshold = 28;
     public static boolean staggerSensorUpdates = true;

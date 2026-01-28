@@ -30,14 +30,14 @@ public class Turret {
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
-    public static double rapidFireDistanceThresholdIn = 87;
+    public static double rapidFireDistanceThresholdIn = 250;
     public static double rapidFireSleepScalePerIn = 0.009584479 ;
     public static double
             largeP = 0.006, largeI = 0, largeD = 0.0003,
-            smallP = 0.0125, smallI = 0, smallD = 0.0004,
+            smallP = 0.017 , smallI = 0, smallD = 0.0004,
             errorThresholdDeg = 4, manualPower = 0;
 
-    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-2175.59803, shooterG = -0.0112301, shooterH = 1.70272, shooterI = 5397.98826;
+    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-4383.53086, shooterG = -0.00733324, shooterH = 1.81436, shooterI = 8284.3436;
 
     public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
 
