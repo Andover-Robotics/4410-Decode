@@ -27,8 +27,8 @@ public class Pos {
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
     public static int closeIntake = 22;
 
-    public static Pose2d blueFarIntake = new Pose2d(-35, 32, Math.toRadians(90));
-    public static int farIntake = 32;
+    public static Pose2d blueFarIntake = new Pose2d(-35, 35, Math.toRadians(90));
+    public static int farIntake = 29;
 
     public static Pose2d blueHpIntake = new Pose2d(-53, 67, Math.toRadians(179));
 
