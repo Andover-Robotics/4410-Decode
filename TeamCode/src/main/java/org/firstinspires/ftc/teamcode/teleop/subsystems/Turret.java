@@ -37,9 +37,9 @@ public class Turret {
             smallP = 0.017 , smallI = 0, smallD = 0.0004,
             errorThresholdDeg = 4, manualPower = 0;
 
-    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterA = 197821.985, shooterC = 1403235.28, shooterF=-4383.53086, shooterG = -0.00733324, shooterH = 1.81436, shooterI = 8284.3436;
+    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterF=-4383.53086, shooterG = -0.00733324, shooterH = 1.81436, shooterI = 8284.3436;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135, highLimitTicks = highLimit / degsPerTick, lowLimitTicks = lowLimit/degsPerTick;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 

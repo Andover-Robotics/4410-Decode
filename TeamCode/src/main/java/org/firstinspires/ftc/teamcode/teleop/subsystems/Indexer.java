@@ -324,7 +324,9 @@ public class Indexer {
                 shotsPlanned++;
             }
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
-            actions.add(new SleepAction(motifShootSleep));
+            if (i <= 2) {
+                actions.add(new SleepAction(motifShootSleep));
+            }
         }
 
         if (updateAutoMotif) {
