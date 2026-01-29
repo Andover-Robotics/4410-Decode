@@ -347,7 +347,7 @@ public class Indexer {
     }
 
 
-    public static String getMotifPattern() {
+    public String getMotifPattern() {
         if (Bot.motif == null) {
             return "PPP"; //DEFAULT
         }

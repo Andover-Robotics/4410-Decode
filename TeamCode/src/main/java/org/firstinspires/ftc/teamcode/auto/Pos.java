@@ -19,8 +19,8 @@ public class Pos {
     public static Pose2d blueMidIntake = new Pose2d(-16, 32, Math.toRadians(90));
     public static int midIntake = 32;
 
-    public static Pose2d gate = new Pose2d(-12, 62.5, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-14, 62.5, GATE_INTAKE_ANGLE);
+    public static Pose2d gate = new Pose2d(-11.5, 63.5, GATE_INTAKE_ANGLE);
+    public static Pose2d gateIntaking = new Pose2d(-13, 65.5, Math.toRadians(40));
 
     public static Pose2d gateSideOpen = new Pose2d(3, 61, Math.toRadians(-10));
 

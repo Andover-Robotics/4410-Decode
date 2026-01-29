@@ -356,15 +356,19 @@ public class AdaptiveCSAuto extends LinearOpMode {
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineToSplineHeading(Pos.gate, Math.toRadians(105))
-                    .waitSeconds(0.55)
+                    .splineToSplineHeading(Pos.gate, Math.toRadians(85))
+//                    .waitSeconds(0.5)
+//                    .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
+//                    .waitSeconds(0.325)
+
+                    .waitSeconds(0.5)
                     .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
-                    .waitSeconds(0.4)
+                    .waitSeconds(0.325)
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.2, bot.indexer.jiggleKickers())
                     .afterTime(0.9, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-45))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(110))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
