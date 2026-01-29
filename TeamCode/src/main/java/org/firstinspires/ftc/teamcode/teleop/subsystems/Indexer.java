@@ -69,6 +69,7 @@ public class Indexer {
 
     public final Holder[] holders;
     private String autoMotifPattern;
+    private boolean autoMotifInitialized = false;
     private static SRSHub srsHubLeft;
     private static SRSHub srsHubRight;
     private boolean updateLeftNext = true;
@@ -253,7 +254,7 @@ public class Indexer {
     }
 
     public Action shootMotifAuto() {
-        return buildMotifActionSupplier(() -> autoMotifPattern, true);
+        return buildMotifActionSupplier(this::getAutoMotifPattern, true);
     }
 
     private Action buildMotifActionSupplier(Supplier<String> motifSupplier, boolean updateAutoMotif) {
@@ -333,6 +334,11 @@ public class Indexer {
             autoMotifPattern = rotateMotifPattern(motifPattern, shotsPlanned);
         }
 
+        if (updateAutoMotif) {
+            autoMotifPattern = rotateMotifPattern(motifPattern, shotsPlanned);
+            autoMotifInitialized = true;
+        }
+
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
@@ -346,6 +352,14 @@ public class Indexer {
             return motifPattern;
         }
         return motifPattern.substring(shift) + motifPattern.substring(0, shift);
+    }
+
+    private String getAutoMotifPattern() {
+        if (!autoMotifInitialized) {
+            autoMotifPattern = getMotifPattern();
+            autoMotifInitialized = true;
+        }
+        return autoMotifPattern;
     }
 
 
