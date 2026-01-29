@@ -5,8 +5,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -26,6 +24,7 @@ public class LowerClimb extends LinearOpMode {
     private double driveSpeed = 1, driveMultiplier = 1 ;
     private GamepadEx gp1, gp2;
     private List<Action> runningActions = new ArrayList<>();
+    private boolean headingLockEnabled = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -60,6 +59,10 @@ public class LowerClimb extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
                 bot.lift.lower();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
+                headingLockEnabled = !headingLockEnabled;
             }
 
             bot.lift.periodic();
@@ -103,14 +106,10 @@ public class LowerClimb extends LinearOpMode {
     private void drive() { // Robot centric, drive multiplier default 1
         driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
-//        bot.fixMotors();
-        com.arcrobotics.ftclib.geometry.Vector2d driveVector = new com.arcrobotics.ftclib.geometry.Vector2d(-gp1.getLeftX(), -gp1.getLeftY());
-//                turnVector = new com.arcrobotics.ftclib.geometry.Vector2d(-gp1.getRightX(), 0);
-//        bot.driveRobotCentric(driveVector.getX() * driveSpeed,
-//                driveVector.getY() * driveSpeed,
-//                turnVector.getX() * driveSpeed
-//        );
-
-        Bot.drive.setDrivePowers(new PoseVelocity2d(new Vector2d(driveSpeed * gp1.getLeftY(),driveSpeed * -gp1.getLeftX()),driveSpeed * -gp1.getRightX()));
+        if (headingLockEnabled) {
+            bot.strafeHeadingLock(-gp1.getLeftX(), driveSpeed);
+        } else {
+            bot.driveRobotCentric(gp1.getLeftY(), -gp1.getLeftX(), -gp1.getRightX(), driveSpeed);
+        }
     }
 }
