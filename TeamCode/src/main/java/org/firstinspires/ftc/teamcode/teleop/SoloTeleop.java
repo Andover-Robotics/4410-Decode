@@ -307,6 +307,7 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("starting pos", Bot.getStartingPos());
 
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
+            telemetry.addData("\nShoot Sleep", Turret.getRapidShootSleep(0.04));
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());

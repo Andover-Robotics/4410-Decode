@@ -41,7 +41,7 @@ public class Indexer {
     public static double rapidShootSleep = 0.04;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.26;
+    public static double motifShootSleep = 0.35;
 
     public static double proximityThreshold = 28;
     public static boolean staggerSensorUpdates = true;
@@ -130,6 +130,7 @@ public class Indexer {
         );
 
         holders = new Holder[]{ rightHolder, backHolder, leftHolder};
+        autoMotifPattern = getMotifPattern();
         resetIndexer();
     }
 
@@ -195,9 +196,10 @@ public class Indexer {
      */
     public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
+        double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
         for (Holder h : holders) {
             actions.add(h.kickResetAction());
-            actions.add(new SleepAction(rapidShootSleep));
+            actions.add(new SleepAction(sleepSeconds));
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
@@ -206,10 +208,11 @@ public class Indexer {
 
     public Action shootRapidFireSensor() {
         List<Action> actions = new ArrayList<>();
+        double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
         for (Holder h : holders) {
             if (h.ballPresent()) {
                 actions.add(h.kickResetAction());
-                actions.add(new SleepAction(rapidShootSleep));
+                actions.add(new SleepAction(sleepSeconds));
             }
         }
         return new SequentialAction(actions.toArray(new Action[0]));
@@ -322,7 +325,13 @@ public class Indexer {
                 shotsPlanned++;
             }
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
-            actions.add(new SleepAction(motifShootSleep));
+            if (i <= 2) {
+                actions.add(new SleepAction(motifShootSleep));
+            }
+        }
+
+        if (updateAutoMotif) {
+            autoMotifPattern = rotateMotifPattern(motifPattern, shotsPlanned);
         }
 
         if (updateAutoMotif) {

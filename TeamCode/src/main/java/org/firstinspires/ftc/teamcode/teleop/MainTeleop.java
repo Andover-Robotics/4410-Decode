@@ -143,14 +143,16 @@ public class MainTeleop extends LinearOpMode {
                     bot.intake();
                     gp1.gamepad.stopRumble();
                 }
-            } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
+            } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                 bot.reverseIntake();
-                if (bot.indexer.countBalls()==3) {
+                if (bot.indexer.countBalls() == 3) {
                     gp1.gamepad.rumble(1, 1, -1);
                 } else {
                     bot.reverseIntake();
                     gp1.gamepad.stopRumble();
                 }
+            } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                bot.intake();
             } else {
                 bot.stopIntake();
                 gp1.gamepad.stopRumble();
@@ -315,7 +317,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Target RPM", Turret.shooterRpm);
-            telemetry.addData("Current", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
