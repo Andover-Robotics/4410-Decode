@@ -39,6 +39,7 @@ public class Indexer {
 
     // Rapid fire between shots (normal)
     public static double rapidShootSleep = 0.04;
+    public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.35;
@@ -197,6 +198,15 @@ public class Indexer {
     public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
         double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
+        for (Holder h : holders) {
+            actions.add(h.kickResetAction());
+            actions.add(new SleepAction(sleepSeconds));
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+    public Action shootFarAuto() {
+        List<Action> actions = new ArrayList<>();
+        double sleepSeconds = Turret.getRapidShootSleep(autoFarSleep);
         for (Holder h : holders) {
             actions.add(h.kickResetAction());
             actions.add(new SleepAction(sleepSeconds));

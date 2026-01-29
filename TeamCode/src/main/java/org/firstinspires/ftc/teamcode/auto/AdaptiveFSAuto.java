@@ -265,7 +265,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(bot.enableShooter())
                     .waitSeconds(0.8)
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd(bot.indexer.shootFarAuto())
                     .stopAndAdd(bot.disableShooter());
             addedAction = true;
         }
@@ -285,8 +285,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .splineTo(Pos.farShoot, Math.toRadians(-175))
-                    .stopAndAdd(bot.indexer.shootRapidFire());
+                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
+                    .stopAndAdd(bot.indexer.shootFarAuto());
             addedAction = true;
         }
 
@@ -306,9 +306,15 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.2, bot.indexer.jiggleKickers())
                     .afterTime(0.9, (() -> bot.reverseIntake()))
-                    .setTangent(Math.toRadians(-90))
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-175)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .setTangent(Math.toRadians(-85));
+            builder = (gateIndex == gateCycles - 1) ?
+                    builder
+                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(45)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
+                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd((() -> bot.disableShooter())) :
+                    builder
+                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
+                    .stopAndAdd(bot.indexer.shootFarAuto())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -327,8 +333,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.1, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .splineTo(Pos.farShoot, Math.toRadians(-175))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
+                    .stopAndAdd(bot.indexer.shootFarAuto())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -348,7 +354,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(1.00, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineTo(Pos.farShoot, Math.toRadians(-135))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd(bot.indexer.shootFarAuto())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -369,7 +375,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
                     .strafeToConstantHeading(Pos.farShoot)
-                    .stopAndAdd(bot.indexer.shootRapidFire());
+                    .stopAndAdd(bot.indexer.shootFarAuto());
             addedAction = true;
         }
         builder = builder.strafeToConstantHeading(Pos.farPark);

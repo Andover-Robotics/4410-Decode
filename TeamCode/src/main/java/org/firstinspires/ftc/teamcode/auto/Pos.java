@@ -36,7 +36,7 @@ public class Pos {
     // SHOOTING (Vectors, as we do not care about robot orientation here)
     public static Vector2d closeShoot = new Vector2d(7, 16);
     public static Vector2d closePark = new Vector2d(-1, 21);
-    public static Vector2d farShoot = new Vector2d(-58, 12);
+    public static Vector2d farShoot = new Vector2d(-55, 15);
     public static Vector2d farPark = new Vector2d(-44, 24);
 
     public static Pose2d transformRed(Pose2d pose) {
