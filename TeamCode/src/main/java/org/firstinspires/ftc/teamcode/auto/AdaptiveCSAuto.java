@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -25,7 +24,7 @@ import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 
 @Config
-@Autonomous(name = "Adaptive CS Auto", group = "Competition")
+@Autonomous(name = "Adaptive Close Shot Auto", group = "Competition")
 public class AdaptiveCSAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
@@ -455,7 +454,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(bot.indexer.shootMotifAuto());
             addedAction = true;
         }
-        builder = builder.strafeToConstantHeading(Pos.park);
+        builder = builder.strafeToConstantHeading(Pos.closePark);
 
         if (!addedAction) {
             builder = builder.stopAndAdd((() -> telemetry.addData("Auto", "No segments enabled")));
