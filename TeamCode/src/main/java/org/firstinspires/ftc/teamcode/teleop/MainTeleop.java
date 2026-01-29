@@ -97,7 +97,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
 
-            telemetry.addData("Motif:", Indexer.getMotifPattern());
+            telemetry.addData("Motif:", bot.indexer.getMotifPattern());
             telemetry.addLine("DPAD Down: PPG");
             telemetry.addLine("DPAD Left: GPP");
             telemetry.addLine("DPAD Right: PGP");

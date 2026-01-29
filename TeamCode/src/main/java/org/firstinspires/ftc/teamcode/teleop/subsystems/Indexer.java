@@ -20,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.SRSHub;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Config
 public class Indexer {
@@ -67,6 +68,8 @@ public class Indexer {
     public final Holder backHolder;
 
     public final Holder[] holders;
+    private String autoMotifPattern;
+    private boolean autoMotifInitialized = false;
     private static SRSHub srsHubLeft;
     private static SRSHub srsHubRight;
     private boolean updateLeftNext = true;
@@ -244,13 +247,21 @@ public class Indexer {
     /* ================= MOTIF SHOOT (SLOW SLEEP) ================= */
 
     public Action shootMotif() {
+        return buildMotifActionSupplier(this::getMotifPattern, false);
+    }
+
+    public Action shootMotifAuto() {
+        return buildMotifActionSupplier(this::getAutoMotifPattern, true);
+    }
+
+    private Action buildMotifActionSupplier(Supplier<String> motifSupplier, boolean updateAutoMotif) {
         return new Action() {
             private Action builtAction;
 
             @Override
             public boolean run(@NonNull TelemetryPacket t) {
                 if (builtAction == null) {
-                    builtAction = buildMotifAction();
+                    builtAction = buildMotifAction(motifSupplier.get(), updateAutoMotif);
                 }
                 return builtAction.run(t);
             }
@@ -264,8 +275,7 @@ public class Indexer {
         };
     }
 
-    private Action buildMotifAction() {
-        String motifPattern = getMotifPattern();
+    private Action buildMotifAction(String motifPattern, boolean updateAutoMotif) {
 
         List<Integer> purple = new ArrayList<>();
         List<Integer> green = new ArrayList<>();
@@ -280,6 +290,8 @@ public class Indexer {
         }
 
         List<Action> actions = new ArrayList<>();
+
+        int shotsPlanned = 0;
 
         for (int i = 0; i < motifPattern.length(); i++) {
             char target = motifPattern.charAt(i);
@@ -306,15 +318,43 @@ public class Indexer {
                 }
             }
 
+            if (h != null) {
+                shotsPlanned++;
+            }
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
             actions.add(new SleepAction(motifShootSleep));
+        }
+
+        if (updateAutoMotif) {
+            autoMotifPattern = rotateMotifPattern(motifPattern, shotsPlanned);
+            autoMotifInitialized = true;
         }
 
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
+    private static String rotateMotifPattern(String motifPattern, int offset) {
+        if (motifPattern == null || motifPattern.isEmpty()) {
+            return motifPattern;
+        }
+        int length = motifPattern.length();
+        int shift = ((offset % length) + length) % length;
+        if (shift == 0) {
+            return motifPattern;
+        }
+        return motifPattern.substring(shift) + motifPattern.substring(0, shift);
+    }
 
-    public static String getMotifPattern() {
+    private String getAutoMotifPattern() {
+        if (!autoMotifInitialized) {
+            autoMotifPattern = getMotifPattern();
+            autoMotifInitialized = true;
+        }
+        return autoMotifPattern;
+    }
+
+
+    public String getMotifPattern() {
         if (Bot.motif == null) {
             return "PPP"; //DEFAULT
         }

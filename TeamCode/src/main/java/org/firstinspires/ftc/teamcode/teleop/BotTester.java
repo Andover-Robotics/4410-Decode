@@ -99,7 +99,7 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
 
-            telemetry.addData("Motif:", Indexer.getMotifPattern());
+            telemetry.addData("Motif:", bot.indexer.getMotifPattern());
             telemetry.addLine("DPAD Down: PPG");
             telemetry.addLine("DPAD Left: GPP");
             telemetry.addLine("DPAD Right: PGP");
@@ -311,7 +311,7 @@ public class BotTester extends LinearOpMode {
 //
 //            telemetry.addData("<big><b><u>Total loop time</big></b></u>", "<font color=\""+ color + "\"><b>%.1f ms</b></font>", lastLoopTime);
 
-            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Indexer.getMotifPattern() + "</big></b></u>");
+            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ bot.indexer.getMotifPattern() + "</big></b></u>");
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 //            telemetry.addData("Obelisk Detection", bot.limelight.isObelisk());
 //            if (bot.limelight.llResult != null && bot.limelight.llResult.isValid())
