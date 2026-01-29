@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -37,6 +38,7 @@ public class Bot {
     public boolean shooting = false, sensorIntaking;
 
     public static MecanumDrive drive;
+    public static double headingLockGain = 3.0;
 
     public static enum allianceOptions {
         RED_ALLIANCE,
@@ -188,6 +190,21 @@ public class Bot {
         turret.enableShooter(on);
     }
 
+    public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
+        drive.setDrivePowers(new PoseVelocity2d(
+                new Vector2d(driveSpeed * forwardInput, driveSpeed * strafeInput),
+                driveSpeed * turnInput));
+    }
+
+    public void strafeHeadingLock(double strafeInput, double driveSpeed) {
+        double targetHeading = Math.toRadians(isRed() ? -45.0 : 45.0);
+        double currentHeading = drive.localizer.getPose().heading.log();
+        double headingError = normalizeRadians(targetHeading - currentHeading);
+        double turn = headingError * headingLockGain;
+
+        drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0.0, driveSpeed * strafeInput), turn));
+    }
+
     public Action enableShooter() {
         return new InstantAction(()-> enableShooter(true));
     }
@@ -226,6 +243,10 @@ public class Bot {
             periodic();
             return true;
         }
+    }
+
+    private static double normalizeRadians(double angleRad) {
+        return Math.atan2(Math.sin(angleRad), Math.cos(angleRad));
     }
 //
 //    public Action actionNoScreenPeriodic() {
