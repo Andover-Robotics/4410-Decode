@@ -30,7 +30,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
     public static class AutoConfig {
         public boolean runPreload = true;
         public boolean runMid     = true;
-        public int gateCycles = 2;
+        public int gateCycles = 1;
         public boolean runClose   = false;
         public boolean runFar     = true;
         public boolean runHp      = true;
