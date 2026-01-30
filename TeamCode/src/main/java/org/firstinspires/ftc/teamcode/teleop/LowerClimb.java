@@ -60,11 +60,6 @@ public class LowerClimb extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
                 bot.lift.lower();
             }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
-                headingLockEnabled = !headingLockEnabled;
-            }
-
             bot.lift.periodic();
 
             List<Action> newActions = new ArrayList<>();

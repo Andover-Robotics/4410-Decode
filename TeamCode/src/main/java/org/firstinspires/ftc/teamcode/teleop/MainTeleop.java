@@ -32,7 +32,7 @@ public class MainTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = true;
+    private boolean headingLockEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
     public static boolean stallIntake = true, manualTurret = false;
@@ -90,10 +90,6 @@ public class MainTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
                 useStoredPose = !useStoredPose;
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
-                headingLockEnabled = !headingLockEnabled;
             }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
@@ -236,7 +232,8 @@ public class MainTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.limelight.relocalizeBotPose();
+//                bot.limelight.relocalizeBotPose();
+                headingLockEnabled = !headingLockEnabled;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -255,9 +252,6 @@ public class MainTeleop extends LinearOpMode {
                 bot.indexer.jiggleKickers();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
-                headingLockEnabled = !headingLockEnabled;
-            }
 
             bot.periodic();
             drive();
@@ -395,7 +389,7 @@ public class MainTeleop extends LinearOpMode {
 
     // Driving
     private void drive() { // Robot centric, drive multiplier default 1
-        driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        driveSpeed = driveMultiplier - 0.75 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
         if (headingLockEnabled) {
             bot.strafeHeadingLock(-gp1.getLeftX(), driveSpeed);

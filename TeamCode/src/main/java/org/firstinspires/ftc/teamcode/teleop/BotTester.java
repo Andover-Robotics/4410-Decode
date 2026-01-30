@@ -33,7 +33,7 @@ public class BotTester extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = true;
+    private boolean headingLockEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
     private int n = 0, rpmTotalError = 0;
 
@@ -92,10 +92,6 @@ public class BotTester extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
                 useStoredPose = !useStoredPose;
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
-                headingLockEnabled = !headingLockEnabled;
             }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
@@ -258,7 +254,8 @@ public class BotTester extends LinearOpMode {
                 bot.turret.resetEncoder();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+//                bot.limelight.relocalizeBotPose();
                 headingLockEnabled = !headingLockEnabled;
             }
 

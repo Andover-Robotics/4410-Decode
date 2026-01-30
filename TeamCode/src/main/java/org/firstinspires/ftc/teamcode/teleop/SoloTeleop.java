@@ -32,7 +32,7 @@ public class SoloTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = true;
+    private boolean headingLockEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
     public static boolean stallIntake = true, manualTurret = false;
@@ -88,10 +88,6 @@ public class SoloTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
                 useStoredPose = !useStoredPose;
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
-                headingLockEnabled = !headingLockEnabled;
             }
 
             telemetry.addData("ALLIANCE (A)", Bot.getAlliance());
@@ -248,7 +244,8 @@ public class SoloTeleop extends LinearOpMode {
                 bot.turret.runManual(gp1.getLeftX());
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.TOUCHPAD)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+//                bot.limelight.relocalizeBotPose();
                 headingLockEnabled = !headingLockEnabled;
             }
 
@@ -353,21 +350,12 @@ public class SoloTeleop extends LinearOpMode {
 //            telemetry.addData("LR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorLR()));
 //            telemetry.addData("LL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorLL()));
 
-
-
-
-
-
-
-
 //            telemetry.addData("auto target rpm", Turret.shooterRpm);
 //            telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
-//
 //            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
 //            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
 //            telemetry.addData("\nLeft Climb Abs Position", bot.lift.getLeftEncAbsDeg());
 //            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
-//
 ////            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
 //            telemetry.addData("Left Power", bot.lift.leftPower);
 //            telemetry.addData("Right Power", bot.lift.rightPower);

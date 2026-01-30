@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -328,7 +329,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .setTangent(Math.toRadians(180))
                     .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + Pos.midIntake))
+                            Pos.blueMidIntake.position.y + Pos.midIntake), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));
@@ -359,11 +360,20 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .waitSeconds(0.5)
                     .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
                     .waitSeconds(0.325)
-                    .stopAndAdd(bot.enableShooter())
+                    .stopAndAdd(bot.enableShooter());
+            builder = (gateIndex != gateCycles - 1) ?
+                    builder
                     .afterTime(0.2, bot.indexer.jiggleKickers())
                     .afterTime(0.9, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(110))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(110), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter())) :
+                    builder
+                    .afterTime(0.2, bot.indexer.jiggleKickers())
+                    .afterTime(0.9, (() -> bot.reverseIntake()))
+                    .setReversed(true)
+                    .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.closeShoot.y), Math.toRadians(90))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
