@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 @Config
 public class Pos {
     // SOME VARIABLES
-    public static final double GATE_INTAKE_ANGLE = Math.toRadians(60);
+    public static final double GATE_INTAKE_ANGLE = Math.toRadians(65);
 
     // INITIAL
     public static Pose2d initialFarBluePose = new Pose2d(-63, 9, Math.toRadians(0));
@@ -16,11 +16,11 @@ public class Pos {
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueMidIntake = new Pose2d(-16, 32, Math.toRadians(90));
+    public static Pose2d blueMidIntake = new Pose2d(-17, 32, Math.toRadians(90));
     public static int midIntake = 32;
 
-    public static Pose2d gate = new Pose2d(-11.5, 63.5, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-13, 65.5, Math.toRadians(40));
+    public static Pose2d gate = new Pose2d(-12, 63.5, GATE_INTAKE_ANGLE);
+    public static Pose2d gateIntaking = new Pose2d(-14, 65.5, Math.toRadians(35));
 
     public static Pose2d gateSideOpen = new Pose2d(3, 61, Math.toRadians(-10));
 
@@ -35,6 +35,7 @@ public class Pos {
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
     public static Vector2d closeShoot = new Vector2d(7, 16);
+    public static Vector2d closeGateCycleShoot = new Vector2d(3, 20);
     public static Vector2d closePark = new Vector2d(-1, 21);
     public static Vector2d farShoot = new Vector2d(-55, 15);
     public static Vector2d farPark = new Vector2d(-44, 24);

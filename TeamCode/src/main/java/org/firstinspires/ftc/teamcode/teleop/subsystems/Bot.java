@@ -7,17 +7,12 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Config
 public class Bot {
@@ -38,7 +33,7 @@ public class Bot {
     public boolean shooting = false, sensorIntaking;
 
     public static MecanumDrive drive;
-    public static double headingLockGain = 3.0;
+    public static double headingLockGain = 4.5;
 
     public static enum allianceOptions {
         RED_ALLIANCE,
@@ -196,13 +191,13 @@ public class Bot {
                 driveSpeed * turnInput));
     }
 
-    public void strafeHeadingLock(double strafeInput, double driveSpeed) {
+    public void driveHeadingLock(double forwardInput, double strafeInput, double driveSpeed) {
         double targetHeading = Math.toRadians(isRed() ? -45.0 : 45.0);
         double currentHeading = drive.localizer.getPose().heading.log();
         double headingError = normalizeRadians(targetHeading - currentHeading);
         double turn = headingError * headingLockGain;
 
-        drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0.0, driveSpeed * strafeInput), turn));
+        drive.setDrivePowers(new PoseVelocity2d(new Vector2d(driveSpeed * forwardInput, driveSpeed * strafeInput), turn));
     }
 
     public Action enableShooter() {

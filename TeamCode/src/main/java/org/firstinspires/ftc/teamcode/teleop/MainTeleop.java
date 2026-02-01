@@ -369,10 +369,10 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
 //
 ////            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-//            telemetry.addData("Left Power", bot.lift.leftPower);
-//            telemetry.addData("Right Power", bot.lift.rightPower);
-//            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
-//            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+            telemetry.addData("Left Power", bot.lift.leftPower);
+            telemetry.addData("Right Power", bot.lift.rightPower);
+            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
+            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
 ////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
 //////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
 //            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
@@ -392,7 +392,7 @@ public class MainTeleop extends LinearOpMode {
         driveSpeed = driveMultiplier - 0.75 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
         if (headingLockEnabled) {
-            bot.strafeHeadingLock(-gp1.getLeftX(), driveSpeed);
+            bot.driveHeadingLock(gp1.getLeftY(), -gp1.getLeftX(), driveSpeed);
         } else {
             bot.driveRobotCentric(gp1.getLeftY(), -gp1.getLeftX(), -gp1.getRightX(), driveSpeed);
         }

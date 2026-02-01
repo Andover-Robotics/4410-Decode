@@ -17,7 +17,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
-import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -428,7 +427,7 @@ public class BotTester extends LinearOpMode {
         driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
         if (headingLockEnabled) {
-            bot.strafeHeadingLock(-gp1.getLeftX(), driveSpeed);
+            bot.driveHeadingLock(gp1.getLeftY(), -gp1.getLeftX(), driveSpeed);
         } else {
             bot.driveRobotCentric(gp1.getLeftY(), -gp1.getLeftX(), -gp1.getRightX(), driveSpeed);
         }

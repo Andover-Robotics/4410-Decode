@@ -102,7 +102,7 @@ public class LowerClimb extends LinearOpMode {
         driveSpeed = driveMultiplier - 0.5 * gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         driveSpeed = Math.max(0, driveSpeed);
         if (headingLockEnabled) {
-            bot.strafeHeadingLock(-gp1.getLeftX(), driveSpeed);
+            bot.driveHeadingLock(gp1.getLeftY(), -gp1.getLeftX(), driveSpeed);
         } else {
             bot.driveRobotCentric(gp1.getLeftY(), -gp1.getLeftX(), -gp1.getRightX(), driveSpeed);
         }

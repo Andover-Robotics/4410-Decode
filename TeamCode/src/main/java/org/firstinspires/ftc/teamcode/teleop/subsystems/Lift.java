@@ -60,6 +60,8 @@ public class Lift {
     public final CRServo climbLeft, climbRight;
     private final AnalogInput leftEnc, rightEnc;
 
+    public static double leftScaler = 0.40;
+
     private final ContinuousAngleTracker leftTracker, rightTracker;
     private final PIDController leftPID = new PIDController(kP, kI, kD);
     private final PIDController rightPID = new PIDController(kP, kI, kD);
@@ -149,7 +151,7 @@ public class Lift {
         }; // allow driving servos manually when disabled
 
         climbLeft.set(leftPower);
-        climbRight.set(rightPower);
+        climbRight.set(rightPower * leftScaler); //left and right are switched
 
 
 //        climbLeft.set(clamp(leftPower, -0.8, 0.8));
