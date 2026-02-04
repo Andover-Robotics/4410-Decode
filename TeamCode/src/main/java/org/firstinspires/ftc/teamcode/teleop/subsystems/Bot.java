@@ -30,10 +30,12 @@ public class Bot {
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
+    public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking;
 
     public static MecanumDrive drive;
-    public static double headingLockGain = 4.5;
+    public static double headingLockGain = 4.5, positionLockGain = 4.5;
+    public boolean positionLockEnabled = false;
 
     public static enum allianceOptions {
         RED_ALLIANCE,
@@ -193,11 +195,33 @@ public class Bot {
 
     public void driveHeadingLock(double forwardInput, double strafeInput, double driveSpeed) {
         double targetHeading = Math.toRadians(isRed() ? -45.0 : 45.0);
-        double currentHeading = drive.localizer.getPose().heading.log();
+        double currentHeading = storedPose.heading.log();
         double headingError = normalizeRadians(targetHeading - currentHeading);
         double turn = headingError * headingLockGain;
 
         drive.setDrivePowers(new PoseVelocity2d(new Vector2d(driveSpeed * forwardInput, driveSpeed * strafeInput), turn));
+    }
+
+    public void drivePoseLock() {
+        if (!positionLockEnabled) {
+            positionLockPose = storedPose;
+        }
+        positionLockEnabled = true;
+
+        Pose2d pose = storedPose;
+
+        Vector2d posError = positionLockPose.position.minus(pose.position);
+        double headingError = normalizeRadians(positionLockPose.heading.log() - pose.heading.log());
+
+        Vector2d translation = posError.times(positionLockGain);
+        double turn = headingError * headingLockGain;
+
+        drive.setDrivePowers(
+                new PoseVelocity2d(
+                        translation,
+                        turn
+                )
+        );
     }
 
     public Action enableShooter() {
