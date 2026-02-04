@@ -17,14 +17,12 @@ public class Shooter {
     private final MotorEx motor1;
     private final MotorEx motor2;
 
-    public Servo hoodServo;
-
     // basic control objects
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
     public static double p = 0.001, i = 0.0, d = 0.0, f = 0.000185;
-    public static boolean inverted = true;
+    public static boolean inverted = false;
 
     // targeting and behavior
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
@@ -37,10 +35,6 @@ public class Shooter {
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
 
-//    hood positions
-    public static double hoodLowLimit = 0.1;
-    public static double testingHood = 0.2;
-
 
     public Shooter(OpMode opMode) {
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
@@ -51,7 +45,6 @@ public class Shooter {
         motor2.setInverted(inverted);
         motor2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
         motor2.setRunMode(Motor.RunMode.RawPower);
-        hoodServo = opMode.hardwareMap.get(Servo.class,"hoodServo");
 
 
         controller = new PIDController(p, i, d);
@@ -77,13 +70,6 @@ public class Shooter {
     public void setPower(double power) {
         motor1.set(power);
         motor2.set(-power);
-    }
-    public void setHoodLow() {
-        hoodServo.setPosition(hoodLowLimit);
-    }
-
-    public void setHoodTest() {
-        hoodServo.setPosition(testingHood);
     }
 
     public void periodic() {
