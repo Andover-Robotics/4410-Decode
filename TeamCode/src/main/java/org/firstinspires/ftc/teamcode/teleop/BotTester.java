@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class BotTester extends LinearOpMode {
 
     NormalizedRGBA colors;
 
-    public static int rpm = 2000;
+    public static int rpm = -2000;
     public static boolean manualTurret = false, shooting = false, intakeOverride = false;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -175,11 +176,11 @@ public class BotTester extends LinearOpMode {
                 bot.enableFullAuto(true);
                 manualTurret = false;
             }
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
-                bot.enableFullAuto(false);
-                bot.turret.enablePositionTracking(true);
-                manualTurret = false;
-            }
+//            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) { //position tracking
+//                bot.enableFullAuto(false);
+//                bot.turret.enablePositionTracking(true);
+//                manualTurret = false;
+//            }
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) { //no tracking
                 bot.enableFullAuto(false);
                 manualTurret = true;
@@ -198,6 +199,14 @@ public class BotTester extends LinearOpMode {
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
                 rpm-=200;
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                bot.shooter.testingHood+=0.01;
+                bot.shooter.setHoodTest();
+            }
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+                bot.shooter.testingHood-=0.01;
+                bot.shooter.setHoodTest();
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
@@ -235,6 +244,7 @@ public class BotTester extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
                 bot.lift.liftUp();
             }
+
             // FAILSAFES
 
 //            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
