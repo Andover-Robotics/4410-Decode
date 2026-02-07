@@ -26,13 +26,11 @@ public class Shooter {
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
-    public static double hoodNearAngleDeg = 34;
     public static double hoodMidAngleDeg = 38;
     public static double hoodFarAngleDeg = 44;
-    public static double hoodNearPos = angleToPos(hoodNearAngleDeg);
-    public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
+    public static double hoodMidPos = 0.8;//angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
-
+    public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -51,8 +49,8 @@ public class Shooter {
         motor2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
         motor2.setRunMode(Motor.RunMode.RawPower);
 
-        hood = opMode.hardwareMap.get(Servo.class, "hood");
-        hood.setPosition(hoodNearPos);
+        hood = opMode.hardwareMap.servo.get("hood");
+        hood.setPosition(hoodMidPos);
 
         controller = new PIDController(p, i, d);
     }
@@ -105,11 +103,9 @@ public class Shooter {
         hood.setPosition(position);
     }
 
-    public void setHoodNear() { hood.setPosition(hoodNearPos);}
+    protected void setHoodFar() { hood.setPosition(hoodFarPos); }
 
-    public void setHoodFar() { hood.setPosition(hoodFarPos); }
-
-    public void setHoodMid() { hood.setPosition(hoodMidPos); }
+    protected void setHoodMid() { hood.setPosition(hoodMidPos); }
 
     public void changePosition() {}
 
@@ -125,6 +121,7 @@ public class Shooter {
     }
 
     private static double angleToPos(double angle) {
-        return 0.74 -(0.26 * ((angle - 32.5) / 11.5));
+//        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
+        return servoPosPerAngle * (angle - lowAngleLimit) + lowServoLimit;
     }
 }

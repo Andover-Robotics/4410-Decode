@@ -56,13 +56,12 @@ public class Bot {
     }
 
     public static enum HoodPosition {
-        NEAR,
         MID,
-        FAR;
+        FAR
     }
 
     public static Motif motif = Motif.PPG;
-    public HoodPosition hoodPosition = HoodPosition.NEAR;
+    public HoodPosition hoodPosition = HoodPosition.MID;
 
     private static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     private static startingPosition startingPos = startingPosition.FAR;
@@ -79,7 +78,7 @@ public class Bot {
         screen = new Screen(opMode, this);
         updatePoses();
 
-        setNearShooting();
+        setMidShooting();
     }
 
     public void switchAlliance() {
@@ -197,11 +196,11 @@ public class Bot {
         turret.enableShooter(on);
     }
 
-    public void setNearShooting() {
-        turret.useNearAngleRegression();
-        turret.shooter.setHoodNear();
-        hoodPosition = HoodPosition.NEAR;
-    }
+//    public void setNearShooting() {
+//        turret.useNearAngleRegression();
+//        turret.shooter.setHoodNear();
+//        hoodPosition = HoodPosition.NEAR;
+//    }
 
     public void setMidShooting() {
         turret.useMidAngleRegression();
@@ -217,12 +216,10 @@ public class Bot {
 
     public void switchShooting() {
         switch(hoodPosition) {
-            case NEAR:
-                setMidShooting();
             case MID:
                 setFarShooting();
             case FAR:
-                setNearShooting();
+                setMidShooting();
                 break;
         }
     }

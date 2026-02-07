@@ -229,13 +229,7 @@ public class BotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
             if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                if (h==0){
-                    bot.shooter.setHoodFar();
-                    h+=1;
-                }else if (h==1){
-                    bot.shooter.setHoodMid();
-                    h-=1;
-                }
+                bot.switchShooting();
             }
 
 
@@ -368,7 +362,7 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("BR Hue", "%.1f", bot.indexer.backHolder.getHueA());
             telemetry.addData("BB Dist (mm)", "%.1f", bot.indexer.backHolder.getDistanceB());
             telemetry.addData("BB Hue", "%.1f", bot.indexer.backHolder.getHueB());
-//
+            //
             FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
             loopTimer.reset();
