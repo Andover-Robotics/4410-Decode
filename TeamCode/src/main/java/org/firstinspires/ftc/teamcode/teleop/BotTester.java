@@ -229,7 +229,8 @@ public class BotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
             if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                bot.switchShooting();
+//                bot.switchShooting();
+                bot.turret.shooter.hood.setPosition(0.8);
             }
 
 

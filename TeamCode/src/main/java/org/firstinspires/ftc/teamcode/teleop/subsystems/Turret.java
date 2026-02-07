@@ -177,7 +177,7 @@ public class Turret {
     }
 
     public void velocityCompensation(double dx, double dy) {
-        if (getPositionDegs() < highLimit - 10 && getPositionDegs() > lowLimit + 10) {
+        if (getPositionDegs() < highLimit - 5 && getPositionDegs() > lowLimit + 5) {
             double time = calculateTime(dx, dy);
             velocity = Bot.drive.localizer.getPoseVelocity();
 //        double dispX = velocity.linearVel.x * time;
@@ -212,7 +212,7 @@ public class Turret {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
         final double heightDisplacement = 26.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 48.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double launchAngleAboveHorizDeg = 49.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)

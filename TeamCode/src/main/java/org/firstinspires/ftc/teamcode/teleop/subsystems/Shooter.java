@@ -13,7 +13,7 @@ public class Shooter {
     // brr brrs
     private final MotorEx motor1;
     private final MotorEx motor2;
-    private final Servo hood;
+    public final Servo hood;
 
     // basic control objects
     private final PIDController controller;
