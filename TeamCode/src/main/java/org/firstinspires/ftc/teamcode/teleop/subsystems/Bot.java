@@ -70,6 +70,7 @@ public class Bot {
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
         updatePoses();
+        setLowShooting();
     }
 
     public void switchAlliance() {
@@ -185,6 +186,21 @@ public class Bot {
 
     public void enableShooter(boolean on) {
         turret.enableShooter(on);
+    }
+
+    public void setLowShooting() {
+        turret.useLowAngleRegression();
+        turret.shooter.setHoodLow();
+    }
+
+    public void setMidShooting() {
+        turret.useMidAngleRegression();
+        turret.shooter.setHoodMid();
+    }
+
+    public void setHighShooting() {
+        turret.useHighAngleRegression();
+        turret.shooter.setHoodHigh();
     }
 
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
