@@ -29,19 +29,19 @@ public class Shooter {
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
-    public static double hoodLowAngleDeg = 39.0;
-    public static double hoodMidAngleDeg = 43.0;
-    public static double hoodHighAngleDeg = 48.0;
-    public static double hoodLowPos = 0.2;
-    public static double hoodMidPos = 0.5;
-    public static double hoodHighPos = 0.8;
+    public static double hoodLowAngleDeg = 38.0;
+    public static double hoodMidAngleDeg = 41.0;
+    public static double hoodHighAngleDeg = 44.5;
+    public static double hoodLowPos = 0.0;
+    public static double hoodMidPos = 0.0;
+    public static double hoodHighPos = 1;
 
     // state estimation and data
     private double targetRPM = 0.0;
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
-    public double minPos = 1, maxPos = 0.735;
+    public double minPos = 1, maxPos = 0.735; //TODO these are the actual rangles - max is all the way up and min is all the way down positions
 
 
     public Shooter(OpMode opMode) {
