@@ -215,6 +215,12 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
 
+            if ((gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) ||
+                    gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) && !bot.shooting) {
+                bot.switchShooting();
+            }
+
+
 
             // CLIMB
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {

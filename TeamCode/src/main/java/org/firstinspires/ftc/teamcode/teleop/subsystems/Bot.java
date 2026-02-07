@@ -54,7 +54,14 @@ public class Bot {
         UNKNOWN //TODO Remove
     }
 
+    public static enum HoodPosition {
+        NEAR,
+        MID,
+        FAR;
+    }
+
     public static Motif motif = Motif.PPG;
+    public HoodPosition hoodPosition = HoodPosition.NEAR;
 
     private static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     private static startingPosition startingPos = startingPosition.FAR;
@@ -70,7 +77,8 @@ public class Bot {
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
         updatePoses();
-        setLowShooting();
+
+        setNearShooting();
     }
 
     public void switchAlliance() {
@@ -188,20 +196,36 @@ public class Bot {
         turret.enableShooter(on);
     }
 
-    public void setLowShooting() {
-        turret.useLowAngleRegression();
-        turret.shooter.setHoodLow();
+    public void setNearShooting() {
+        turret.useNearAngleRegression();
+        turret.shooter.setHoodNear();
+        hoodPosition = HoodPosition.NEAR;
     }
 
     public void setMidShooting() {
         turret.useMidAngleRegression();
         turret.shooter.setHoodMid();
+        hoodPosition = HoodPosition.MID;
     }
 
-    public void setHighShooting() {
-        turret.useHighAngleRegression();
-        turret.shooter.setHoodHigh();
+    public void setFarShooting() {
+        turret.useFarAngleRegression();
+        turret.shooter.setHoodFar();
+        hoodPosition = HoodPosition.FAR;
     }
+
+    public void switchShooting() {
+        switch(hoodPosition) {
+            case NEAR:
+                setMidShooting();
+            case MID:
+                setFarShooting();
+            case FAR:
+                setNearShooting();
+                break;
+        }
+    }
+
 
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
         drive.setDrivePowers(new PoseVelocity2d(
@@ -310,4 +334,5 @@ public class Bot {
         instance.opMode = opMode;
         return instance;
     }
+
 }

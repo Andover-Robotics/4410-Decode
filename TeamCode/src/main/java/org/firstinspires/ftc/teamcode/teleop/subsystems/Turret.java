@@ -276,7 +276,7 @@ public class Turret {
         shooter.setVelocity(rpm);
     }
 
-    public void useLowAngleRegression() {
+    public void useNearAngleRegression() {
         setShooterRegression(shooterLowF, shooterLowG, shooterLowH, shooterLowI);
     }
 
@@ -284,7 +284,7 @@ public class Turret {
         setShooterRegression(shooterMidF, shooterMidG, shooterMidH, shooterMidI);
     }
 
-    public void useHighAngleRegression() {
+    public void useFarAngleRegression() {
         setShooterRegression(shooterHighF, shooterHighG, shooterHighH, shooterHighI);
     }
 

@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class Shooter {
@@ -29,12 +26,13 @@ public class Shooter {
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
-    public static double hoodLowAngleDeg = 38.0;
-    public static double hoodMidAngleDeg = 41.0;
-    public static double hoodHighAngleDeg = 44.5;
-    public static double hoodLowPos = 0.0;
-    public static double hoodMidPos = 0.0;
-    public static double hoodHighPos = 1;
+    public static double hoodNearAngleDeg = 34;
+    public static double hoodMidAngleDeg = 38;
+    public static double hoodFarAngleDeg = 44;
+    public static double hoodNearPos = angleToPos(hoodNearAngleDeg);
+    public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
+    public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
+
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -42,7 +40,6 @@ public class Shooter {
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
     public double minPos = 1, maxPos = 0.735; //TODO these are the actual rangles - max is all the way up and min is all the way down positions
-
 
     public Shooter(OpMode opMode) {
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
@@ -55,8 +52,7 @@ public class Shooter {
         motor2.setRunMode(Motor.RunMode.RawPower);
 
         hood = opMode.hardwareMap.get(Servo.class, "hood");
-        hood.setPosition(hoodLowPos);
-
+        hood.setPosition(hoodNearPos);
 
         controller = new PIDController(p, i, d);
     }
@@ -109,17 +105,13 @@ public class Shooter {
         hood.setPosition(position);
     }
 
-    public void setHoodLow() {
-        hood.setPosition(hoodLowPos);
-    }
+    public void setHoodNear() { hood.setPosition(hoodNearPos);}
 
-    public void setHoodHigh() {
-        hood.setPosition(hoodHighPos);
-    }
+    public void setHoodFar() { hood.setPosition(hoodFarPos); }
 
-    public void setHoodMid() {
-        hood.setPosition(hoodMidPos);
-    }
+    public void setHoodMid() { hood.setPosition(hoodMidPos); }
+
+    public void changePosition() {}
 
     // telemetry
     public double getTargetRPM() { return targetRPM; }
@@ -130,5 +122,9 @@ public class Shooter {
     //utils
     private static double clamp(double v, double lo, double hi) {
         return Math.max(lo, Math.min(hi, v));
+    }
+
+    private static double angleToPos(double angle) {
+        return 0.74 -(0.26 * ((angle - 32.5) / 11.5));
     }
 }
