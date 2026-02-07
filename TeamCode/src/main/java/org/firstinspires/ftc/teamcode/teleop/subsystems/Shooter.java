@@ -16,6 +16,7 @@ public class Shooter {
     // brr brrs
     private final MotorEx motor1;
     private final MotorEx motor2;
+    private final Servo hood;
 
     // basic control objects
     private final PIDController controller;
@@ -28,6 +29,12 @@ public class Shooter {
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
+    public static double hoodLowAngleDeg = 39.0;
+    public static double hoodMidAngleDeg = 43.0;
+    public static double hoodHighAngleDeg = 48.0;
+    public static double hoodLowPos = 0.2;
+    public static double hoodMidPos = 0.5;
+    public static double hoodHighPos = 0.8;
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -46,6 +53,8 @@ public class Shooter {
         motor2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
         motor2.setRunMode(Motor.RunMode.RawPower);
 
+        hood = opMode.hardwareMap.get(Servo.class, "hood");
+        hood.setPosition(hoodLowPos);
 
         controller = new PIDController(p, i, d);
     }
@@ -92,6 +101,22 @@ public class Shooter {
         }
         power = clamp(power, -maxPower, maxPower);
         setPower(power);
+    }
+
+    public void setHoodPosition(double position) {
+        hood.setPosition(position);
+    }
+
+    public void setHoodLow() {
+        hood.setPosition(hoodLowPos);
+    }
+
+    public void setHoodHigh() {
+        hood.setPosition(hoodHighPos);
+    }
+
+    public void setHoodMid() {
+        hood.setPosition(hoodMidPos);
     }
 
     // telemetry
