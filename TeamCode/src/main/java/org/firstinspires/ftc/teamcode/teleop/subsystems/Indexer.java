@@ -26,14 +26,12 @@ import java.util.function.Supplier;
 public class Indexer {
 
     /* ================= CONFIG ================= */
-
-
-    public static double kickerLeftDown  = 0.697;
-    public static double kickerLeftUp    = 0.39;
-    public static double kickerRightDown = 0.64;
-    public static double kickerRightUp   = 0.325;
-    public static double kickerBackDown  = 0.60;
-    public static double kickerBackUp    = 0.29;
+    public static double kickerLeftDown  = 0.515;
+    public static double kickerLeftUp    = 0.20;
+    public static double kickerRightDown = 0.519;
+    public static double kickerRightUp   = 0.20;
+    public static double kickerBackDown  = 0.5;
+    public static double kickerBackUp    = 0.19;
 
     public static double kickerSleep = 0.198;
 

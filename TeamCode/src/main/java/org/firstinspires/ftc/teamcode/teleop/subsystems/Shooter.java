@@ -21,7 +21,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.001, i = 0.0, d = 0.0, f = 0.000185;
+    public static double p = 0.0025, i = 0.0, d = 0.0, f = 0.000225;
     public static boolean inverted = false;
 
     // targeting and behavior
@@ -34,6 +34,7 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
+    public double minPos = 1, maxPos = 0.735;
 
 
     public Shooter(OpMode opMode) {
@@ -45,6 +46,7 @@ public class Shooter {
         motor2.setInverted(inverted);
         motor2.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
         motor2.setRunMode(Motor.RunMode.RawPower);
+
 
 
         controller = new PIDController(p, i, d);
