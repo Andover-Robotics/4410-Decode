@@ -35,6 +35,7 @@ public class BotTester extends LinearOpMode {
     private boolean headingLockEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
     private int n = 0, rpmTotalError = 0;
+    private int h = 1;
 
     NormalizedRGBA colors;
 
@@ -227,6 +228,16 @@ public class BotTester extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) && !bot.shooting) {
                 runningActions.add(bot.indexer.shootGreen());
             }
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                if (h==0){
+                    bot.shooter.setHoodFar();
+                    h+=1;
+                }else if (h==1){
+                    bot.shooter.setHoodMid();
+                    h-=1;
+                }
+            }
+
 
             if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());

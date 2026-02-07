@@ -39,7 +39,7 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
-    public double minPos = 1, maxPos = 0.735; //TODO these are the actual rangles - max is all the way up and min is all the way down positions
+//    public double minPos = 1, maxPos = 0.735; //TODO these are the actual ranges - max is all the way up and min is all the way down positions
 
     public Shooter(OpMode opMode) {
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
