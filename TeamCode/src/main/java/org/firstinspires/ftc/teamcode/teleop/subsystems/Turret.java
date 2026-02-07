@@ -37,7 +37,11 @@ public class Turret {
             smallP = 0.017 , smallI = 0, smallD = 0.0004,
             errorThresholdDeg = 4, manualPower = 0;
 
-    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterF=-4383.53086, shooterG = -0.00733324, shooterH = 1.81436, shooterI = 8284.3436;
+    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
+    public static double shooterLowF = -4383.53086, shooterLowG = -0.00733324, shooterLowH = 1.81436, shooterLowI = 8284.3436;
+    public static double shooterMidF = -4440.0, shooterMidG = -0.0072, shooterMidH = 1.85, shooterMidI = 8340.0;
+    public static double shooterHighF = -4500.0, shooterHighG = -0.0071, shooterHighH = 1.9, shooterHighI = 8400.0;
+    private double shooterF = shooterLowF, shooterG = shooterLowG, shooterH = shooterLowH, shooterI = shooterLowI;
 
     public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135;
 
@@ -270,6 +274,25 @@ public class Turret {
 
     public void setShooterVelocity(double rpm) {
         shooter.setVelocity(rpm);
+    }
+
+    public void useLowAngleRegression() {
+        setShooterRegression(shooterLowF, shooterLowG, shooterLowH, shooterLowI);
+    }
+
+    public void useMidAngleRegression() {
+        setShooterRegression(shooterMidF, shooterMidG, shooterMidH, shooterMidI);
+    }
+
+    public void useHighAngleRegression() {
+        setShooterRegression(shooterHighF, shooterHighG, shooterHighH, shooterHighI);
+    }
+
+    private void setShooterRegression(double f, double g, double h, double i) {
+        shooterF = f;
+        shooterG = g;
+        shooterH = h;
+        shooterI = i;
     }
 
     public void setShooterOverride(boolean override) {
