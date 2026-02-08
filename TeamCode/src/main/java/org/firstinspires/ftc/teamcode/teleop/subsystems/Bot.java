@@ -196,14 +196,12 @@ public class Bot {
     }
 
     public void setMidShooting() {
-        turret.useMidAngleRegression();
-        turret.shooter.setHoodMid();
+        // Hood angle and RPM are now set by distance-based interpolation in the turret.
         hoodPosition = HoodPosition.MID;
     }
 
     public void setFarShooting() {
-        turret.useFarAngleRegression();
-        turret.shooter.setHoodFar();
+        // Hood angle and RPM are now set by distance-based interpolation in the turret.
         hoodPosition = HoodPosition.FAR;
     }
 

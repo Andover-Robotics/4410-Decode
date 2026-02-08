@@ -104,6 +104,10 @@ public class Shooter {
         hood.setPosition(angleToPos(angle));
     }
 
+    public void setHoodAngleDeg(double angleDeg) {
+        hood.setPosition(angleToPos(angleDeg));
+    }
+
     protected void setHoodFar() { hood.setPosition(hoodFarPos); }
 
     protected void setHoodMid() { hood.setPosition(hoodMidPos); }
