@@ -38,7 +38,6 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
-//    public double minPos = 1, maxPos = 0.735; //TODO these are the actual ranges - max is all the way up and min is all the way down positions
 
     public Shooter(OpMode opMode) {
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
@@ -51,7 +50,7 @@ public class Shooter {
         motor2.setRunMode(Motor.RunMode.RawPower);
 
         hood = opMode.hardwareMap.servo.get("hood");
-        hood.setPosition(1);
+        hood.setPosition(0.8);
 
         controller = new PIDController(p, i, d);
     }
