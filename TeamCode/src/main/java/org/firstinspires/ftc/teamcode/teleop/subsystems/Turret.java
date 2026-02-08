@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
+import org.firstinspires.ftc.teamcode.util.LinearInterpolation;
 
 import java.util.ArrayList;
 
@@ -38,10 +39,16 @@ public class Turret {
             errorThresholdDeg = 4, manualPower = 0;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
-    public static double shooterLowF = -4383.53086, shooterLowG = -0.00733324, shooterLowH = 1.81436, shooterLowI = 8284.3436;
-    public static double shooterMidF = -4440.0, shooterMidG = -0.0072, shooterMidH = 1.85, shooterMidI = 8340.0;
-    public static double shooterHighF = -4500.0, shooterHighG = -0.0071, shooterHighH = 1.9, shooterHighI = 8400.0;
-    private double shooterF = shooterLowF, shooterG = shooterLowG, shooterH = shooterLowH, shooterI = shooterLowI;
+    /**
+     * Example calibration data (replace with real tuned values).
+     * Distances are in inches, RPMs are target flywheel speeds, and hood angles are degrees.
+     */
+    public static final double[] SHOOTER_DISTANCE_IN = {110, 150, 190, 230, 270};
+    public static final double[] SHOOTER_RPM = {3600, 3900, 4200, 4500, 4800};
+    public static final double[] SHOOTER_HOOD_ANGLE_DEG = {36.0, 38.0, 40.5, 42.5, 44.0};
+
+    private final LinearInterpolation rpmInterpolator;
+    private final LinearInterpolation hoodAngleInterpolator;
 
     public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135;
 
@@ -67,6 +74,8 @@ public class Turret {
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         shooter = new Shooter(opMode);
+        rpmInterpolator = new LinearInterpolation(SHOOTER_DISTANCE_IN, SHOOTER_RPM);
+        hoodAngleInterpolator = new LinearInterpolation(SHOOTER_DISTANCE_IN, SHOOTER_HOOD_ANGLE_DEG);
 
         timer.reset();
         lastTime = timer.seconds();
@@ -254,7 +263,8 @@ public class Turret {
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
-        shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+        shooterRpm = rpmInterpolator.interpolate(trackingDistance);
+        double hoodAngleDeg = hoodAngleInterpolator.interpolate(trackingDistance);
 
         if (MainTeleop.manualTurret) {
             shooterRpm = 3000;
@@ -264,6 +274,7 @@ public class Turret {
             shooter.periodic();
             if (!shooterOverride) {
                 shooter.setVelocity(shooterRpm);
+                shooter.setHoodAngleDeg(hoodAngleDeg);
             }
         } else {
             shooter.setPower(0);
@@ -274,25 +285,6 @@ public class Turret {
 
     public void setShooterVelocity(double rpm) {
         shooter.setVelocity(rpm);
-    }
-
-    public void useNearAngleRegression() {
-        setShooterRegression(shooterLowF, shooterLowG, shooterLowH, shooterLowI);
-    }
-
-    public void useMidAngleRegression() {
-        setShooterRegression(shooterMidF, shooterMidG, shooterMidH, shooterMidI);
-    }
-
-    public void useFarAngleRegression() {
-        setShooterRegression(shooterHighF, shooterHighG, shooterHighH, shooterHighI);
-    }
-
-    private void setShooterRegression(double f, double g, double h, double i) {
-        shooterF = f;
-        shooterG = g;
-        shooterH = h;
-        shooterI = i;
     }
 
     public void setShooterOverride(boolean override) {
