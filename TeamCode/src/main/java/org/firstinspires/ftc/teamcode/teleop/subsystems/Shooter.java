@@ -19,16 +19,17 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.0025, i = 0.0, d = 0.0, f = 0.000225;
+    public static double p = 0.0025, i = 0.0, d = 0.0, f = 0.000185;
     public static boolean inverted = false;
 
+    // note for interpoilation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
     // targeting and behavior
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
     public static double maxPower = 1.0;        // clamp
-    public static double hoodMidAngleDeg = 38;
+    public static double hoodMidAngleDeg = 42;
     public static double hoodFarAngleDeg = 44;
-    public static double hoodMidPos = 0.8;//angleToPos(hoodMidAngleDeg);
+    public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
     public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
 
@@ -50,7 +51,7 @@ public class Shooter {
         motor2.setRunMode(Motor.RunMode.RawPower);
 
         hood = opMode.hardwareMap.servo.get("hood");
-        hood.setPosition(hoodMidPos);
+        hood.setPosition(1);
 
         controller = new PIDController(p, i, d);
     }
@@ -99,15 +100,13 @@ public class Shooter {
         setPower(power);
     }
 
-    public void setHoodPosition(double position) {
-        hood.setPosition(position);
+    public void setHoodAngle(double angle) {
+        hood.setPosition(angleToPos(angle));
     }
 
     protected void setHoodFar() { hood.setPosition(hoodFarPos); }
 
     protected void setHoodMid() { hood.setPosition(hoodMidPos); }
-
-    public void changePosition() {}
 
     // telemetry
     public double getTargetRPM() { return targetRPM; }

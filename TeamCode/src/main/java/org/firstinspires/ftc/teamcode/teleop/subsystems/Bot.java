@@ -195,12 +195,6 @@ public class Bot {
         turret.enableShooter(on);
     }
 
-//    public void setNearShooting() {
-//        turret.useNearAngleRegression();
-//        turret.shooter.setHoodNear();
-//        hoodPosition = HoodPosition.NEAR;
-//    }
-
     public void setMidShooting() {
         turret.useMidAngleRegression();
         turret.shooter.setHoodMid();

@@ -35,11 +35,11 @@ public class BotTester extends LinearOpMode {
     private boolean headingLockEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
     private int n = 0, rpmTotalError = 0;
-    private int h = 1;
 
     NormalizedRGBA colors;
 
     public static int rpm = 2000;
+    public static double angle = 40;
     public static boolean manualTurret = false, shooting = false, intakeOverride = false;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -229,8 +229,14 @@ public class BotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
             if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-//                bot.switchShooting();
-                bot.turret.shooter.hood.setPosition(0.8);
+//                if (bot.hoodPosition == Bot.HoodPosition.FAR) {
+//                    bot.turret.shooter.setHoodPosition(1);
+//                    bot.hoodPosition = Bot.HoodPosition.MID;
+//                } else {
+//                    bot.turret.shooter.setHoodPosition(0.74);
+//                    bot.hoodPosition = Bot.HoodPosition.FAR;
+//                }
+                bot.turret.shooter.setHoodAngle(angle);
             }
 
 
@@ -350,19 +356,19 @@ public class BotTester extends LinearOpMode {
             packet.fieldOverlay().setStroke("#3F51B5");
             Drawing.drawRobot(packet.fieldOverlay(), Bot.storedPose);
             telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-            telemetry.addLine("=== SRSHub Sensor Cache ===");
-            telemetry.addData("RR Dist (mm)", "%.1f", bot.indexer.rightHolder.getDistanceA());
-            telemetry.addData("RR Hue", "%.1f", bot.indexer.rightHolder.getHueA());
-            telemetry.addData("RL Dist (mm)", "%.1f", bot.indexer.rightHolder.getDistanceB());
-            telemetry.addData("RL Hue", "%.1f", bot.indexer.rightHolder.getHueB());
-            telemetry.addData("LL Dist (mm)", "%.1f", bot.indexer.leftHolder.getDistanceA());
-            telemetry.addData("LL Hue", "%.1f", bot.indexer.leftHolder.getHueA());
-            telemetry.addData("LR Dist (mm)", "%.1f", bot.indexer.leftHolder.getDistanceB());
-            telemetry.addData("LR Hue", "%.1f", bot.indexer.leftHolder.getHueB());
-            telemetry.addData("BR Dist (mm)", "%.1f", bot.indexer.backHolder.getDistanceA());
-            telemetry.addData("BR Hue", "%.1f", bot.indexer.backHolder.getHueA());
-            telemetry.addData("BB Dist (mm)", "%.1f", bot.indexer.backHolder.getDistanceB());
-            telemetry.addData("BB Hue", "%.1f", bot.indexer.backHolder.getHueB());
+//            telemetry.addLine("=== SRSHub Sensor Cache ===");
+//            telemetry.addData("RR Dist (mm)", "%.1f", bot.indexer.rightHolder.getDistanceA());
+//            telemetry.addData("RR Hue", "%.1f", bot.indexer.rightHolder.getHueA());
+//            telemetry.addData("RL Dist (mm)", "%.1f", bot.indexer.rightHolder.getDistanceB());
+//            telemetry.addData("RL Hue", "%.1f", bot.indexer.rightHolder.getHueB());
+//            telemetry.addData("LL Dist (mm)", "%.1f", bot.indexer.leftHolder.getDistanceA());
+//            telemetry.addData("LL Hue", "%.1f", bot.indexer.leftHolder.getHueA());
+//            telemetry.addData("LR Dist (mm)", "%.1f", bot.indexer.leftHolder.getDistanceB());
+//            telemetry.addData("LR Hue", "%.1f", bot.indexer.leftHolder.getHueB());
+//            telemetry.addData("BR Dist (mm)", "%.1f", bot.indexer.backHolder.getDistanceA());
+//            telemetry.addData("BR Hue", "%.1f", bot.indexer.backHolder.getHueA());
+//            telemetry.addData("BB Dist (mm)", "%.1f", bot.indexer.backHolder.getDistanceB());
+//            telemetry.addData("BB Hue", "%.1f", bot.indexer.backHolder.getHueB());
             //
             FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
