@@ -50,7 +50,7 @@ public class Shooter {
         motor2.setRunMode(Motor.RunMode.RawPower);
 
         hood = opMode.hardwareMap.servo.get("hood");
-        hood.setPosition(0.8);
+        hood.setPosition(1);
 
         controller = new PIDController(p, i, d);
     }

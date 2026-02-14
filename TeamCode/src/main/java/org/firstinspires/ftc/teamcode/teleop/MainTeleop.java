@@ -319,6 +319,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
 
+
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
@@ -379,6 +380,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Right Power", bot.lift.rightPower);
             telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
             telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+
 ////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
 //////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
 //            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);

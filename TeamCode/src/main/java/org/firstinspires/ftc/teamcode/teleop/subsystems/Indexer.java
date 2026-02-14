@@ -28,9 +28,9 @@ public class Indexer {
     /* ================= CONFIG ================= */
     public static double kickerLeftDown  = 0.515;
     public static double kickerLeftUp    = 0.20;
-    public static double kickerRightDown = 0.519;
+    public static double kickerRightDown = 0.513;
     public static double kickerRightUp   = 0.20;
-    public static double kickerBackDown  = 0.5;
+    public static double kickerBackDown  = 0.495;
     public static double kickerBackUp    = 0.19;
 
     public static double kickerSleep = 0.198;
