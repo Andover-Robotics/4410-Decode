@@ -17,20 +17,21 @@ public class Pos {
 
     // INTAKE
     public static Pose2d blueMidIntake = new Pose2d(-17, 32, Math.toRadians(90));
-    public static int midIntake = 32;
+    public static double midIntake = 31;
 
     public static Pose2d gate = new Pose2d(-12, 63.5, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-14, 65.5, Math.toRadians(35));
+    public static Pose2d gateIntaking = new Pose2d(-11, 57, Math.toRadians(50));
 
-    public static Pose2d gateSideOpen = new Pose2d(3, 61, Math.toRadians(-10));
+    public static Pose2d gateSideOpen = new Pose2d(3, 60, Math.toRadians(-10));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
-    public static int closeIntake = 22;
+    public static double closeIntake = 21;
 
     public static Pose2d blueFarIntake = new Pose2d(-35, 35, Math.toRadians(90));
-    public static int farIntake = 29;
+    public static double farIntake = 30;
+    public static double farIntakeFarAuto = 25;
 
-    public static Pose2d blueHpIntake = new Pose2d(-53, 67, Math.toRadians(179));
+    public static Pose2d blueHpIntake = new Pose2d(-53, 65.5, Math.toRadians(179));
 
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)

@@ -460,7 +460,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             new SleepAction(0.5),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-                    .splineTo(Pos.closeShoot, Math.toRadians(-45))
+                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(135))
+                    .waitSeconds(0.2)
                     .stopAndAdd(bot.indexer.shootMotifAuto());
             addedAction = true;
         }
