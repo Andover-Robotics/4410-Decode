@@ -32,6 +32,10 @@ public class Shooter {
     public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
     public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
+    private double currentHoodAngle;//debugging
+    private double currentServoPos;
+
+
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -100,7 +104,15 @@ public class Shooter {
     }
 
     public void setHoodAngle(double angle) {
+        currentHoodAngle = angle;   // stores the angle for telemetry
+        currentServoPos = (angleToPos(angle));
         hood.setPosition(angleToPos(angle));
+    }
+    public double getHoodAngle() {
+        return currentHoodAngle;
+    }
+    public double getServoPosition(){
+        return currentServoPos;
     }
 
     public void setHoodAngleDeg(double angleDeg) {
