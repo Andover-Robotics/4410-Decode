@@ -29,8 +29,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
     // ---------------- CONFIG STRUCT ----------------
     public static class AutoConfig {
         public boolean runPreload = true;
-        public boolean runMid     = true;
-        public int gateCycles = 1;
+        public boolean runMid     = false;
+        public int gateCycles = 0;
         public boolean runClose   = false;
         public boolean runFar     = true;
         public boolean runHp      = true;
@@ -265,7 +265,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(bot.enableShooter())
                     .waitSeconds(0.8)
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(bot.disableShooter());
             addedAction = true;
         }
@@ -280,13 +280,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueMidIntake.component1(), Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + Pos.midIntake))
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(bot.indexer.shootFarAuto());
+                    .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
 
@@ -310,11 +310,11 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = (gateIndex == gateCycles - 1) ?
                     builder
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(45)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter())) :
                     builder
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -334,7 +334,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(1.1, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -354,7 +354,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(1.00, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineTo(Pos.farShoot, Math.toRadians(-135))
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -366,18 +366,23 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
+//                    .setTangent(Math.toRadians(60))
+                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90))
+                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
                     .waitSeconds(0.2)
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
                             new SleepAction(0.5),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-                    .strafeToConstantHeading(Pos.farShoot)
-                    .stopAndAdd(bot.indexer.shootFarAuto());
+                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
+
+
+
         builder = builder.strafeToConstantHeading(Pos.farPark);
 
         if (!addedAction) {

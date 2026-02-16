@@ -202,15 +202,6 @@ public class Indexer {
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
-    public Action shootFarAuto() {
-        List<Action> actions = new ArrayList<>();
-        double sleepSeconds = Turret.getRapidShootSleep(autoFarSleep);
-        for (Holder h : holders) {
-            actions.add(h.kickResetAction());
-            actions.add(new SleepAction(sleepSeconds));
-        }
-        return new SequentialAction(actions.toArray(new Action[0]));
-    }
 
 
 

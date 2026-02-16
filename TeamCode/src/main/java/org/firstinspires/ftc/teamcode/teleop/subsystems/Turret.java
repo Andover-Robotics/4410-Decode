@@ -34,15 +34,12 @@ public class Turret {
     public static double rapidFireDistanceThresholdIn = 250;
     public static double rapidFireSleepScalePerIn = 0.009584479 ;
     public static double
-            largeP = 0.006, largeI = 0, largeD = 0.0003,
-            smallP = 0.017 , smallI = 0, smallD = 0.0004,
+            largeP = 0.0078, largeI = 0, largeD = 0.0003,
+            smallP = 0.02 , smallI = 0, smallD = 0.0004,
             errorThresholdDeg = 4, manualPower = 0;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
-    /**
-     * Example calibration data (replace with real tuned values).
-     * Distances are in inches, RPMs are target flywheel speeds, and hood angles are degrees.
-     */
+
     public static final double[] SHOOTER_DISTANCE_IN = {
             30.0, 32.5, 35.0, 37.5, 40.0, 42.5, 45.0, 47.5, 50.0, 52.5,
             55.0, 57.5, 60.0, 62.5, 65.0, 67.5, 70.0, 72.5, 75.0, 77.5,

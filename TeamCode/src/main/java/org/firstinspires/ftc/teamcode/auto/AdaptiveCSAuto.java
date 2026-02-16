@@ -329,7 +329,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .setTangent(Math.toRadians(180))
                     .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + Pos.midIntake), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));
@@ -433,7 +433,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.farIntake))
+                            Pos.blueFarIntake.position.y + Pos.intakeDisp))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.00, (() -> bot.reverseIntake()))
@@ -460,12 +460,14 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             new SleepAction(0.5),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(135))
+                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
                     .waitSeconds(0.2)
                     .stopAndAdd(bot.indexer.shootMotifAuto());
             addedAction = true;
         }
-        builder = builder.strafeToConstantHeading(Pos.closePark);
+        if (!cfg.runHp) {
+            builder = builder.strafeToConstantHeading(Pos.closePark);
+        }
 
         if (!addedAction) {
             builder = builder.stopAndAdd((() -> telemetry.addData("Auto", "No segments enabled")));
