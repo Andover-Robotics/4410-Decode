@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-// RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -21,34 +21,34 @@ import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 @Config
-@Autonomous(name = "Adaptive Far Shot Auto (No Motif)", group = "Competition")
-public class AdaptiveFSAuto extends LinearOpMode {
+@Autonomous(name = "18 Ball Auto", group = "Competition")
+public class SoloAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
     // ---------------- CONFIG STRUCT ----------------
     public static class AutoConfig {
+        public boolean startFar = false;
         public boolean runPreload = true;
-        public boolean runMid     = false;
-        public int gateCycles = 0;
-        public boolean runClose   = false;
-        public boolean runHp      = true;
+        public boolean runMid     = true;
+        public int gateCycles = 3;
+        public boolean runClose   = true;
+        public boolean runOpenGate = false;
         public boolean runFar     = true;
-        public int tunnelCycles   = 0;
+        public boolean runHp      = false;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
         public int delayClose   = 0;
+        public int delayOpenGate = 0;
         public int delayMid     = 0;
-        public int delayHp      = 0;
         public int delayFar     = 0;
-        public int delayTunnel  = 0;
-        public int intervalTunnel = 0;
+        public int delayHp      = 0;
     }
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = preload, 1 = mid, 2 = gate, 3 = close, 4 = hp, 5 = far, 6 = tunnel
+    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = open gate, 6 = far, 7 = hp
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -83,20 +83,21 @@ public class AdaptiveFSAuto extends LinearOpMode {
 
             telemetry.addData("ALLIANCE (A)", "<big><b>%s</b></big>", Bot.getAlliance());
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
-            addSegmentLine(0, "Preload: run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(0, "STARTING POSITION (X)", "%s", cfg.startFar ? "Far" : "Close");
+            addSegmentLine(1, "Preload: run (X) / delay (L/R)", "%b / %ds",
                     cfg.runPreload, cfg.delayPreload);
-            addSegmentLine(1, "Mid:     run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(2, "Mid:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runMid, cfg.delayMid);
-            addSegmentLine(2, "Gate:    cycles (X) / delay (L/R)", "%d / %ds",
+            addSegmentLine(3, "Gate:    cycles (X) / delay (L/R)", "%d / %ds",
                     cfg.gateCycles, cfg.delayGate);
-            addSegmentLine(3, "Close:   run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(4, "Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayClose);
-            addSegmentLine(4, "HP:      run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runHp, cfg.delayHp);
-            addSegmentLine(5, "Far:     run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(5, "Open Gate: run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runOpenGate, cfg.delayOpenGate);
+            addSegmentLine(6, "Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayFar);
-            addSegmentLine(6, "Tunnel:  cycles (X) / delay (L/R) / interval (LB/RB)", "%d / %ds / %ds",
-                    cfg.tunnelCycles, cfg.delayTunnel, cfg.intervalTunnel);
+            addSegmentLine(7, "HP:      run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runHp, cfg.delayHp);
             if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
             } else {
@@ -117,8 +118,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
-        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b hp:%b far:%b tunnel:%d",
-                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runHp, cfg.runFar, cfg.tunnelCycles);
+        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b openGate:%b far:%b hp:%b",
+                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runOpenGate, cfg.runFar, cfg.runHp);
         telemetry.update();
 
         applyStartingPosition(drive);
@@ -141,11 +142,20 @@ public class AdaptiveFSAuto extends LinearOpMode {
     }
 
     private void applyStartingPosition(MecanumDrive drive) {
-        bot.setFar();
-        if (Bot.isBlue()) {
-            drive.localizer.setPose(Pos.initialFarBluePose);
+        if (cfg.startFar) {
+            bot.setFar();
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(Pos.initialFarBluePose);
+            } else {
+                drive.localizer.setPose(Pos.initialFarRedPose);
+            }
         } else {
-            drive.localizer.setPose(Pos.initialFarRedPose);
+            bot.setClose();
+            if (Bot.isBlue()) {
+                drive.localizer.setPose(Pos.initialCloseBluePose);
+            } else {
+                drive.localizer.setPose(Pos.initialCloseRedPose);
+            }
         }
     }
 
@@ -161,35 +171,39 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 7 - 1) % 7;
+            selectedSegment = (selectedSegment + 8 - 1) % 8;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 7;
+            selectedSegment = (selectedSegment + 1) % 8;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
             addedAction = true;
             switch (selectedSegment) {
                 case 0:
-                    cfg.runPreload = !cfg.runPreload;
+                    cfg.startFar = false;
+                    builtAuto = null;
                     break;
                 case 1:
-                    cfg.runMid = !cfg.runMid;
+                    cfg.runPreload = true;
                     break;
                 case 2:
-                    cfg.gateCycles = (cfg.gateCycles + 1) % 4;
+                    cfg.runMid = true;
                     break;
                 case 3:
-                    cfg.runClose = !cfg.runClose;
+                    cfg.gateCycles = 3; //2 before far, one after far
                     break;
                 case 4:
-                    cfg.runHp = !cfg.runHp;
+                    cfg.runClose = true;
                     break;
                 case 5:
-                    cfg.runFar = !cfg.runFar;
+                    cfg.runOpenGate = false;
                     break;
                 case 6:
-                    cfg.tunnelCycles = (cfg.tunnelCycles + 1) % 6;
+                    cfg.runFar = true;
+                    break;
+                case 7:
+                    cfg.runHp = false;
                     break;
             }
         }
@@ -207,48 +221,36 @@ public class AdaptiveFSAuto extends LinearOpMode {
         if (delta != 0) {
             switch (selectedSegment) {
                 case 0:
+                    break;
+                case 1:
                     cfg.delayPreload =
                             clampDelay(cfg.delayPreload + delta);
                     break;
-                case 1:
+                case 2:
                     cfg.delayMid =
                             clampDelay(cfg.delayMid + delta);
                     break;
-                case 2:
+                case 3:
                     cfg.delayGate =
                             clampDelay(cfg.delayGate + delta);
                     break;
-                case 3:
+                case 4:
                     cfg.delayClose =
                             clampDelay(cfg.delayClose + delta);
                     break;
-                case 4:
-                    cfg.delayHp =
-                            clampDelay(cfg.delayHp + delta);
-                    break;
                 case 5:
+                    cfg.delayOpenGate =
+                            clampDelay(cfg.delayOpenGate + delta);
+                    break;
+                case 6:
                     cfg.delayFar =
                             clampDelay(cfg.delayFar + delta);
                     break;
-                case 6:
-                    cfg.delayTunnel =
-                            clampDelay(cfg.delayTunnel + delta);
+                case 7:
+                    cfg.delayHp =
+                            clampDelay(cfg.delayHp + delta);
                     break;
             }
-        }
-
-        int intervalDelta = 0;
-        if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            intervalDelta = 1;
-            addedAction = true;
-        }
-        if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            intervalDelta = -1;
-            addedAction = true;
-        }
-
-        if (intervalDelta != 0 && selectedSegment == 6) {
-            cfg.intervalTunnel = clampDelay(cfg.intervalTunnel + intervalDelta);
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
@@ -274,13 +276,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
     // ---------------- BUILDER: BUILD BLUE/RED AUTO ----------------
 
     private Action buildAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
-        Pose2d startPose = isBlue ? Pos.initialFarBluePose : Pos.initialFarRedPose;
+        cfg.runPreload = true;
+        Pose2d startPose = cfg.startFar ? Pos.initialFarBluePose : Pos.initialCloseBluePose;
         builder = isBlue
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
 
         int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
-        int tunnelCycles = Math.max(0, Math.min(5, cfg.tunnelCycles));
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
 
@@ -291,9 +293,10 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd(bot.enableShooter())
-                    .waitSeconds(0.8)
+                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
                     .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd(bot.disableShooter());
+                    .stopAndAdd((() -> bot.disableShooter()));
+
             addedAction = true;
         }
 
@@ -305,49 +308,45 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueMidIntake.component1(), Math.toRadians(90))
+                    .setTangent(Math.toRadians(180))
+                    .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + Pos.intakeDisp))
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
-                    .afterTime(0.85, (() -> bot.reverseIntake()))
-                    .setReversed(true)
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire());
+                    .afterTime(0.85, (() -> bot.reverseIntake()));
+            if (cfg.runClose && cfg.gateCycles == 0) {
+                builder = builder
+                        .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.closeShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                        .stopAndAdd(bot.indexer.shootRapidFire())
+                        .stopAndAdd((() -> bot.disableShooter()));
+            } else {
+                builder = builder
+                        .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((110)))
+                        .stopAndAdd(bot.indexer.shootRapidFire())
+                        .stopAndAdd((() -> bot.disableShooter()));
+            }
             addedAction = true;
         }
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackAlliance());
 
-        if (cfg.delayGate > 0 && gateCycles > 0) {
-            builder = builder.stopAndAdd(new SleepAction(cfg.delayGate));
-            addedAction = true;
-        }
-        for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) { //TODO - Make sure this doesn't hit far balls, if it does, then add another .splineTo above line 302 that goes to a position that is just 10 inches lower y than the gate position
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.gate.component1(), Math.toRadians(90))
-                    .waitSeconds(0.5)
-                    .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
-                    .waitSeconds(0.35)
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.2, bot.indexer.jiggleKickers())
-                    .afterTime(0.9, (() -> bot.reverseIntake()))
-                    .setTangent(Math.toRadians(-85));
-            builder = (gateIndex == gateCycles - 1) ?
-                    builder
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(45)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter())) :
-                    builder
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter()));
-            addedAction = true;
-        }
+        //GATE CYCLE 1
+        builder = builder
+                .stopAndAdd((() -> bot.sensorIntake(true)))
+                .splineToSplineHeading(Pos.gate, Math.toRadians(85))
+                .waitSeconds(0.825)
+                .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
+                .waitSeconds(0.1)
+                .stopAndAdd(bot.enableShooter());
+        builder = builder
+                .afterTime(0.2, bot.indexer.jiggleKickers())
+                .afterTime(0.9, (() -> bot.reverseIntake()))
+                .setReversed(true)
+                .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-52.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                .stopAndAdd(bot.indexer.shootRapidFire())
+                .stopAndAdd((() -> bot.disableShooter()));
+        addedAction = true;
 
         if (cfg.runClose) {
             if (cfg.delayClose > 0) {
@@ -358,39 +357,40 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + Pos.closeIntake))
-                    .stopAndAdd(bot.enableShooter())
+                            Pos.blueCloseIntake.position.y + Pos.closeIntake));
+
+
+            builder = builder
+                    .afterTime(0.01, bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.1, (() -> bot.reverseIntake()))
+                    .afterTime(1.1, (() -> bot.reverseIntake()));
+
+            builder = builder
                     .setReversed(true)
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .splineTo(Pos.closeShoot, Math.toRadians(-90));
+
+            builder = builder
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
 
-        if (cfg.runHp) {
-            if (cfg.delayHp > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
-                addedAction = true;
-            }
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-//                    .setTangent(Math.toRadians(60))
-                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90))
-                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
-                    .waitSeconds(0.2)
-                    .afterTime(0.01, new SequentialAction(
-                            bot.enableShooter(),
-                            new SleepAction(0.5),
-                            new InstantAction((() -> bot.reverseIntake()))
-                    ))
-                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire());
-            addedAction = true;
-        }
+        //GATE CYCLE 2
+        builder = builder
+                .stopAndAdd((() -> bot.sensorIntake(true)))
+                .splineToSplineHeading(Pos.gate, Math.toRadians(85))
+                .waitSeconds(0.825)
+                .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
+                .waitSeconds(0.1)
+                .stopAndAdd(bot.enableShooter());
+        builder = builder
+                .afterTime(0.2, bot.indexer.jiggleKickers())
+                .afterTime(0.9, (() -> bot.reverseIntake()))
+                .setReversed(true)
+                .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165))
+                .stopAndAdd(bot.indexer.shootRapidFire())
+                .stopAndAdd((() -> bot.disableShooter()));
+        addedAction = true;
 
         if (cfg.runFar) {
             if (cfg.delayFar > 0) {
@@ -401,44 +401,35 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.farIntakeFarAuto))
+                            Pos.blueFarIntake.position.y + Pos.intakeDisp))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.00, (() -> bot.reverseIntake()))
                     .setReversed(true)
-                    .splineTo(Pos.farShoot, Math.toRadians(-135))
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((110)))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
+
             addedAction = true;
         }
 
-        if (tunnelCycles > 0) {
-            if (cfg.delayTunnel > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayTunnel));
-                addedAction = true;
-            }
+        //GATE CYCLE 3
+        builder = builder
+                .stopAndAdd((() -> bot.sensorIntake(true)))
+                .splineToSplineHeading(Pos.gate, Math.toRadians(85))
+                .waitSeconds(0.825)
+                .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
+                .waitSeconds(0.1)
+                .stopAndAdd(bot.enableShooter());
+        builder = builder
+                .afterTime(0.2, bot.indexer.jiggleKickers())
+                .afterTime(0.9, (() -> bot.reverseIntake()))
+                .setReversed(true)
+                .strafeToSplineHeading(Pos.closeShootPark, Math.toRadians(100))
+                .stopAndAdd(bot.indexer.shootRapidFire())
+                .stopAndAdd((() -> bot.disableShooter()));
+        addedAction = true;
 
-            for (int tunnelIndex = 0; tunnelIndex < tunnelCycles; tunnelIndex++) {
-                if (tunnelIndex > 0 && cfg.intervalTunnel > 0) {
-                    builder = builder.stopAndAdd(new SleepAction(cfg.intervalTunnel));
-                }
-
-                builder = builder
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueSecretTunnelStart.position, Math.toRadians(45))
-                        .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 36, Pos.blueSecretTunnelStart.position.y), 0)
-                        .afterTime(0.50, (() -> bot.reverseIntake()))
-                        .setReversed(true)
-                        .splineTo(Pos.farShoot, Math.toRadians(-135))
-                        .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                        .stopAndAdd(bot.indexer.shootRapidFire())
-                        .stopAndAdd((() -> bot.disableShooter()));
-                addedAction = true;
-            }
-        }
-
-        builder = builder.strafeToConstantHeading(Pos.farPark);
 
         if (!addedAction) {
             builder = builder.stopAndAdd((() -> telemetry.addData("Auto", "No segments enabled")));

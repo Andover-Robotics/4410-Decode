@@ -17,15 +17,15 @@ public class Pos {
 
     // INTAKE
     public static Pose2d blueMidIntake = new Pose2d(-17, 32, Math.toRadians(90));
-    public static double intakeDisp = 29;
+    public static double intakeDisp = 31;
 
     public static Pose2d gate = new Pose2d(-12, 63.5, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-11, 57, Math.toRadians(50));
+    public static Pose2d gateIntaking = new Pose2d(-11, 59.5, Math.toRadians(50));
 
     public static Pose2d gateSideOpen = new Pose2d(3, 60, Math.toRadians(-10));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
-    public static double closeIntake = 21;
+    public static double closeIntake = 24;
 
     public static Pose2d blueFarIntake = new Pose2d(-35, 35, Math.toRadians(90));
     public static double farIntakeFarAuto = 25;

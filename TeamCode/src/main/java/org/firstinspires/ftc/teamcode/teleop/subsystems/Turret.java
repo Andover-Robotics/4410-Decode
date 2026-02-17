@@ -32,10 +32,10 @@ public class Turret {
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
     public static double rapidFireDistanceThresholdIn = 250;
-    public static double rapidFireSleepScalePerIn = 0.009584479 ;
+    public static double rapidFireSleepScalePerIn = 0.009584479;
     public static double
-            largeP = 0.0078, largeI = 0, largeD = 0.0003,
-            smallP = 0.02 , smallI = 0, smallD = 0.0004,
+            largeP = 0.0120, largeI = 0, largeD = 0.0003,
+            smallP = 0.023 , smallI = 0, smallD = 0.000525,
             errorThresholdDeg = 4, manualPower = 0;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
@@ -68,7 +68,7 @@ public class Turret {
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 230, lowLimit = -140;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
