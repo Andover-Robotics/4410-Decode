@@ -357,7 +357,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(Pos.gate, Math.toRadians(85))
-                    .waitSeconds(0.775)
+                    .waitSeconds(0.675)
                     .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
                     .waitSeconds(0.1)
                     .stopAndAdd(bot.enableShooter());
@@ -376,7 +376,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-52.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
-
             addedAction = true;
         }
 

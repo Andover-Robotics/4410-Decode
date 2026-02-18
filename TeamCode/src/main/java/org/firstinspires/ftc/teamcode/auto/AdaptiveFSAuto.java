@@ -34,7 +34,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
         public boolean runClose   = false;
         public boolean runHp      = true;
         public boolean runFar     = true;
-        public int tunnelCycles   = 0;
+        public int tunnelCycles   = 2;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
@@ -274,7 +274,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
     // ---------------- BUILDER: BUILD BLUE/RED AUTO ----------------
 
     private Action buildAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
-        Pose2d startPose = isBlue ? Pos.initialFarBluePose : Pos.initialFarRedPose;
+        Pose2d startPose = Pos.initialFarBluePose;
         builder = isBlue
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
@@ -377,7 +377,6 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-//                    .setTangent(Math.toRadians(60))
                     .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90))
                     .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
                     .waitSeconds(0.6)

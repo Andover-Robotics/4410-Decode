@@ -267,7 +267,7 @@ public class Bot {
         limelight.periodic();
         turret.periodic();
         lift.periodic();
-        screen.periodic();
+        // screen.periodic();
         drive.updatePoseEstimate();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {

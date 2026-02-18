@@ -258,7 +258,6 @@ public class MainTeleop extends LinearOpMode {
                 bot.indexer.jiggleKickers();
             }
 
-
             bot.periodic();
             drive();
 
@@ -321,14 +320,14 @@ public class MainTeleop extends LinearOpMode {
 
 
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());
-            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getServoPosition());
+//            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());
+//            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getServoPosition());
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Target RPM", Turret.shooterRpm);
             telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
-            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
+//            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
@@ -378,10 +377,10 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
 //
 ////            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-            telemetry.addData("Left Power", bot.lift.leftPower);
-            telemetry.addData("Right Power", bot.lift.rightPower);
-            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
-            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+//            telemetry.addData("Left Power", bot.lift.leftPower);
+//            telemetry.addData("Right Power", bot.lift.rightPower);
+//            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
+//            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
 
 ////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
 //////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
