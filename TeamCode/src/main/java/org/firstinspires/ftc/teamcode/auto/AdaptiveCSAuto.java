@@ -357,7 +357,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(Pos.gate, Math.toRadians(85))
-                    .waitSeconds(0.825)
+                    .waitSeconds(0.775)
                     .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
                     .waitSeconds(0.1)
                     .stopAndAdd(bot.enableShooter());
@@ -369,20 +369,13 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .strafeToSplineHeading(Pos.closeGateCycleShoot, Math.toRadians(110), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter())) :
-                    (gateCycles == 3) ?
-                        builder
-                        .afterTime(0.2, bot.indexer.jiggleKickers())
-                        .afterTime(0.9, (() -> bot.reverseIntake()))
-                        .strafeToSplineHeading(Pos.closeShootPark, Math.toRadians(100), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                        .stopAndAdd(bot.indexer.shootRapidFire())
-                        .stopAndAdd((() -> bot.disableShooter())) :
-                        builder
-                        .afterTime(0.2, bot.indexer.jiggleKickers())
-                        .afterTime(0.9, (() -> bot.reverseIntake()))
-                        .setReversed(true)
-                        .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-52.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                        .stopAndAdd(bot.indexer.shootRapidFire())
-                        .stopAndAdd((() -> bot.disableShooter()));
+                    builder
+                    .afterTime(0.2, bot.indexer.jiggleKickers())
+                    .afterTime(0.9, (() -> bot.reverseIntake()))
+                    .setReversed(true)
+                    .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-52.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
 
             addedAction = true;
         }

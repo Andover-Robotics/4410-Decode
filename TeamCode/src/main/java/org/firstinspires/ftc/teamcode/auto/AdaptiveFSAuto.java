@@ -380,7 +380,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                    .setTangent(Math.toRadians(60))
                     .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90))
                     .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
-                    .waitSeconds(0.2)
+                    .waitSeconds(0.6)
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
                             new SleepAction(0.5),
