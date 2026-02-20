@@ -215,11 +215,13 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
 
-            if ((gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) ||
-                    gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) && !bot.shooting) {
+            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
                 bot.switchShooting();
             }
 
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.toggleScreenPeriodic();
+            }
 
 
             // CLIMB
@@ -329,6 +331,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
 //            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
+            telemetry.addData("Screen periodic (GP2 R stick)", bot.isScreenPeriodicEnabled());
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
 
