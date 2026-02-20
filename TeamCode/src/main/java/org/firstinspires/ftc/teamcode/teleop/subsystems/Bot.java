@@ -32,6 +32,7 @@ public class Bot {
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking;
+    private boolean screenPeriodicEnabled = false;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -215,6 +216,18 @@ public class Bot {
         }
     }
 
+    public boolean isScreenPeriodicEnabled() {
+        return screenPeriodicEnabled;
+    }
+
+    public void setScreenPeriodicEnabled(boolean enabled) {
+        screenPeriodicEnabled = enabled;
+    }
+
+    public void toggleScreenPeriodic() {
+        screenPeriodicEnabled = !screenPeriodicEnabled;
+    }
+
 
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
         drive.setDrivePowers(new PoseVelocity2d(
@@ -267,7 +280,9 @@ public class Bot {
         limelight.periodic();
         turret.periodic();
         lift.periodic();
-        // screen.periodic();
+        if (screenPeriodicEnabled) {
+            screen.periodic();
+        }
         drive.updatePoseEstimate();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {

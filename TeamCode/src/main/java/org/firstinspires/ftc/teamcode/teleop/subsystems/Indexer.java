@@ -196,6 +196,12 @@ public class Indexer {
     public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
         double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
+
+        Bot bot = Bot.getInstance();
+        if (bot.intake.isRunning() && Turret.trackingDistance > 120) {
+            sleepSeconds = 0.1;
+        }
+
         for (Holder h : holders) {
             actions.add(h.kickResetAction());
             actions.add(new SleepAction(sleepSeconds));

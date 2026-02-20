@@ -56,5 +56,8 @@ public class Intake {
     public void setPower(double power) {
         motor.set(power);
     }
-}
 
+    public boolean isRunning() {
+        return currentMode != IntakeMode.STOPPED;
+    }
+}
