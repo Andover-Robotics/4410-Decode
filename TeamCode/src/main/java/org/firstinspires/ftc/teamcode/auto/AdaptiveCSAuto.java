@@ -398,6 +398,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
                         .setReversed(true)
                         .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
+//                        .splineToLinearHeading(Pos.gateSideOpenHeadOn, Math.toRadians(90))
                         .waitSeconds(1.55);
                 addedAction = true;
             }
