@@ -440,7 +440,17 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.intakeDisp))
+                            Pos.blueFarIntake.position.y + Pos.intakeDisp));
+
+            if (cfg.runPushPark) {
+                builder = builder
+                        .setReversed(true)
+                        .splineTo(Pos.closePark, Math.toRadians(-25))
+                        .setReversed(false)
+                        .splineTo(Pos.blueFarIntake.position, Math.toRadians(90));
+            }
+
+            builder = builder
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.00, (() -> bot.reverseIntake()))
@@ -467,13 +477,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
                     .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180));
-
-            if (cfg.runPushPark) {
-                builder = builder
-                        .setReversed(true)
-                        .splineTo(Pos.closePark, Math.toRadians(-25))
-                        .setReversed(false);
-            }
 
             builder = builder
                     .waitSeconds(0.2)
