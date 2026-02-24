@@ -26,14 +26,18 @@ import java.util.function.Supplier;
 public class Indexer {
 
     /* ================= CONFIG ================= */
-
-
-    public static double kickerLeftDown  = 0.697;
-    public static double kickerLeftUp    = 0.39;
-    public static double kickerRightDown = 0.627;
-    public static double kickerRightUp   = 0.325;
-    public static double kickerBackDown  = 0.59;
-    public static double kickerBackUp    = 0.29;
+//    public static double kickerLeftDown  = 0.515;
+//    public static double kickerLeftUp    = 0.20;
+//    public static double kickerRightDown = 0.513;
+//    public static double kickerRightUp   = 0.20;
+//    public static double kickerBackDown  = 0.495;
+//    public static double kickerBackUp    = 0.19;
+    public static double kickerLeftDown  = 0.222;
+    public static double kickerLeftUp    = 0.58;
+    public static double kickerRightDown = 0.225;
+    public static double kickerRightUp   = 0.58;
+    public static double kickerBackDown  = 0.218;
+    public static double kickerBackUp    = 0.58;
 
     public static double kickerSleep = 0.198;
 
@@ -198,15 +202,12 @@ public class Indexer {
     public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
         double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
-        for (Holder h : holders) {
-            actions.add(h.kickResetAction());
-            actions.add(new SleepAction(sleepSeconds));
+
+        Bot bot = Bot.getInstance();
+        if (bot.intake.isRunning() && Turret.trackingDistance > 120) {
+            sleepSeconds = 0.1;
         }
-        return new SequentialAction(actions.toArray(new Action[0]));
-    }
-    public Action shootFarAuto() {
-        List<Action> actions = new ArrayList<>();
-        double sleepSeconds = Turret.getRapidShootSleep(autoFarSleep);
+
         for (Holder h : holders) {
             actions.add(h.kickResetAction());
             actions.add(new SleepAction(sleepSeconds));

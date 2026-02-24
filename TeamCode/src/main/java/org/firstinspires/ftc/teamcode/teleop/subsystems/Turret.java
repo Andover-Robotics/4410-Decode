@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
+import org.firstinspires.ftc.teamcode.util.LinearInterpolation;
 
 import java.util.ArrayList;
 
@@ -31,15 +32,43 @@ public class Turret {
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
     public static double rapidFireDistanceThresholdIn = 250;
-    public static double rapidFireSleepScalePerIn = 0.009584479 ;
+    public static double rapidFireSleepScalePerIn = 0.009584479;
     public static double
-            largeP = 0.006, largeI = 0, largeD = 0.0003,
-            smallP = 0.017 , smallI = 0, smallD = 0.0004,
+            largeP = 0.0075, largeI = 0, largeD = 0.0003,
+            smallP = 0.023 , smallI = 0, smallD = 0.000525,
             errorThresholdDeg = 4, manualPower = 0;
 
-    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick, shooterF=-4383.53086, shooterG = -0.00733324, shooterH = 1.81436, shooterI = 8284.3436;
+    private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 235, lowLimit = -135;
+    public static final double[] SHOOTER_DISTANCE_IN = {
+            30.0, 32.5, 35.0, 37.5, 40.0, 42.5, 45.0, 47.5, 50.0, 52.5,
+            55.0, 57.5, 60.0, 62.5, 65.0, 67.5, 70.0, 72.5, 75.0, 77.5,
+            80.0, 82.5, 85.0, 87.5, 90.0, 92.5, 95.0, 97.5, 100.0, 102.5,
+            105.0, 107.5, 110.0, 112.5, 115.0, 117.5, 120.0, 122.5, 125.0, 127.5,
+            130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0
+    };
+
+    public static final double[] SHOOTER_RPM = {
+            2875, 2895, 2910, 2930, 2940, 2950, 2965, 2985, 3050, 3100,
+            3200, 3250, 3300, 3330, 3360, 3390, 3440, 3480, 3520, 3560,
+            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
+            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
+            4400, 4425, 4450, 4475, 4500, 4520, 4545
+    };
+
+    public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
+            32.500, 32.500, 32.500, 33.023, 33.545, 34.068, 34.591, 35.114, 35.636, 36.159,
+            36.682, 37.205, 37.727, 38.250, 38.773, 39.295, 39.818, 40.341, 40.864, 41.386,
+            41.909, 42.432, 42.955, 43.477, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000,
+            44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000,
+            44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000
+    };
+
+
+    private final LinearInterpolation rpmInterpolator;
+    private final LinearInterpolation hoodAngleInterpolator;
+
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 230, lowLimit = -140;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
@@ -63,6 +92,8 @@ public class Turret {
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         shooter = new Shooter(opMode);
+        rpmInterpolator = new LinearInterpolation(SHOOTER_DISTANCE_IN, SHOOTER_RPM);
+        hoodAngleInterpolator = new LinearInterpolation(SHOOTER_DISTANCE_IN, SHOOTER_HOOD_ANGLE_DEG);
 
         timer.reset();
         lastTime = timer.seconds();
@@ -173,7 +204,7 @@ public class Turret {
     }
 
     public void velocityCompensation(double dx, double dy) {
-        if (getPositionDegs() < highLimit - 10 && getPositionDegs() > lowLimit + 10) {
+        if (getPositionDegs() < highLimit - 5 && getPositionDegs() > lowLimit + 5) {
             double time = calculateTime(dx, dy);
             velocity = Bot.drive.localizer.getPoseVelocity();
 //        double dispX = velocity.linearVel.x * time;
@@ -208,7 +239,7 @@ public class Turret {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
         final double heightDisplacement = 26.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 48.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double launchAngleAboveHorizDeg = 49.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
@@ -250,7 +281,8 @@ public class Turret {
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
-        shooterRpm = shooterF * Math.sqrt(Math.abs(shooterG * trackingDistance + shooterH)) + shooterI; //Math.sqrt(shooterA * (distance) + shooterC);
+        shooterRpm = rpmInterpolator.interpolate(trackingDistance);
+        double hoodAngleDeg = hoodAngleInterpolator.interpolate(trackingDistance);
 
         if (MainTeleop.manualTurret) {
             shooterRpm = 3000;
@@ -260,6 +292,7 @@ public class Turret {
             shooter.periodic();
             if (!shooterOverride) {
                 shooter.setVelocity(shooterRpm);
+                shooter.setHoodAngleDeg(hoodAngleDeg);
             }
         } else {
             shooter.setPower(0);

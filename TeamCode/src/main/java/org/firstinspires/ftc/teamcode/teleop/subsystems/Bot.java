@@ -31,7 +31,8 @@ public class Bot {
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
-    public boolean shooting = false, sensorIntaking;
+    public boolean shooting = false, sensorIntaking = true;
+    private boolean screenPeriodicEnabled = false;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -54,7 +55,13 @@ public class Bot {
         UNKNOWN //TODO Remove
     }
 
+    public static enum HoodPosition {
+        MID,
+        FAR
+    }
+
     public static Motif motif = Motif.PPG;
+    public HoodPosition hoodPosition = HoodPosition.MID;
 
     private static allianceOptions alliance = allianceOptions.BLUE_ALLIANCE;
     private static startingPosition startingPos = startingPosition.FAR;
@@ -70,6 +77,8 @@ public class Bot {
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
         updatePoses();
+
+        setMidShooting();
     }
 
     public void switchAlliance() {
@@ -179,6 +188,18 @@ public class Bot {
         sensorIntaking = false;
     }
 
+    public void teleopReverseIntake() {
+        intake.reverse();
+    }
+
+    public void teleopIntake() {
+        intake.intake();
+    }
+
+    public void teleopStopIntake() {
+        intake.stop();
+    }
+
     public void enableFullAuto(boolean on) {
         turret.enableFullAuto(on);
     }
@@ -186,6 +207,39 @@ public class Bot {
     public void enableShooter(boolean on) {
         turret.enableShooter(on);
     }
+
+    public void setMidShooting() {
+        // Hood angle and RPM are now set by distance-based interpolation in the turret.
+        hoodPosition = HoodPosition.MID;
+    }
+
+    public void setFarShooting() {
+        // Hood angle and RPM are now set by distance-based interpolation in the turret.
+        hoodPosition = HoodPosition.FAR;
+    }
+
+    public void switchShooting() {
+        switch(hoodPosition) {
+            case MID:
+                setFarShooting();
+            case FAR:
+                setMidShooting();
+                break;
+        }
+    }
+
+    public boolean isScreenPeriodicEnabled() {
+        return screenPeriodicEnabled;
+    }
+
+    public void setScreenPeriodicEnabled(boolean enabled) {
+        screenPeriodicEnabled = enabled;
+    }
+
+    public void toggleScreenPeriodic() {
+        screenPeriodicEnabled = !screenPeriodicEnabled;
+    }
+
 
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
         drive.setDrivePowers(new PoseVelocity2d(
@@ -238,7 +292,25 @@ public class Bot {
         limelight.periodic();
         turret.periodic();
         lift.periodic();
-        screen.periodic();
+        if (screenPeriodicEnabled) {
+            screen.periodic();
+        }
+        drive.updatePoseEstimate();
+//        if (sensorIntaking) {
+//            if (indexer.countBalls()==3) {
+//                intake.reverse();
+//            } else {
+//                intake.intake();
+//            }
+//        }
+    }
+
+    public void autoPeriodic() {
+        clearBulkCache();
+        indexer.updateSensorCache();
+        limelight.periodic();
+        turret.periodic();
+        lift.periodic();
         drive.updatePoseEstimate();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {
@@ -259,7 +331,7 @@ public class Bot {
     public class actionPeriodic implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            periodic();
+            autoPeriodic();
             return true;
         }
     }
@@ -267,17 +339,7 @@ public class Bot {
     private static double normalizeRadians(double angleRad) {
         return Math.atan2(Math.sin(angleRad), Math.cos(angleRad));
     }
-//
-//    public Action actionNoScreenPeriodic() {
-//        return new actionPeriodic();
-//    }
-//    public class actionNoScreenPeriodic implements Action {
-//        @Override
-//        public boolean run(@NonNull TelemetryPacket packet) {
-//            periodic();
-//            return true;
-//        }
-//    }
+
 
     // get bot instance
     public static Bot getInstance() {
@@ -294,4 +356,5 @@ public class Bot {
         instance.opMode = opMode;
         return instance;
     }
+
 }

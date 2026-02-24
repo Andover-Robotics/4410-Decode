@@ -136,25 +136,29 @@ public class MainTeleop extends LinearOpMode {
 //            } //
 
             if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                if (bot.indexer.countBalls()==3) {
-                    bot.reverseIntake();
-                    gp1.gamepad.rumble(1, 1, -1);
+                if (bot.sensorIntaking) {
+                    if (bot.indexer.countBalls()==3) {
+                        bot.teleopReverseIntake();
+                        gp1.gamepad.rumble(1, 1, -1);
+                    } else {
+                        bot.teleopIntake();
+                        gp1.gamepad.stopRumble();
+                    }
                 } else {
-                    bot.intake();
-                    gp1.gamepad.stopRumble();
+                    bot.teleopIntake();
                 }
             } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                bot.reverseIntake();
+                bot.teleopReverseIntake();
                 if (bot.indexer.countBalls() == 3) {
                     gp1.gamepad.rumble(1, 1, -1);
                 } else {
-                    bot.reverseIntake();
+                    bot.teleopReverseIntake();
                     gp1.gamepad.stopRumble();
                 }
             } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                bot.intake();
+                bot.teleopIntake();
             } else {
-                bot.stopIntake();
+                bot.teleopStopIntake();
                 gp1.gamepad.stopRumble();
             }
 
@@ -215,6 +219,14 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
 
+            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
+                bot.switchShooting();
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.toggleScreenPeriodic();
+            }
+
 
             // CLIMB
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
@@ -233,7 +245,8 @@ public class MainTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
 //                bot.limelight.relocalizeBotPose();
-                headingLockEnabled = !headingLockEnabled;
+//                headingLockEnabled = !headingLockEnabled;
+                bot.sensorIntaking = !bot.sensorIntaking;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -251,7 +264,6 @@ public class MainTeleop extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
                 bot.indexer.jiggleKickers();
             }
-
 
             bot.periodic();
             drive();
@@ -313,14 +325,19 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
 
+
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
+//            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());
+//            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getServoPosition());
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Target RPM", Turret.shooterRpm);
             telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
-            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
+//            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
+            telemetry.addData("Screen periodic (GP2 R stick)", bot.isScreenPeriodicEnabled());
+            telemetry.addData("Sensor Intaking (GP1 Back Button)", bot.sensorIntaking);
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
 
@@ -369,10 +386,11 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
 //
 ////            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-            telemetry.addData("Left Power", bot.lift.leftPower);
-            telemetry.addData("Right Power", bot.lift.rightPower);
-            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
-            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+//            telemetry.addData("Left Power", bot.lift.leftPower);
+//            telemetry.addData("Right Power", bot.lift.rightPower);
+//            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
+//            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
+
 ////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
 //////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
 //            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);

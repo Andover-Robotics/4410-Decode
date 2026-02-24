@@ -29,23 +29,26 @@ public class AdaptiveFSAuto extends LinearOpMode {
     // ---------------- CONFIG STRUCT ----------------
     public static class AutoConfig {
         public boolean runPreload = true;
-        public boolean runMid     = true;
-        public int gateCycles = 1;
+        public boolean runMid     = false;
+        public int gateCycles = 0;
         public boolean runClose   = false;
-        public boolean runFar     = true;
         public boolean runHp      = true;
+        public boolean runFar     = true;
+        public int tunnelCycles   = 3;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
         public int delayClose   = 0;
         public int delayMid     = 0;
-        public int delayFar     = 0;
         public int delayHp      = 0;
+        public int delayFar     = 0;
+        public int delayTunnel  = 0;
+        public int intervalTunnel = 0;
     }
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = preload, 1 = mid, 2 = gate, 3 = close, 4 = far, 5 = hp
+    // 0 = preload, 1 = mid, 2 = gate, 3 = close, 4 = hp, 5 = far, 6 = tunnel
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -88,10 +91,12 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     cfg.gateCycles, cfg.delayGate);
             addSegmentLine(3, "Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayClose);
-            addSegmentLine(4, "Far:     run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runFar, cfg.delayFar);
-            addSegmentLine(5, "HP:      run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(4, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayHp);
+            addSegmentLine(5, "Far:     run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runFar, cfg.delayFar);
+            addSegmentLine(6, "Tunnel:  cycles (X) / delay (L/R) / interval (LB/RB)", "%d / %ds / %ds",
+                    cfg.tunnelCycles, cfg.delayTunnel, cfg.intervalTunnel);
             if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
             } else {
@@ -112,8 +117,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
-        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b far:%b hp:%b",
-                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runFar, cfg.runHp);
+        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b hp:%b far:%b tunnel:%d",
+                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runHp, cfg.runFar, cfg.tunnelCycles);
         telemetry.update();
 
         applyStartingPosition(drive);
@@ -156,10 +161,10 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 6 - 1) % 6;
+            selectedSegment = (selectedSegment + 7 - 1) % 7;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 6;
+            selectedSegment = (selectedSegment + 1) % 7;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
@@ -178,10 +183,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     cfg.runClose = !cfg.runClose;
                     break;
                 case 4:
-                    cfg.runFar = !cfg.runFar;
+                    cfg.runHp = !cfg.runHp;
                     break;
                 case 5:
-                    cfg.runHp = !cfg.runHp;
+                    cfg.runFar = !cfg.runFar;
+                    break;
+                case 6:
+                    cfg.tunnelCycles = (cfg.tunnelCycles + 1) % 6;
                     break;
             }
         }
@@ -215,14 +223,32 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             clampDelay(cfg.delayClose + delta);
                     break;
                 case 4:
-                    cfg.delayFar =
-                            clampDelay(cfg.delayFar + delta);
-                    break;
-                case 5:
                     cfg.delayHp =
                             clampDelay(cfg.delayHp + delta);
                     break;
+                case 5:
+                    cfg.delayFar =
+                            clampDelay(cfg.delayFar + delta);
+                    break;
+                case 6:
+                    cfg.delayTunnel =
+                            clampDelay(cfg.delayTunnel + delta);
+                    break;
             }
+        }
+
+        int intervalDelta = 0;
+        if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+            intervalDelta = 1;
+            addedAction = true;
+        }
+        if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+            intervalDelta = -1;
+            addedAction = true;
+        }
+
+        if (intervalDelta != 0 && selectedSegment == 6) {
+            cfg.intervalTunnel = clampDelay(cfg.intervalTunnel + intervalDelta);
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
@@ -248,12 +274,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
     // ---------------- BUILDER: BUILD BLUE/RED AUTO ----------------
 
     private Action buildAuto(MecanumDrive drive, boolean isBlue, AutoConfig cfg) {
-        Pose2d startPose = isBlue ? Pos.initialFarBluePose : Pos.initialFarRedPose;
+        Pose2d startPose = Pos.initialFarBluePose;
         builder = isBlue
                 ? drive.actionBuilderBlue(startPose)
                 : drive.actionBuilderRed(startPose);
 
         int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
+        int tunnelCycles = Math.max(0, Math.min(5, cfg.tunnelCycles));
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
 
@@ -265,7 +292,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(bot.enableShooter())
                     .waitSeconds(0.8)
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(bot.disableShooter());
             addedAction = true;
         }
@@ -280,13 +307,14 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueMidIntake.component1(), Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-                            Pos.blueMidIntake.position.y + Pos.midIntake))
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(bot.indexer.shootFarAuto());
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
 
@@ -302,7 +330,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .splineTo(Pos.gate.component1(), Math.toRadians(90))
                     .waitSeconds(0.5)
                     .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
-                    .waitSeconds(0.325)
+                    .waitSeconds(0.35)
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.2, bot.indexer.jiggleKickers())
                     .afterTime(0.9, (() -> bot.reverseIntake()))
@@ -310,11 +338,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = (gateIndex == gateCycles - 1) ?
                     builder
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(45)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter())) :
                     builder
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -334,8 +364,34 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .afterTime(1.1, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
+            addedAction = true;
+        }
+
+        if (cfg.runHp) {
+            if (cfg.delayHp > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
+                addedAction = true;
+            }
+            builder = builder
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
+//                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
+//                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
+//                    .waitSeconds(0.6)
+                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
+                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)
+                    .waitSeconds(0.2)
+
+                    .afterTime(0.01, new SequentialAction(
+                            bot.enableShooter(),
+                            new SleepAction(0.5),
+                            new InstantAction((() -> bot.reverseIntake()))
+                    ))
+                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
 
@@ -348,36 +404,66 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.farIntake))
+                            Pos.blueFarIntake.position.y + Pos.farIntakeFarAuto))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.00, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineTo(Pos.farShoot, Math.toRadians(-135))
-                    .stopAndAdd(bot.indexer.shootFarAuto())
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
 
-        if (cfg.runHp) {
-            if (cfg.delayHp > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
+        if (tunnelCycles > 0) {
+            if (cfg.delayTunnel > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayTunnel));
                 addedAction = true;
             }
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
-                    .waitSeconds(0.2)
-                    .afterTime(0.01, new SequentialAction(
-                            bot.enableShooter(),
-                            new SleepAction(0.5),
-                            new InstantAction((() -> bot.reverseIntake()))
-                    ))
-                    .strafeToConstantHeading(Pos.farShoot)
-                    .stopAndAdd(bot.indexer.shootFarAuto());
-            addedAction = true;
+
+            for (int tunnelIndex = 0; tunnelIndex < tunnelCycles; tunnelIndex++) {
+                if (tunnelIndex > 0 && cfg.intervalTunnel > 0) {
+                    builder = builder.stopAndAdd(new SleepAction(cfg.intervalTunnel));
+                }
+                if (tunnelIndex == 0 || tunnelIndex == 2) {
+                    builder = builder
+                            // old tunnel intaking (gov cup)
+//                        .stopAndAdd((() -> bot.sensorIntake(true)))
+//                        .splineTo(Pos.blueSecretTunnelStart.position, Math.toRadians(45))
+//                        .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 35, Pos.blueSecretTunnelStart.position.y), 0)
+//                        .afterTime(0.50, (() -> bot.reverseIntake()))
+//                        .setReversed(true)
+//                        .splineTo(Pos.farShoot, Math.toRadians(-135))
+//                        .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+//                        .stopAndAdd(bot.indexer.shootRapidFire())
+//                        .stopAndAdd((() -> bot.disableShooter()));
+
+                            .stopAndAdd((() -> bot.sensorIntake(true)))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 20, Pos.blueSecretTunnelStart.position.y), Math.toRadians(120))
+                            .strafeToLinearHeading(Pos.blueSecretTunnelStart.position, Math.toRadians(-170))
+                            .afterTime(0.20, (() -> bot.reverseIntake()))
+                            .setReversed(true)
+                            .splineTo(Pos.farShoot, Math.toRadians(-100))
+                            .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                            .stopAndAdd(bot.indexer.shootRapidFire())
+                            .stopAndAdd((() -> bot.disableShooter()));
+                } else {
+                    builder = builder
+                            .stopAndAdd((() -> bot.sensorIntake(true)))
+                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90))
+                            .afterTime(0.20, (() -> bot.reverseIntake()))
+                            .setReversed(true)
+                            .strafeToSplineHeading(Pos.farShoot, Math.toRadians(-135))
+                            .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                            .stopAndAdd(bot.indexer.shootRapidFire())
+                            .stopAndAdd((() -> bot.disableShooter()));
+                }
+
+                addedAction = true;
+            }
         }
+
         builder = builder.strafeToConstantHeading(Pos.farPark);
 
         if (!addedAction) {
