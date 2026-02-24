@@ -377,9 +377,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90))
-                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
-                    .waitSeconds(0.6)
+//                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
+//                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
+//                    .waitSeconds(0.6)
+                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
+                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)
+                    .waitSeconds(0.2)
+
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
                             new SleepAction(0.5),
@@ -423,7 +427,17 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     builder = builder.stopAndAdd(new SleepAction(cfg.intervalTunnel));
                 }
 
-                builder = builder
+                builder = builder// old tunnel intaking (gov cup)
+//                        .stopAndAdd((() -> bot.sensorIntake(true)))
+//                        .splineTo(Pos.blueSecretTunnelStart.position, Math.toRadians(45))
+//                        .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 35, Pos.blueSecretTunnelStart.position.y), 0)
+//                        .afterTime(0.50, (() -> bot.reverseIntake()))
+//                        .setReversed(true)
+//                        .splineTo(Pos.farShoot, Math.toRadians(-135))
+//                        .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+//                        .stopAndAdd(bot.indexer.shootRapidFire())
+//                        .stopAndAdd((() -> bot.disableShooter()));
+
                         .stopAndAdd((() -> bot.sensorIntake(true)))
                         .splineTo(Pos.blueSecretTunnelStart.position, Math.toRadians(45))
                         .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 35, Pos.blueSecretTunnelStart.position.y), 0)
