@@ -447,17 +447,22 @@ public class AdaptiveCSAuto extends LinearOpMode {
             if (cfg.runPushPark) {
                 builder = builder
                         .setReversed(true)
-                        .splineTo(Pos.closePark, Math.toRadians(-25))
-                        .setReversed(false)
-                        .splineTo(Pos.blueFarIntake.position, Math.toRadians(90));
+                        .splineToConstantHeading(Pos.pushPark.position, Math.toRadians(100))
+                        .stopAndAdd(bot.enableShooter())
+                        .setTangent(Math.toRadians(-80))
+                        .afterTime(0.4, bot.indexer.jiggleKickers())
+                        .afterTime(1.00, (() -> bot.reverseIntake()))
+                        .setReversed(true)
+                        .splineTo(Pos.closeShoot, Math.toRadians(-25));
+            } else {
+                builder = builder
+                        .stopAndAdd(bot.enableShooter())
+                        .afterTime(0.4, bot.indexer.jiggleKickers())
+                        .afterTime(1.00, (() -> bot.reverseIntake()))
+                        .setReversed(true)
+                        .splineTo(Pos.closeShoot, Math.toRadians(-25));
             }
 
-            builder = builder
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.00, (() -> bot.reverseIntake()))
-                    .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-25));
             if (cfg.gateCycles > 0) {
                 builder = builder
                         .stopAndAdd(bot.indexer.shootRapidFire())

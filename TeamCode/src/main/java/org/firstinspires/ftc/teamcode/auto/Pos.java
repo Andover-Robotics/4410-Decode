@@ -31,6 +31,8 @@ public class Pos {
     public static Pose2d blueFarIntake = new Pose2d(-35, 35, Math.toRadians(90));
     public static double farIntakeFarAuto = 25;
 
+    public static Pose2d pushPark = new Pose2d(-58, 16, Math.toRadians(90));
+
     public static Pose2d blueHpIntake = new Pose2d(-53, 65.5, Math.toRadians(179));
     public static Pose2d blueHpSideInterIntake = new Pose2d(-56, 54, Math.toRadians(90));
     public static Pose2d blueHpSideIntake = new Pose2d(-65, 62, Math.toRadians(90));
