@@ -34,7 +34,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
         public boolean runClose   = false;
         public boolean runHp      = true;
         public boolean runFar     = true;
-        public int tunnelCycles   = 2;
+        public int tunnelCycles   = 3;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
@@ -426,8 +426,9 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex > 0 && cfg.intervalTunnel > 0) {
                     builder = builder.stopAndAdd(new SleepAction(cfg.intervalTunnel));
                 }
-
-                builder = builder// old tunnel intaking (gov cup)
+                if (tunnelIndex == 0 || tunnelIndex == 2) {
+                    builder = builder
+                            // old tunnel intaking (gov cup)
 //                        .stopAndAdd((() -> bot.sensorIntake(true)))
 //                        .splineTo(Pos.blueSecretTunnelStart.position, Math.toRadians(45))
 //                        .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 35, Pos.blueSecretTunnelStart.position.y), 0)
@@ -438,15 +439,27 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                        .stopAndAdd(bot.indexer.shootRapidFire())
 //                        .stopAndAdd((() -> bot.disableShooter()));
 
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueSecretTunnelStart.position, Math.toRadians(45))
-                        .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 35, Pos.blueSecretTunnelStart.position.y), 0)
-                        .afterTime(0.50, (() -> bot.reverseIntake()))
-                        .setReversed(true)
-                        .splineTo(Pos.farShoot, Math.toRadians(-135))
-                        .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                        .stopAndAdd(bot.indexer.shootRapidFire())
-                        .stopAndAdd((() -> bot.disableShooter()));
+                            .stopAndAdd((() -> bot.sensorIntake(true)))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 20, Pos.blueSecretTunnelStart.position.y), Math.toRadians(120))
+                            .strafeToLinearHeading(Pos.blueSecretTunnelStart.position, Math.toRadians(-170))
+                            .afterTime(0.20, (() -> bot.reverseIntake()))
+                            .setReversed(true)
+                            .splineTo(Pos.farShoot, Math.toRadians(-100))
+                            .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                            .stopAndAdd(bot.indexer.shootRapidFire())
+                            .stopAndAdd((() -> bot.disableShooter()));
+                } else {
+                    builder = builder
+                            .stopAndAdd((() -> bot.sensorIntake(true)))
+                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90))
+                            .afterTime(0.20, (() -> bot.reverseIntake()))
+                            .setReversed(true)
+                            .strafeToSplineHeading(Pos.farShoot, Math.toRadians(-135))
+                            .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                            .stopAndAdd(bot.indexer.shootRapidFire())
+                            .stopAndAdd((() -> bot.disableShooter()));
+                }
+
                 addedAction = true;
             }
         }
