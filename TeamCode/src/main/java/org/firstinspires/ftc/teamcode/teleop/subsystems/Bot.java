@@ -31,7 +31,7 @@ public class Bot {
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
-    public boolean shooting = false, sensorIntaking;
+    public boolean shooting = false, sensorIntaking = true;
     private boolean screenPeriodicEnabled = false;
 
     public static MecanumDrive drive;
@@ -188,6 +188,18 @@ public class Bot {
         sensorIntaking = false;
     }
 
+    public void teleopReverseIntake() {
+        intake.reverse();
+    }
+
+    public void teleopIntake() {
+        intake.intake();
+    }
+
+    public void teleopStopIntake() {
+        intake.stop();
+    }
+
     public void enableFullAuto(boolean on) {
         turret.enableFullAuto(on);
     }
@@ -284,6 +296,22 @@ public class Bot {
             screen.periodic();
         }
         drive.updatePoseEstimate();
+//        if (sensorIntaking) {
+//            if (indexer.countBalls()==3) {
+//                intake.reverse();
+//            } else {
+//                intake.intake();
+//            }
+//        }
+    }
+
+    public void autoPeriodic() {
+        clearBulkCache();
+        indexer.updateSensorCache();
+        limelight.periodic();
+        turret.periodic();
+        lift.periodic();
+        drive.updatePoseEstimate();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {
                 intake.reverse();
@@ -303,7 +331,7 @@ public class Bot {
     public class actionPeriodic implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            periodic();
+            autoPeriodic();
             return true;
         }
     }
@@ -311,17 +339,7 @@ public class Bot {
     private static double normalizeRadians(double angleRad) {
         return Math.atan2(Math.sin(angleRad), Math.cos(angleRad));
     }
-//
-//    public Action actionNoScreenPeriodic() {
-//        return new actionPeriodic();
-//    }
-//    public class actionNoScreenPeriodic implements Action {
-//        @Override
-//        public boolean run(@NonNull TelemetryPacket packet) {
-//            periodic();
-//            return true;
-//        }
-//    }
+
 
     // get bot instance
     public static Bot getInstance() {

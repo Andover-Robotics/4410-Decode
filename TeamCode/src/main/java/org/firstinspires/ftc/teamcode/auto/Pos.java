@@ -22,7 +22,7 @@ public class Pos {
     public static Pose2d gate = new Pose2d(-12, 63.5, GATE_INTAKE_ANGLE);
     public static Pose2d gateIntaking = new Pose2d(-11, 59.5, Math.toRadians(50));
 
-    public static Pose2d gateSideOpen = new Pose2d(3, 60, Math.toRadians(-10));
+    public static Pose2d gateSideOpen = new Pose2d(3, 62, Math.toRadians(-10));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
     public static double closeIntake = 24;
@@ -34,7 +34,7 @@ public class Pos {
     public static Pose2d blueHpSideInterIntake = new Pose2d(-56, 54, Math.toRadians(90));
     public static Pose2d blueHpSideIntake = new Pose2d(-65, 62, Math.toRadians(90));
 
-    public static Pose2d blueSecretTunnelStart = new Pose2d(-56, 62, Math.toRadians(35));
+    public static Pose2d blueSecretTunnelStart = new Pose2d(-60, 62, Math.toRadians(35));
 
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
