@@ -39,6 +39,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         public boolean runClose   = true;
         public boolean runOpenGate = true;
         public boolean runFar     = true;
+        public boolean runPushPark = false;
         public boolean runHp      = true;
 
         public int delayPreload = 0;
@@ -52,7 +53,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = open gate, 6 = far, 7 = hp
+    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = open gate, 6 = far, 7 = push park, 8 = hp
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -100,7 +101,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     cfg.runOpenGate, cfg.delayOpenGate);
             addSegmentLine(6, "Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayFar);
-            addSegmentLine(7, "HP:      run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(7, "Push Park: run (X)", "%b", cfg.runPushPark);
+            addSegmentLine(8, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayHp);
             if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
@@ -122,8 +124,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
-        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b openGate:%b far:%b hp:%b",
-                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runOpenGate, cfg.runFar, cfg.runHp);
+        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b openGate:%b far:%b pushPark:%b hp:%b",
+                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runOpenGate, cfg.runFar, cfg.runPushPark, cfg.runHp);
         telemetry.update();
 
         applyStartingPosition(drive);
@@ -175,10 +177,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 8 - 1) % 8;
+            selectedSegment = (selectedSegment + 9 - 1) % 9;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 8;
+            selectedSegment = (selectedSegment + 1) % 9;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
@@ -207,6 +209,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     cfg.runFar = !cfg.runFar;
                     break;
                 case 7:
+                    cfg.runPushPark = !cfg.runPushPark;
+                    break;
+                case 8:
                     cfg.runHp = !cfg.runHp;
                     break;
             }
@@ -251,6 +256,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             clampDelay(cfg.delayFar + delta);
                     break;
                 case 7:
+                    break;
+                case 8:
                     cfg.delayHp =
                             clampDelay(cfg.delayHp + delta);
                     break;
@@ -398,6 +405,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
                         .setReversed(true)
                         .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
+//                        .setReversed(true)
+//                        .splineToLinearHeading(Pos.gateSideOpenHeadOn, Math.toRadians(90))
                         .waitSeconds(1.55);
                 addedAction = true;
             }
@@ -433,12 +442,27 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
                     .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.intakeDisp))
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.00, (() -> bot.reverseIntake()))
-                    .setReversed(true)
-                    .splineTo(Pos.closeShoot, Math.toRadians(-25));
+                            Pos.blueFarIntake.position.y + Pos.intakeDisp));
+
+            if (cfg.runPushPark) {
+                builder = builder
+                        .setReversed(true)
+                        .splineToConstantHeading(Pos.pushPark.position, Math.toRadians(100))
+                        .stopAndAdd(bot.enableShooter())
+                        .setTangent(Math.toRadians(-80))
+                        .afterTime(0.4, bot.indexer.jiggleKickers())
+                        .afterTime(1.00, (() -> bot.reverseIntake()))
+                        .setReversed(true)
+                        .splineTo(Pos.closeShoot, Math.toRadians(-25));
+            } else {
+                builder = builder
+                        .stopAndAdd(bot.enableShooter())
+                        .afterTime(0.4, bot.indexer.jiggleKickers())
+                        .afterTime(1.00, (() -> bot.reverseIntake()))
+                        .setReversed(true)
+                        .splineTo(Pos.closeShoot, Math.toRadians(-25));
+            }
+
             if (cfg.gateCycles > 0) {
                 builder = builder
                         .stopAndAdd(bot.indexer.shootRapidFire())
@@ -459,7 +483,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180))
+                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180));
+
+            builder = builder
                     .waitSeconds(0.2)
                     .setReversed(true)
                     .afterTime(0.01, new SequentialAction(

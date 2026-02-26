@@ -23,12 +23,15 @@ public class Pos {
     public static Pose2d gateIntaking = new Pose2d(-11, 59.5, Math.toRadians(50));
 
     public static Pose2d gateSideOpen = new Pose2d(3, 62, Math.toRadians(-10));
+    public static Pose2d gateSideOpenHeadOn = new Pose2d(1, 61, Math.toRadians(90));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
     public static double closeIntake = 24;
 
     public static Pose2d blueFarIntake = new Pose2d(-35, 35, Math.toRadians(90));
     public static double farIntakeFarAuto = 25;
+
+    public static Pose2d pushPark = new Pose2d(-58, 16, Math.toRadians(90));
 
     public static Pose2d blueHpIntake = new Pose2d(-53, 65.5, Math.toRadians(179));
     public static Pose2d blueHpSideInterIntake = new Pose2d(-56, 54, Math.toRadians(90));
