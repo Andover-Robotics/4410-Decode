@@ -42,7 +42,7 @@ public class Indexer {
     public static double kickerSleep = 0.135;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.04;
+    public static double rapidShootSleep = 0.025;
     public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
@@ -54,17 +54,11 @@ public class Indexer {
     public static double jiggleKickerDelta = 0.015;
     public static double jiggleKickerSleep = 0.05;
 
-//    public static double //srshub values
-//            greenHueLow = 131,
-//            greenHueHigh = 139.5,
-//            purpleHueLow = 139.6,
-//            purpleHueHigh = 210;
     public static double
             greenHueLow = 153,
             greenHueHigh = 185,
             purpleHueLow = 185,
             purpleHueHigh = 235;
-
 
     /* ================= HOLDERS ================= */
 
@@ -454,7 +448,7 @@ public class Indexer {
         }
 
         private void jiggle(double delta) {
-            double target = downPos - delta;
+            double target = downPos + delta;
             kicker.setPosition(clampPosition(target));
         }
 
