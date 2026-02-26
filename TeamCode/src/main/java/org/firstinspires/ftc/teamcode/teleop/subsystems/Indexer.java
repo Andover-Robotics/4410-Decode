@@ -39,7 +39,7 @@ public class Indexer {
     public static double kickerBackDown  = 0.218;
     public static double kickerBackUp    = 0.58;
 
-    public static double kickerSleep = 0.198;
+    public static double kickerSleep = 0.135;
 
     // Rapid fire between shots (normal)
     public static double rapidShootSleep = 0.04;
