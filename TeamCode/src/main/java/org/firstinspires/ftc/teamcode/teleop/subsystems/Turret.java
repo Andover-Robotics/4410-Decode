@@ -37,7 +37,7 @@ public class Turret {
             largeP = 0.0075, largeI = 0, largeD = 0.0003,
             smallP = 0.023 , smallI = 0, smallD = 0.000525,
             errorThresholdDeg = 4, manualPower = 0,
-            targetVelK = 0.00075, targetAccelK = 0.000015;
+            targetVelK = 0.0004, targetAccelK = 0.00000;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
@@ -45,8 +45,8 @@ public class Turret {
             30.0, 32.5, 35.0, 37.5, 40.0, 42.5, 45.0, 47.5, 50.0, 52.5,
             55.0, 57.5, 60.0, 62.5, 65.0, 67.5, 70.0, 72.5, 75.0, 77.5,
             80.0, 82.5, 85.0, 87.5, 90.0, 92.5, 95.0, 97.5, 100.0, 102.5,
-            105.0, 107.5, 110.0, 112.5, 115.0, 117.5, 120.0, 122.5, 125.0, 127.5,
-            130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0
+            105.0, 107.5, 110.0, 112.5, 115.0, 117.5, 120.0, 122.5, 125.0,
+            127.5, 130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0
     };
 
     public static final double[] SHOOTER_RPM = {
@@ -69,14 +69,14 @@ public class Turret {
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 230, lowLimit = -140;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150;
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
     public ArrayList<Double> txArr, tyArr;
 
-    private boolean velComp = true, shooterOverride = false;
+    private boolean velComp = false, shooterOverride = false; //TODO Velocity Compensation set to FALSE
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -266,7 +266,7 @@ public class Turret {
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);
 
-        // Early-out: position tracking mode
+        // position tracking mode
         if (positionTracking) {
             runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
 //            runToAngle(aimAtGlobalPoint(goalX, goalY));
