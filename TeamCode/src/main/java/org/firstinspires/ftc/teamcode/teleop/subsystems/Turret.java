@@ -36,7 +36,8 @@ public class Turret {
     public static double
             largeP = 0.0075, largeI = 0, largeD = 0.0003,
             smallP = 0.023 , smallI = 0, smallD = 0.000525,
-            errorThresholdDeg = 4, manualPower = 0;
+            errorThresholdDeg = 4, manualPower = 0,
+            targetVelK = 0.00075, targetAccelK = 0.000015;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
@@ -69,6 +70,7 @@ public class Turret {
     private final LinearInterpolation hoodAngleInterpolator;
 
     public double power, lastTime, setPoint = 0, pos = 0, highLimit = 230, lowLimit = -140;
+    private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
@@ -261,6 +263,9 @@ public class Turret {
     public void periodic() {
         power = 0;
         pos = getPosition();
+        double now = timer.seconds();
+        double deltaTime = Math.max(1e-3, now - lastTime);
+
         // Early-out: position tracking mode
         if (positionTracking) {
             runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
@@ -273,9 +278,19 @@ public class Turret {
                 activeController.setPID(smallP, smallI, smallD);
             }
             activeController.setSetPoint(setPoint);
-            power = activeController.calculate(pos);
+
+            double targetVelDegPerSec = ((setPoint - previousTargetTicks) * degsPerTick) / deltaTime;
+            double targetAccelDegPerSec2 = (targetVelDegPerSec - previousTargetVelDegPerSec) / deltaTime;
+
+            double feedforwardPower = (targetVelK * targetVelDegPerSec) + (targetAccelK * targetAccelDegPerSec2);
+            power = activeController.calculate(pos) + feedforwardPower;
+
+            previousTargetTicks = setPoint;
+            previousTargetVelDegPerSec = targetVelDegPerSec;
         } else {
             power = manualPower;
+            previousTargetTicks = setPoint;
+            previousTargetVelDegPerSec = 0;
         }
 
         double maxPower = 1;
@@ -299,6 +314,7 @@ public class Turret {
         }
 
         motor.set(power);
+        lastTime = now;
     }
 
     public void setShooterVelocity(double rpm) {
