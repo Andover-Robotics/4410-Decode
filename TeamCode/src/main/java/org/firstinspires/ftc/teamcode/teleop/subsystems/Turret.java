@@ -37,7 +37,9 @@ public class Turret {
             largeP = 0.0075, largeI = 0, largeD = 0.0003,
             smallP = 0.023 , smallI = 0, smallD = 0.000525,
             errorThresholdDeg = 4, manualPower = 0,
-            targetVelK = 0.0004, targetAccelK = 0.00000;
+            targetVelK = 0.0035, targetAccelK = 0.00000;
+
+    public static double feedforwardPower, velFFPower, accelFFPower;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
@@ -76,7 +78,7 @@ public class Turret {
 
     public ArrayList<Double> txArr, tyArr;
 
-    private boolean velComp = false, shooterOverride = false; //TODO Velocity Compensation set to FALSE
+    public static boolean velComp = true, shooterOverride = false; //TODO Velocity Compensation set to FALSE
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -282,7 +284,10 @@ public class Turret {
             double targetVelDegPerSec = ((setPoint - previousTargetTicks) * degsPerTick) / deltaTime;
             double targetAccelDegPerSec2 = (targetVelDegPerSec - previousTargetVelDegPerSec) / deltaTime;
 
-            double feedforwardPower = (targetVelK * targetVelDegPerSec) + (targetAccelK * targetAccelDegPerSec2);
+            velFFPower = targetVelK * targetVelDegPerSec;
+            accelFFPower = targetAccelK * targetAccelDegPerSec2;
+
+            feedforwardPower = velFFPower + accelFFPower;
             power = activeController.calculate(pos) + feedforwardPower;
 
             previousTargetTicks = setPoint;

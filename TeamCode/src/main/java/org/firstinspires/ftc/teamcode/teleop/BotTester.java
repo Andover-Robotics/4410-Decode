@@ -343,6 +343,10 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
+
+            telemetry.addData("PID Power", bot.turret.getPower() - Turret.feedforwardPower);
+            telemetry.addData("FF Vel Power", Turret.velFFPower);
+            telemetry.addData("FF Accel Power", Turret.accelFFPower);
             telemetry.addData("Power", bot.turret.getPower());
 
             telemetry.addData("rpm target:", rpm);
