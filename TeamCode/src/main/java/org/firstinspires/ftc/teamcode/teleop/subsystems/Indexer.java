@@ -26,23 +26,17 @@ import java.util.function.Supplier;
 public class Indexer {
 
     /* ================= CONFIG ================= */
-//    public static double kickerLeftDown  = 0.515;
-//    public static double kickerLeftUp    = 0.20;
-//    public static double kickerRightDown = 0.513;
-//    public static double kickerRightUp   = 0.20;
-//    public static double kickerBackDown  = 0.495;
-//    public static double kickerBackUp    = 0.19;
     public static double kickerLeftDown  = 0.222;
     public static double kickerLeftUp    = 0.58;
     public static double kickerRightDown = 0.225;
     public static double kickerRightUp   = 0.58;
-    public static double kickerBackDown  = 0.218;
+    public static double kickerBackDown  = 0.210;
     public static double kickerBackUp    = 0.58;
 
     public static double kickerSleep = 0.135;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.035;
+    public static double rapidShootSleep = 0.03;
     public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
@@ -206,10 +200,16 @@ public class Indexer {
             actions.add(h.kickResetAction());
             actions.add(new SleepAction(sleepSeconds));
         }
+        for (int i = 0; i < 3; i++) {
+            if (i != 2) {
+                actions.add(holders[i].kickResetAction());
+                actions.add(new SleepAction(sleepSeconds));
+            } else {
+                actions.add(holders[i].longKickResetAction());
+            }
+        }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
-
-
 
     public Action shootRapidFireSensor() {
         List<Action> actions = new ArrayList<>();
@@ -435,6 +435,14 @@ public class Indexer {
             return new SequentialAction(
                     new InstantAction(this::kick),
                     new SleepAction(Indexer.kickerSleep),
+                    new InstantAction(this::reset)
+            );
+        }
+
+        public Action longKickResetAction() {
+            return new SequentialAction(
+                    new InstantAction(this::kick),
+                    new SleepAction(Indexer.kickerSleep + rapidShootSleep),
                     new InstantAction(this::reset)
             );
         }

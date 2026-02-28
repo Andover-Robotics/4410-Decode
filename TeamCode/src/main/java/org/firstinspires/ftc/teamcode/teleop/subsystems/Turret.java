@@ -31,10 +31,10 @@ public class Turret {
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
-    public static double rapidFireDistanceThresholdIn = 250;
-    public static double rapidFireSleepScalePerIn = 0.009584479;
+    public static double rapidFireDistanceThresholdIn = 85;
+    public static double rapidFireSleepScalePerIn = 0.0022;
     public static double
-            largeP = 0.0075, largeI = 0, largeD = 0.0003,
+            largeP = 0.009, largeI = 0, largeD = 0.0003,
             smallP = 0.023 , smallI = 0, smallD = 0.000525,
             errorThresholdDeg = 4, manualPower = 0,
             targetVelK = 0.0035, targetAccelK = 0.00000;
@@ -78,7 +78,7 @@ public class Turret {
 
     public ArrayList<Double> txArr, tyArr;
 
-    public static boolean velComp = true, shooterOverride = false; //TODO Velocity Compensation set to FALSE
+    public static boolean velComp = true, shooterOverride = false;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
