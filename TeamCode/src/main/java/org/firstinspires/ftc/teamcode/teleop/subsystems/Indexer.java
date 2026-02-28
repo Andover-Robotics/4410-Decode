@@ -33,10 +33,10 @@ public class Indexer {
     public static double kickerBackDown  = 0.210;
     public static double kickerBackUp    = 0.58;
 
-    public static double kickerSleep = 0.135;
+    public static double kickerSleep = 0.14;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.03;
+    public static double rapidShootSleep = 0.045;
     public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
@@ -196,10 +196,11 @@ public class Indexer {
             sleepSeconds = 0.1;
         }
 
-        for (Holder h : holders) {
-            actions.add(h.kickResetAction());
-            actions.add(new SleepAction(sleepSeconds));
-        }
+//        for (Holder h : holders) {
+//            actions.add(h.kickResetAction());
+//            actions.add(new SleepAction(sleepSeconds));
+//        }
+
         for (int i = 0; i < 3; i++) {
             if (i != 2) {
                 actions.add(holders[i].kickResetAction());

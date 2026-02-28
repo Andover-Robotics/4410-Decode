@@ -306,7 +306,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(1.2, bot.indexer.shootRapidFire())
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
 //                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
 

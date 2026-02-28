@@ -31,7 +31,7 @@ public class Turret {
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
-    public static double rapidFireDistanceThresholdIn = 85;
+    public static double rapidFireDistanceThresholdIn = 95;
     public static double rapidFireSleepScalePerIn = 0.0022;
     public static double
             largeP = 0.009, largeI = 0, largeD = 0.0003,
@@ -52,11 +52,16 @@ public class Turret {
     };
 
     public static final double[] SHOOTER_RPM = {
-            2875, 2895, 2910, 2930, 2940, 2950, 2965, 2985, 3050, 3100,
-            3200, 3250, 3300, 3330, 3360, 3390, 3440, 3480, 3520, 3560,
-            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
-            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
-            4400, 4425, 4450, 4475, 4500, 4520, 4545
+//            2875, 2895, 2910, 2930, 2940, 2950, 2965, 2985, 3050, 3100,
+//            3200, 3250, 3300, 3330, 3360, 3390, 3440, 3480, 3520, 3560,
+//            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
+//            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
+//            4400, 4425, 4450, 4475, 4500, 4520, 4545
+            2855, 2875, 2890, 2910, 2920, 2930, 2945, 2965, 3030, 3080,
+            3180, 3230, 3280, 3310, 3340, 3370, 3420, 3460, 3500, 3540,
+            3580, 3620, 3670, 3720, 3770, 3770, 3830, 3880, 3930, 3970,
+            4010, 4040, 4080, 4130, 4185, 4230, 4280, 4305, 4330, 4355,
+            4380, 4405, 4430, 4455, 4480, 4500, 4525
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
