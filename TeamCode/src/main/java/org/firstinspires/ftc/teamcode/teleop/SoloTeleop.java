@@ -126,16 +126,15 @@ public class SoloTeleop extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
 
-            if (!kickersInitialized) {
-                runningActions.add(bot.indexer.jiggleKickers());
-                kickersInitialized = true;
-            }
-
             gp1.readButtons();
 
 
             if (!bot.shooting) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                    if (!kickersInitialized) {
+                        runningActions.add(bot.indexer.leftHolder.resetFastAction());
+                        kickersInitialized = true;
+                    }
                     if (bot.indexer.countBalls()==3) {
                         bot.reverseIntake();
                         gp1.gamepad.rumble(1, 1, -1);

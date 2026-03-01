@@ -28,7 +28,7 @@ public class Indexer {
     /* ================= CONFIG ================= */
     public static double kickerLeftDown  = 0.222;
     public static double kickerLeftUp    = 0.65;
-    public static double kickerRightDown = 0.225;
+    public static double kickerRightDown = 0.22;
     public static double kickerRightUp   = 0.65;
     public static double kickerBackDown  = 0.210;
     public static double kickerBackUp    = 0.65;
@@ -454,6 +454,7 @@ public class Indexer {
         public Action resetFastAction() {
             return new SequentialAction(
                     new InstantAction(this::kick),
+                    new SleepAction(0.0001),
                     new InstantAction(this::reset)
             );
         }

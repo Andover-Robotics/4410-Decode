@@ -35,6 +35,8 @@ public class MainTeleop extends LinearOpMode {
     private boolean headingLockEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
+    private boolean kickersInitialized = false;
+
     public static boolean stallIntake = true, manualTurret = false;
 
     @Override
@@ -138,6 +140,10 @@ public class MainTeleop extends LinearOpMode {
 //            } //
 
             if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                if (!kickersInitialized) {
+                    runningActions.add(bot.indexer.leftHolder.resetFastAction());
+                    kickersInitialized = true;
+                }
                 if (bot.sensorIntaking) {
                     if (bot.indexer.countBalls()==3) {
                         bot.teleopReverseIntake();

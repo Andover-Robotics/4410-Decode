@@ -35,7 +35,7 @@ public class Turret {
     public static double rapidFireSleepScalePerIn = 0.0024;
     public static double
             largeP = 0.009, largeI = 0, largeD = 0.0003,
-            smallP = 0.023 , smallI = 0, smallD = 0.000525,
+            smallP = 0.0185 , smallI = 0, smallD = 0.0006,
             errorThresholdDeg = 4, manualPower = 0,
             targetVelK = 0.0035, targetAccelK = 0.00000;
 
@@ -57,11 +57,11 @@ public class Turret {
 //            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
 //            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
 //            4400, 4425, 4450, 4475, 4500, 4520, 4545
-            2855, 2875, 2890, 2910, 2920, 2930, 2945, 2965, 3030, 3080,
-            3180, 3230, 3280, 3310, 3340, 3370, 3420, 3460, 3500, 3540,
-            3580, 3620, 3670, 3720, 3770, 3770, 3830, 3880, 3930, 3970,
-            4010, 4040, 4080, 4130, 4185, 4230, 4280, 4305, 4330, 4355,
-            4380, 4405, 4430, 4455, 4480, 4500, 4525
+            2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050,
+            3150, 3200, 3250, 3280, 3310, 3340, 3390, 3430, 3470, 3510,
+            3550, 3590, 3640, 3690, 3740, 3740, 3800, 3850, 3900, 3940,
+            3980, 4010, 4050, 4100, 4155, 4200, 4250, 4275, 4300, 4325,
+            4350, 4375, 4400, 4425, 4450, 4470, 4495
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
@@ -78,6 +78,7 @@ public class Turret {
 
     public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150;
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
+    private int cachedPositionTicks = 0;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
