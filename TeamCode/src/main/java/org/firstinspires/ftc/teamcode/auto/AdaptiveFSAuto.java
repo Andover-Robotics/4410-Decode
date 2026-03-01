@@ -440,7 +440,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                        .stopAndAdd((() -> bot.disableShooter()));
 
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 20, Pos.blueSecretTunnelStart.position.y), Math.toRadians(150))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 17, Pos.blueSecretTunnelStart.position.y), Math.toRadians(150))
                             .strafeToLinearHeading(Pos.blueSecretTunnelStart.position, Math.toRadians(-180))
                             .stopAndAdd(bot.enableShooter())
                             .afterTime(1.2, (() -> bot.reverseIntake()))

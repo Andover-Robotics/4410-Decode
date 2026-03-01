@@ -39,7 +39,7 @@ public class Pos {
     public static Pose2d blueHpFarInterIntake = new Pose2d(-59, 59, Math.toRadians(105));
     public static Pose2d blueHpFarIntake = new Pose2d(-65, 63, Math.toRadians(90));
 
-    public static Pose2d blueSecretTunnelStart = new Pose2d(-60, 62, Math.toRadians(35));
+    public static Pose2d blueSecretTunnelStart = new Pose2d(-63, 62, Math.toRadians(35));
     public static Pose2d blueHpCycle = new Pose2d(-64, 62, Math.toRadians(90));
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
