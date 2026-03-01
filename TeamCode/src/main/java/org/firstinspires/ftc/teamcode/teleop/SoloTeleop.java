@@ -31,7 +31,7 @@ public class SoloTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = false;
+    private boolean headingLockEnabled = false, kickersInitialized = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
     public static boolean stallIntake = true, manualTurret = false;
@@ -47,6 +47,7 @@ public class SoloTeleop extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
+        bot.turret.setShooterOverride(false);
         stallIntake = true;
 
 
@@ -75,12 +76,12 @@ public class SoloTeleop extends LinearOpMode {
 //                bot.turret.resetEncoder();
 //            }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
                 bot.switchAlliance();
                 useStoredPose = false;
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !gp1.isDown(GamepadKeys.Button.START)) {
                 bot.switchStartingPos();
                 useStoredPose = false;
             }
@@ -124,6 +125,11 @@ public class SoloTeleop extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
+
+            if (!kickersInitialized) {
+                runningActions.add(bot.indexer.jiggleKickers());
+                kickersInitialized = true;
+            }
 
             gp1.readButtons();
 
@@ -170,7 +176,7 @@ public class SoloTeleop extends LinearOpMode {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)  && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootMotif());
             }
 
@@ -241,11 +247,11 @@ public class SoloTeleop extends LinearOpMode {
             if (manualTurret) {
                 bot.turret.runManual(gp1.getLeftX());
             }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.limelight.relocalizeBotPose();
-                headingLockEnabled = !headingLockEnabled;
-            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+////                bot.limelight.relocalizeBotPose();
+//                headingLockEnabled = !headingLockEnabled;
+//            }
 
             bot.periodic();
             drive();
@@ -312,8 +318,10 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("FF Accel Power", Turret.accelFFPower);
             telemetry.addData("Power", bot.turret.getPower());
 
-            telemetry.addData("rpm target:", bot.turret.shooter.getTargetRPM());
-            telemetry.addData("current rpm:", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Calculated \tRPM", Turret.shooterRpm);
+            telemetry.addData("Target \t\t\tRPM", bot.turret.shooter.getControllerTargetRPM());
+            telemetry.addData("Current \t\tRPM", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Shooter Active?", Turret.shooterActive);
 //
 //            packet.fieldOverlay().setStroke("#3F51B5");
 //            Drawing.drawRobot(packet.fieldOverlay(), Bot.storedPose);

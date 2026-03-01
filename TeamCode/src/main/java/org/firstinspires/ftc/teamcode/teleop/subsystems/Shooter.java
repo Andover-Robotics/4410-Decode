@@ -19,7 +19,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.004, i = 0.0, d = 0.0, f = 0.000180;
+    public static double p = 0.0025, i = 0.0, d = 0.0, f = 0.000180;
     public static boolean inverted = false;
 
     // note for interpoilation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
@@ -35,7 +35,7 @@ public class Shooter {
     private double currentHoodAngle;//debugging
     private double currentServoPos;
 
-
+    public static boolean setPower = true, getVel = true;
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -82,7 +82,7 @@ public class Shooter {
     }
 
     public void periodic() {
-        filteredRPM = motor1.getVelocity() * 60 / 28;
+        if (getVel) filteredRPM = motor1.getVelocity() * 60 / 28;
 
         controller.setPID(p, i, d);
 
@@ -100,7 +100,7 @@ public class Shooter {
             }
         }
         power = clamp(power, -maxPower, maxPower);
-        setPower(power);
+        if (setPower) setPower(power);
     }
 
     public void setHoodAngle(double angle) {
@@ -126,6 +126,7 @@ public class Shooter {
     // telemetry
     public double getTargetRPM() { return targetRPM; }
     public double getFilteredRPM() { return filteredRPM; }
+    public double getControllerTargetRPM() { return controller.getSetPoint(); }
     public double getPower() { return power; }
     public boolean atSpeed() { return Math.abs(targetRPM - filteredRPM) <= toleranceRPM; }
 

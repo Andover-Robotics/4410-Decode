@@ -36,8 +36,6 @@ public class BotTester extends LinearOpMode {
     private final ElapsedTime loopTimer = new ElapsedTime();
     private int n = 0, rpmTotalError = 0;
 
-    NormalizedRGBA colors;
-
     public static int rpm = 2000;
     public static double angle = 40;
     public static boolean manualTurret = false, shooting = false, intakeOverride = false;
@@ -52,6 +50,7 @@ public class BotTester extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
+        bot.indexer.resetIndexer();
         bot.setTargetGoalPose();
         bot.turret.setShooterOverride(true);
 
@@ -210,7 +209,7 @@ public class BotTester extends LinearOpMode {
                 bot.indexer.resetIndexer();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootMotif());
             }
 
@@ -218,7 +217,7 @@ public class BotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootRapidFire());
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootLeft());
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
@@ -272,11 +271,6 @@ public class BotTester extends LinearOpMode {
 
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetEncoder();
-            }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.limelight.relocalizeBotPose();
-                headingLockEnabled = !headingLockEnabled;
             }
 
             bot.periodic();
@@ -359,7 +353,9 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("Power", bot.turret.getPower());
 
             telemetry.addData("rpm target:", rpm);
-            telemetry.addData("current rpm:", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Calculated RPM", Turret.shooterRpm);
+            telemetry.addData("Target RPM", bot.turret.shooter.getControllerTargetRPM());
+            telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
             n += 1;
             rpmTotalError += Math.abs((int) (bot.turret.shooter.getFilteredRPM() - rpm));
             telemetry.addData("avg rpm error:", rpmTotalError/n);

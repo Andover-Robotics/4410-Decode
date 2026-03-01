@@ -49,6 +49,7 @@ public class MainTeleop extends LinearOpMode {
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
+        bot.turret.setShooterOverride(false);
         stallIntake = true;
 
 
@@ -124,6 +125,7 @@ public class MainTeleop extends LinearOpMode {
         }
 
         loopTimer.reset();
+        bot.indexer.resetIndexer();
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -187,7 +189,7 @@ public class MainTeleop extends LinearOpMode {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp2.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootMotif());
             }
 
@@ -332,7 +334,8 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
-            telemetry.addData("Target RPM", Turret.shooterRpm);
+            telemetry.addData("Calculated RPM", Turret.shooterRpm);
+            telemetry.addData("Target RPM", bot.turret.shooter.getControllerTargetRPM());
             telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
 //            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 

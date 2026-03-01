@@ -240,7 +240,6 @@ public class Bot {
         screenPeriodicEnabled = !screenPeriodicEnabled;
     }
 
-
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
         drive.setDrivePowers(new PoseVelocity2d(
                 new Vector2d(driveSpeed * forwardInput, driveSpeed * strafeInput),
