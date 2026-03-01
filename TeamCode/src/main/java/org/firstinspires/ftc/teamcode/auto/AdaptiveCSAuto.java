@@ -303,9 +303,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 addedAction = true;
             }
             builder = builder
+                    .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
-                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .afterTime(1.2, bot.indexer.shootRapidFire())
+                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
+//                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
 
 //            builder = cfg.startFar ?
@@ -403,25 +405,35 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     addedAction = true;
                 }
                 builder = builder
-                        .setReversed(true)
-                        .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
+//                        .setReversed(true)
+//                        .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
+                        .strafeToLinearHeading(Pos.gateSideOpen.position, Pos.gateSideOpen.heading)
 //                        .setReversed(true)
 //                        .splineToLinearHeading(Pos.gateSideOpenHeadOn, Math.toRadians(90))
-                        .waitSeconds(1.55);
+                        .waitSeconds(0.5)
+                        .stopAndAdd(bot.indexer.jiggleKickers())
+                        .waitSeconds(0.2)
+                        .stopAndAdd((() -> bot.reverseIntake()))
+                        .waitSeconds(0.85);
                 addedAction = true;
             }
 
             builder = builder
                     .afterTime(0.01, bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.1, (() -> bot.reverseIntake()));
+                    .afterTime(0.6, (() -> bot.reverseIntake()));
 
             builder = cfg.runFar ?
                     builder
                             .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165)) :
-                    builder
-                            .setReversed(true)
-                            .splineTo(Pos.closeShoot, Math.toRadians(-90));
+                    cfg.gateCycles != 3 ?
+                        builder
+                                .setReversed(true)
+                                .splineTo(Pos.closeShoot, Math.toRadians(-90)) :
+
+                        builder
+                                .setReversed(true)
+                                .splineTo(Pos.closeShootPark, Math.toRadians(-45));
 
             builder = (cfg.gateCycles < 2) ?
                     builder
@@ -438,30 +450,28 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
                 addedAction = true;
             }
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.intakeDisp));
-
             if (cfg.runPushPark) {
                 builder = builder
-                        .setReversed(true)
-                        .splineToConstantHeading(Pos.pushPark.position, Math.toRadians(100))
-                        .stopAndAdd(bot.enableShooter())
-                        .setTangent(Math.toRadians(-80))
-                        .afterTime(0.4, bot.indexer.jiggleKickers())
-                        .afterTime(1.00, (() -> bot.reverseIntake()))
-                        .setReversed(true)
-                        .splineTo(Pos.closeShoot, Math.toRadians(-25));
+                        .stopAndAdd((() -> bot.sensorIntake(true)))
+                        .splineToSplineHeading(Pos.pushPark, Math.toRadians(90))
+                        .splineToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
+                                Pos.blueFarIntake.position.y - 10), Math.toRadians(76))
+                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
+                                Pos.blueFarIntake.position.y + Pos.intakeDisp));
             } else {
                 builder = builder
-                        .stopAndAdd(bot.enableShooter())
-                        .afterTime(0.4, bot.indexer.jiggleKickers())
-                        .afterTime(1.00, (() -> bot.reverseIntake()))
-                        .setReversed(true)
-                        .splineTo(Pos.closeShoot, Math.toRadians(-25));
+                        .stopAndAdd((() -> bot.sensorIntake(true)))
+                        .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
+                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
+                                Pos.blueFarIntake.position.y + Pos.intakeDisp));
             }
+
+            builder = builder
+                    .stopAndAdd(bot.enableShooter())
+                    .afterTime(0.4, bot.indexer.jiggleKickers())
+                    .afterTime(1.00, (() -> bot.reverseIntake()))
+                    .setReversed(true)
+                    .splineTo(Pos.closeShoot, Math.toRadians(-25));
 
             if (cfg.gateCycles > 0) {
                 builder = builder

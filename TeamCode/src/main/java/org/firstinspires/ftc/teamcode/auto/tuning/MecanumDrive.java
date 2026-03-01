@@ -470,8 +470,7 @@ public final class MecanumDrive {
         }
 
         estimatedPoseWriter.write(new PoseMessage(localizer.getPose()));
-        
-        
+
         return vel;
     }
 

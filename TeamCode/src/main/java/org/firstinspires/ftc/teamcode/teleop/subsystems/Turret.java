@@ -31,12 +31,15 @@ public class Turret {
     public static double POS_TRACK_X = 0;
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
-    public static double rapidFireDistanceThresholdIn = 250;
-    public static double rapidFireSleepScalePerIn = 0.009584479;
+    public static double rapidFireDistanceThresholdIn = 95;
+    public static double rapidFireSleepScalePerIn = 0.0024;
     public static double
-            largeP = 0.0075, largeI = 0, largeD = 0.0003,
+            largeP = 0.009, largeI = 0, largeD = 0.0003,
             smallP = 0.023 , smallI = 0, smallD = 0.000525,
-            errorThresholdDeg = 4, manualPower = 0;
+            errorThresholdDeg = 4, manualPower = 0,
+            targetVelK = 0.0035, targetAccelK = 0.00000;
+
+    public static double feedforwardPower, velFFPower, accelFFPower;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
@@ -44,16 +47,21 @@ public class Turret {
             30.0, 32.5, 35.0, 37.5, 40.0, 42.5, 45.0, 47.5, 50.0, 52.5,
             55.0, 57.5, 60.0, 62.5, 65.0, 67.5, 70.0, 72.5, 75.0, 77.5,
             80.0, 82.5, 85.0, 87.5, 90.0, 92.5, 95.0, 97.5, 100.0, 102.5,
-            105.0, 107.5, 110.0, 112.5, 115.0, 117.5, 120.0, 122.5, 125.0, 127.5,
-            130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0
+            105.0, 107.5, 110.0, 112.5, 115.0, 117.5, 120.0, 122.5, 125.0,
+            127.5, 130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0
     };
 
     public static final double[] SHOOTER_RPM = {
-            2875, 2895, 2910, 2930, 2940, 2950, 2965, 2985, 3050, 3100,
-            3200, 3250, 3300, 3330, 3360, 3390, 3440, 3480, 3520, 3560,
-            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
-            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
-            4400, 4425, 4450, 4475, 4500, 4520, 4545
+//            2875, 2895, 2910, 2930, 2940, 2950, 2965, 2985, 3050, 3100,
+//            3200, 3250, 3300, 3330, 3360, 3390, 3440, 3480, 3520, 3560,
+//            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
+//            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
+//            4400, 4425, 4450, 4475, 4500, 4520, 4545
+            2855, 2875, 2890, 2910, 2920, 2930, 2945, 2965, 3030, 3080,
+            3180, 3230, 3280, 3310, 3340, 3370, 3420, 3460, 3500, 3540,
+            3580, 3620, 3670, 3720, 3770, 3770, 3830, 3880, 3930, 3970,
+            4010, 4040, 4080, 4130, 4185, 4230, 4280, 4305, 4330, 4355,
+            4380, 4405, 4430, 4455, 4480, 4500, 4525
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
@@ -68,14 +76,14 @@ public class Turret {
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 230, lowLimit = -140;
-    private int cachedPositionTicks = 0;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150;
+    private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
 
     public static double shooterRpm = 0, trackingDistance, pureDistance;
 
     public ArrayList<Double> txArr, tyArr;
 
-    private boolean velComp = true, shooterOverride = false;
+    public static boolean velComp = true, shooterOverride = false;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -264,7 +272,10 @@ public class Turret {
         power = 0;
         cachedPositionTicks = motor.getCurrentPosition();
         pos = cachedPositionTicks;
-        // Early-out: position tracking mode
+        double now = timer.seconds();
+        double deltaTime = Math.max(1e-3, now - lastTime);
+
+        // position tracking mode
         if (positionTracking) {
             runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
 //            runToAngle(aimAtGlobalPoint(goalX, goalY));
@@ -276,9 +287,22 @@ public class Turret {
                 activeController.setPID(smallP, smallI, smallD);
             }
             activeController.setSetPoint(setPoint);
-            power = activeController.calculate(pos);
+
+            double targetVelDegPerSec = ((setPoint - previousTargetTicks) * degsPerTick) / deltaTime;
+            double targetAccelDegPerSec2 = (targetVelDegPerSec - previousTargetVelDegPerSec) / deltaTime;
+
+            velFFPower = targetVelK * targetVelDegPerSec;
+            accelFFPower = targetAccelK * targetAccelDegPerSec2;
+
+            feedforwardPower = velFFPower + accelFFPower;
+            power = activeController.calculate(pos) + feedforwardPower;
+
+            previousTargetTicks = setPoint;
+            previousTargetVelDegPerSec = targetVelDegPerSec;
         } else {
             power = manualPower;
+            previousTargetTicks = setPoint;
+            previousTargetVelDegPerSec = 0;
         }
 
         double maxPower = 1;
@@ -300,6 +324,7 @@ public class Turret {
         shooter.periodic();
 
         motor.set(power);
+        lastTime = now;
     }
 
     public void setShooterVelocity(double rpm) {
