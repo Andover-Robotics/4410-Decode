@@ -213,7 +213,8 @@ public class Turret {
     }
 
     public void velocityCompensation(double dx, double dy) {
-        if (getPositionDegs() < highLimit - 5 && getPositionDegs() > lowLimit + 5) {
+        double currentTurretDegs = pos * degsPerTick;
+        if (currentTurretDegs < highLimit - 5 && currentTurretDegs > lowLimit + 5) {
             double time = calculateTime(dx, dy);
             velocity = Bot.drive.localizer.getPoseVelocity();
 //        double dispX = velocity.linearVel.x * time;
@@ -269,7 +270,8 @@ public class Turret {
 
     public void periodic() {
         power = 0;
-        pos = getPosition();
+        cachedPositionTicks = motor.getCurrentPosition();
+        pos = cachedPositionTicks;
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);
 
@@ -313,15 +315,13 @@ public class Turret {
             shooterRpm = 3000;
         }
 
-        if (shooterActive) {
-            shooter.periodic();
-            if (!shooterOverride) {
-                shooter.setVelocity(shooterRpm);
-                shooter.setHoodAngleDeg(hoodAngleDeg);
-            }
-        } else {
+        if (shooterActive && !shooterOverride) {
+            shooter.setVelocity(shooterRpm);
+            shooter.setHoodAngleDeg(hoodAngleDeg);
+        } else if (!shooterActive) {
             shooter.setPower(0);
         }
+        shooter.periodic();
 
         motor.set(power);
         lastTime = now;
@@ -345,7 +345,7 @@ public class Turret {
     }
 
     public int getPosition() {
-        return motor.getCurrentPosition();
+        return cachedPositionTicks;
     }
 
     public double getPositionDegs() {
