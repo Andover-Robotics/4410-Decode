@@ -329,14 +329,16 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .afterTime(0.85, (() -> bot.reverseIntake()));
             if (cfg.runClose && cfg.gateCycles == 0) {
                 builder = builder
-                        .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.closeShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                        .stopAndAdd(bot.indexer.shootRapidFire())
-                        .stopAndAdd((() -> bot.disableShooter()));
+                        .afterTime(1.5, bot.indexer.shootRapidFire())
+                        .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.closeShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70));
+//                        .stopAndAdd(bot.indexer.shootRapidFire())
+//                        .stopAndAdd((() -> bot.disableShooter()));
             } else {
                 builder = builder
-                        .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((cfg.gateCycles == 0 ? 135 : 110)))
-                        .stopAndAdd(bot.indexer.shootRapidFire())
-                        .stopAndAdd((() -> bot.disableShooter()));
+                        .afterTime(1.5, bot.indexer.shootRapidFire())
+                        .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((cfg.gateCycles == 0 ? 135 : 110)));
+//                        .stopAndAdd(bot.indexer.shootRapidFire())
+//                        .stopAndAdd((() -> bot.disableShooter()));
             }
             addedAction = true;
         }
