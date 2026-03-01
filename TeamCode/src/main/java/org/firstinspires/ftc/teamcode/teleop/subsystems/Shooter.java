@@ -34,8 +34,7 @@ public class Shooter {
     public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
     private double currentHoodAngle;//debugging
     private double currentServoPos;
-
-
+    private double requestedHoodPos = 1.0;
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -54,7 +53,7 @@ public class Shooter {
         motor2.setRunMode(Motor.RunMode.RawPower);
 
         hood = opMode.hardwareMap.servo.get("hood");
-        hood.setPosition(1);
+        hood.setPosition(requestedHoodPos);
 
         controller = new PIDController(p, i, d);
     }
@@ -77,8 +76,8 @@ public class Shooter {
     }
 
     public void setPower(double power) {
-        motor1.set(power);
-        motor2.set(-power);
+        this.power = clamp(power, -maxPower, maxPower);
+        closedLoopEnabled = false;
     }
 
     public void periodic() {
@@ -100,13 +99,15 @@ public class Shooter {
             }
         }
         power = clamp(power, -maxPower, maxPower);
-        setPower(power);
+        motor1.set(power);
+        motor2.set(-power);
+        hood.setPosition(requestedHoodPos);
     }
 
     public void setHoodAngle(double angle) {
         currentHoodAngle = angle;   // stores the angle for telemetry
-        currentServoPos = (angleToPos(angle));
-        hood.setPosition(angleToPos(angle));
+        currentServoPos = angleToPos(angle);
+        requestedHoodPos = currentServoPos;
     }
     public double getHoodAngle() {
         return currentHoodAngle;
@@ -116,12 +117,12 @@ public class Shooter {
     }
 
     public void setHoodAngleDeg(double angleDeg) {
-        hood.setPosition(angleToPos(angleDeg));
+        setHoodAngle(angleDeg);
     }
 
-    protected void setHoodFar() { hood.setPosition(hoodFarPos); }
+    protected void setHoodFar() { requestedHoodPos = hoodFarPos; }
 
-    protected void setHoodMid() { hood.setPosition(hoodMidPos); }
+    protected void setHoodMid() { requestedHoodPos = hoodMidPos; }
 
     // telemetry
     public double getTargetRPM() { return targetRPM; }
