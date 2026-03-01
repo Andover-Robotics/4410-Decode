@@ -32,7 +32,7 @@ public class Bot {
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
-    private boolean screenPeriodicEnabled = false;
+    private boolean screenPeriodicEnabled = true;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -239,7 +239,6 @@ public class Bot {
     public void toggleScreenPeriodic() {
         screenPeriodicEnabled = !screenPeriodicEnabled;
     }
-
 
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
         drive.setDrivePowers(new PoseVelocity2d(

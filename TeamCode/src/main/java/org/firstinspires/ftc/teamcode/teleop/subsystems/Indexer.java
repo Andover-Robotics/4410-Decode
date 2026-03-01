@@ -26,23 +26,17 @@ import java.util.function.Supplier;
 public class Indexer {
 
     /* ================= CONFIG ================= */
-//    public static double kickerLeftDown  = 0.515;
-//    public static double kickerLeftUp    = 0.20;
-//    public static double kickerRightDown = 0.513;
-//    public static double kickerRightUp   = 0.20;
-//    public static double kickerBackDown  = 0.495;
-//    public static double kickerBackUp    = 0.19;
     public static double kickerLeftDown  = 0.222;
-    public static double kickerLeftUp    = 0.58;
+    public static double kickerLeftUp    = 0.65;
     public static double kickerRightDown = 0.225;
-    public static double kickerRightUp   = 0.58;
-    public static double kickerBackDown  = 0.218;
-    public static double kickerBackUp    = 0.58;
+    public static double kickerRightUp   = 0.65;
+    public static double kickerBackDown  = 0.210;
+    public static double kickerBackUp    = 0.65;
 
     public static double kickerSleep = 0.135;
 
     // Rapid fire between shots (normal)
-    public static double rapidShootSleep = 0.04;
+    public static double rapidShootSleep = 0.035;
     public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
@@ -190,6 +184,14 @@ public class Indexer {
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
+    public Action resetKickersAction() {
+        List<Action> actions = new ArrayList<>();
+        for (Holder h : holders) {
+            actions.add(h.resetFastAction());
+        }
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
     /**
      * Rapid-fire all present holders, using rapidShootSleep between shots.
      */
@@ -202,14 +204,21 @@ public class Indexer {
             sleepSeconds = 0.1;
         }
 
-        for (Holder h : holders) {
-            actions.add(h.kickResetAction());
-            actions.add(new SleepAction(sleepSeconds));
+//        for (Holder h : holders) {
+//            actions.add(h.kickResetAction());
+//            actions.add(new SleepAction(sleepSeconds));
+//        }
+
+        for (int i = 0; i < 3; i++) {
+            if (i != 2) {
+                actions.add(holders[i].kickResetAction());
+                actions.add(new SleepAction(sleepSeconds));
+            } else {
+                actions.add(holders[i].longKickResetAction());
+            }
         }
         return new SequentialAction(actions.toArray(new Action[0]));
     }
-
-
 
     public Action shootRapidFireSensor() {
         List<Action> actions = new ArrayList<>();
@@ -330,7 +339,7 @@ public class Indexer {
                 shotsPlanned++;
             }
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
-            if (i <= 2) {
+            if (i < 2) {
                 actions.add(new SleepAction(motifShootSleep));
             }
         }
@@ -431,10 +440,28 @@ public class Indexer {
         private void kick()  { up(); }
         private void reset() { down(); }
 
+        public Action resetAction() {
+            return new InstantAction(this::reset);
+        }
+
         public Action kickResetAction() {
             return new SequentialAction(
                     new InstantAction(this::kick),
                     new SleepAction(Indexer.kickerSleep),
+                    new InstantAction(this::reset)
+            );
+        }
+        public Action resetFastAction() {
+            return new SequentialAction(
+                    new InstantAction(this::kick),
+                    new InstantAction(this::reset)
+            );
+        }
+
+        public Action longKickResetAction() {
+            return new SequentialAction(
+                    new InstantAction(this::kick),
+                    new SleepAction(Indexer.kickerSleep + rapidShootSleep),
                     new InstantAction(this::reset)
             );
         }

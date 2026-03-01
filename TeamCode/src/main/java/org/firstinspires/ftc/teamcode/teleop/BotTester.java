@@ -36,8 +36,6 @@ public class BotTester extends LinearOpMode {
     private final ElapsedTime loopTimer = new ElapsedTime();
     private int n = 0, rpmTotalError = 0;
 
-    NormalizedRGBA colors;
-
     public static int rpm = 2000;
     public static double angle = 40;
     public static boolean manualTurret = false, shooting = false, intakeOverride = false;
@@ -52,6 +50,7 @@ public class BotTester extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
+        bot.indexer.resetIndexer();
         bot.setTargetGoalPose();
         bot.turret.setShooterOverride(true);
 
@@ -143,27 +142,31 @@ public class BotTester extends LinearOpMode {
                 shooting = !shooting;
             }
 
-            if (!bot.shooting) {
-                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+            if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                if (bot.sensorIntaking) {
                     if (bot.indexer.countBalls()==3) {
-                        bot.reverseIntake();
-                        gp1.gamepad.rumble(0, 1, -1);
+                        bot.teleopReverseIntake();
+                        gp1.gamepad.rumble(1, 1, -1);
                     } else {
-                        bot.intake();
-                        gp1.gamepad.stopRumble();
-                    }
-                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-                    bot.reverseIntake();
-                    if (bot.indexer.countBalls()==3) {
-                        gp1.gamepad.rumble(-1);
-                    } else {
-                        bot.reverseIntake();
+                        bot.teleopIntake();
                         gp1.gamepad.stopRumble();
                     }
                 } else {
-                    bot.stopIntake();
+                    bot.teleopIntake();
+                }
+            } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                bot.teleopReverseIntake();
+                if (bot.indexer.countBalls() == 3) {
+                    gp1.gamepad.rumble(1, 1, -1);
+                } else {
+                    bot.teleopReverseIntake();
                     gp1.gamepad.stopRumble();
                 }
+            } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                bot.teleopIntake();
+            } else {
+                bot.teleopStopIntake();
+                gp1.gamepad.stopRumble();
             }
 
             if (manualTurret) {
@@ -189,6 +192,7 @@ public class BotTester extends LinearOpMode {
             // SHOOTING
 
             if (gp1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2 || shooting) {
+                bot.turret.setShooterOverride(true);
                 bot.turret.setShooterVelocity(rpm);
                 bot.turret.enableShooter(true);
             } else {
@@ -205,7 +209,7 @@ public class BotTester extends LinearOpMode {
                 bot.indexer.resetIndexer();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootMotif());
             }
 
@@ -213,7 +217,7 @@ public class BotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootRapidFire());
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootLeft());
             }
             if (gp1.wasJustPressed(GamepadKeys.Button.X) && !bot.shooting) {
@@ -254,20 +258,19 @@ public class BotTester extends LinearOpMode {
 //            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.limelight.relocalizeBotPose();
+                bot.sensorIntaking = !bot.sensorIntaking;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
                 bot.resetPose();
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.turret.resetEncoder();
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.switchAlliance();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.limelight.relocalizeBotPose();
-                headingLockEnabled = !headingLockEnabled;
+            if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.turret.resetEncoder();
             }
 
             bot.periodic();
@@ -343,10 +346,16 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
+
+            telemetry.addData("PID Power", bot.turret.getPower() - Turret.feedforwardPower);
+            telemetry.addData("FF Vel Power", Turret.velFFPower);
+            telemetry.addData("FF Accel Power", Turret.accelFFPower);
             telemetry.addData("Power", bot.turret.getPower());
 
             telemetry.addData("rpm target:", rpm);
-            telemetry.addData("current rpm:", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Calculated RPM", Turret.shooterRpm);
+            telemetry.addData("Target RPM", bot.turret.shooter.getControllerTargetRPM());
+            telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
             n += 1;
             rpmTotalError += Math.abs((int) (bot.turret.shooter.getFilteredRPM() - rpm));
             telemetry.addData("avg rpm error:", rpmTotalError/n);

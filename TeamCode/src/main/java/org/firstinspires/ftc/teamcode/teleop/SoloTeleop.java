@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.Pos;
+import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
@@ -30,7 +31,7 @@ public class SoloTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = false;
+    private boolean headingLockEnabled = false, kickersInitialized = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
     public static boolean stallIntake = true, manualTurret = false;
@@ -46,6 +47,7 @@ public class SoloTeleop extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
+        bot.turret.setShooterOverride(false);
         stallIntake = true;
 
 
@@ -74,12 +76,12 @@ public class SoloTeleop extends LinearOpMode {
 //                bot.turret.resetEncoder();
 //            }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
                 bot.switchAlliance();
                 useStoredPose = false;
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.B)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.B) && !gp1.isDown(GamepadKeys.Button.START)) {
                 bot.switchStartingPos();
                 useStoredPose = false;
             }
@@ -123,6 +125,11 @@ public class SoloTeleop extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
+
+            if (!kickersInitialized) {
+                runningActions.add(bot.indexer.jiggleKickers());
+                kickersInitialized = true;
+            }
 
             gp1.readButtons();
 
@@ -169,7 +176,7 @@ public class SoloTeleop extends LinearOpMode {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)  && !gp1.isDown(GamepadKeys.Button.START)) {
                 runningActions.add(bot.indexer.shootMotif());
             }
 
@@ -230,8 +237,7 @@ public class SoloTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-                bot.limelight.relocalizeBotPose();
-                bot.turret.resetEncoder();
+                bot.sensorIntaking = !bot.sensorIntaking;
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
@@ -241,11 +247,11 @@ public class SoloTeleop extends LinearOpMode {
             if (manualTurret) {
                 bot.turret.runManual(gp1.getLeftX());
             }
-
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.limelight.relocalizeBotPose();
-                headingLockEnabled = !headingLockEnabled;
-            }
+//
+//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+////                bot.limelight.relocalizeBotPose();
+//                headingLockEnabled = !headingLockEnabled;
+//            }
 
             bot.periodic();
             drive();
@@ -303,18 +309,23 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
             telemetry.addData("<big><b><u>Ball Count</big></b></u>", "<big><b> "+ bot.indexer.countBalls() + "</big></b></u>");
 
-            telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-//            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
-            telemetry.addData("\nalliance", Bot.getAlliance());
-            telemetry.addData("starting pos", Bot.getStartingPos());
-
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-            telemetry.addData("\nShoot Sleep", Turret.getRapidShootSleep(0.04));
-//            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
+            telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
+
+            telemetry.addData("PID Power", bot.turret.getPower() - Turret.feedforwardPower);
+            telemetry.addData("FF Vel Power", Turret.velFFPower);
+            telemetry.addData("FF Accel Power", Turret.accelFFPower);
             telemetry.addData("Power", bot.turret.getPower());
-            telemetry.addData("Target RPM", Turret.shooterRpm);
-            telemetry.addData("Current", bot.turret.shooter.getFilteredRPM());
+
+            telemetry.addData("Calculated \tRPM", Turret.shooterRpm);
+            telemetry.addData("Target \t\t\tRPM", bot.turret.shooter.getControllerTargetRPM());
+            telemetry.addData("Current \t\tRPM", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Shooter Active?", Turret.shooterActive);
+//
+//            packet.fieldOverlay().setStroke("#3F51B5");
+//            Drawing.drawRobot(packet.fieldOverlay(), Bot.storedPose);
+            telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
 
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
