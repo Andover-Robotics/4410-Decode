@@ -128,6 +128,7 @@ public class MainTeleop extends LinearOpMode {
 
         loopTimer.reset();
         bot.indexer.resetIndexer();
+        runningActions.add(bot.indexer.leftHolder.resetFastAction());
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -135,15 +136,7 @@ public class MainTeleop extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
 
-//            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-//                sensing = !sensing;
-//            } //
-
             if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                if (!kickersInitialized) {
-                    runningActions.add(bot.indexer.leftHolder.resetFastAction());
-                    kickersInitialized = true;
-                }
                 if (bot.sensorIntaking) {
                     if (bot.indexer.countBalls()==3) {
                         bot.teleopReverseIntake();
