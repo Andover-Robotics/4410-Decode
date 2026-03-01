@@ -35,7 +35,7 @@ public class Turret {
     public static double rapidFireSleepScalePerIn = 0.0024;
     public static double
             largeP = 0.009, largeI = 0, largeD = 0.0003,
-            smallP = 0.0185 , smallI = 0, smallD = 0.0006,
+            smallP = 0.0168 , smallI = 0, smallD = 0.0006,
             errorThresholdDeg = 4, manualPower = 0,
             targetVelK = 0.0035, targetAccelK = 0.00000;
 
@@ -60,8 +60,8 @@ public class Turret {
             2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050,
             3150, 3200, 3250, 3280, 3310, 3340, 3390, 3430, 3470, 3510,
             3550, 3590, 3640, 3690, 3740, 3740, 3800, 3850, 3900, 3940,
-            3980, 4010, 4050, 4100, 4155, 4200, 4250, 4275, 4300, 4325,
-            4350, 4375, 4400, 4425, 4450, 4470, 4495
+            3980, 4010, 4050, 4080, 4135, 4190, 4220, 4205, 4210, 4235,
+            4250, 4270, 4300, 4315, 4360, 4390, 4425
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {

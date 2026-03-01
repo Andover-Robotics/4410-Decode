@@ -83,7 +83,7 @@ public class Shooter {
     }
 
     public void periodic() {
-        if (getVel) filteredRPM = motor1.getVelocity() * 60 / 28;
+        filteredRPM = motor1.getVelocity() * 60 / 28;
 
         controller.setPID(p, i, d);
 

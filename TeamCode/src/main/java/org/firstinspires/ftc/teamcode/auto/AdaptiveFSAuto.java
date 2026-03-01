@@ -377,12 +377,12 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-//                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
-//                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
-//                    .waitSeconds(0.6)
-                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
-                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)
+                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
+                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
                     .waitSeconds(0.15)
+//                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
+//                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)
+//                    .waitSeconds(0.15)
 
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
@@ -443,7 +443,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 20, Pos.blueSecretTunnelStart.position.y), Math.toRadians(150))
                             .strafeToLinearHeading(Pos.blueSecretTunnelStart.position, Math.toRadians(-180))
                             .stopAndAdd(bot.enableShooter())
-                            .afterTime(0.9, (() -> bot.reverseIntake()))
+                            .afterTime(1.2, (() -> bot.reverseIntake()))
                             .setReversed(true)
                             .splineTo(Pos.farShoot, Math.toRadians(-100))
                             .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
@@ -454,7 +454,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             .stopAndAdd((() -> bot.sensorIntake(true)))
                             .splineTo(Pos.blueHpCycle.position, Math.toRadians(90))
                             .stopAndAdd(bot.enableShooter())
-                            .afterTime(0.20, (() -> bot.reverseIntake()))
+                            .afterTime(1.5, (() -> bot.reverseIntake()))
                             .setReversed(true)
                             .splineTo(Pos.farShoot, Math.toRadians(-135))
                             .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
