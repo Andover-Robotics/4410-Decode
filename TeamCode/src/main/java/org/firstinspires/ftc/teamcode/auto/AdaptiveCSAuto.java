@@ -305,25 +305,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .afterTime(1.2, bot.indexer.shootRapidFire())
+                    .afterTime(1, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
-//                    .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd((() -> bot.disableShooter()));
 
-//            builder = cfg.startFar ?
-//                    builder
-//                            .stopAndAdd(bot.enableShooter())
-//                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(0)) //shoot once we've entered close zone
-//                            .stopAndAdd(bot.indexer.shootRapidFire())
-//                            .stopAndAdd((() -> bot.disableShooter()))
-//                            :
-//                    builder
-//                            .stopAndAdd(bot.enableShooter())
-//                            .waitSeconds(0.35)
-//                            .afterTime(0.85, bot.indexer.shootRapidFire()) //shoot AS we get to close shooting position
-//                            .strafeToLinearHeading(Pos.closeShoot, Math.toRadians(-8)) //don't want to shoot while spinning bc turret lag
-//                            .waitSeconds(0.2)
-//                            .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
 
