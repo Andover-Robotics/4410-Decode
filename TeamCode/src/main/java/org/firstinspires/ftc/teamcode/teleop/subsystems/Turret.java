@@ -85,6 +85,10 @@ public class Turret {
     public ArrayList<Double> txArr, tyArr;
 
     public static boolean velComp = true, shooterOverride = false;
+    public static boolean enableRpmDropoffAngleCompensation = true;
+    public static double targetHeightDisplacementIn = 26.0;
+    public static double minRpmForBallisticComp = 1200.0;
+    public static double maxAngleCompensationDeg = 8.0;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -218,18 +222,13 @@ public class Turret {
         if (currentTurretDegs < highLimit - 5 && currentTurretDegs > lowLimit + 5) {
             double time = calculateTime(dx, dy);
             velocity = Bot.drive.localizer.getPoseVelocity();
-//        double dispX = velocity.linearVel.x * time;
-//        double dispY = velocity.linearVel.y * time;
-//        POS_TRACK_X = dx + dispX;
-//        POS_TRACK_Y = dy + dispY;
             double heading = pose.heading.log();
 
-            // Convert robot-centric velocity to field frame
+            // Convert robot centric velocity to field frame
             double velocityXField = velocity.linearVel.x * Math.cos(heading) - velocity.linearVel.y * Math.sin(heading);
             double velocityYField = velocity.linearVel.x * Math.sin(heading) + velocity.linearVel.y * Math.cos(heading);
 
-            // Offset the target opposite the robot's drift so that the added launch
-            // velocity from the robot's motion lands on the goal.
+            // Offset the target opposite the robot's drift so that the added launch velocity from the robot's motion lands on the goal
             double dispX = velocityXField * time;
             double dispY = velocityYField * time;
             if (velComp) {
@@ -249,8 +248,8 @@ public class Turret {
     public double calculateTime(double dx, double dy) {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
-        final double heightDisplacement = 26.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 49.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double heightDisplacement = targetHeightDisplacementIn;  // inches (Δz)
+        final double launchAngleAboveHorizDeg = 50;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
@@ -312,6 +311,10 @@ public class Turret {
         shooterRpm = rpmInterpolator.interpolate(trackingDistance);
         double hoodAngleDeg = hoodAngleInterpolator.interpolate(trackingDistance);
 
+        if (enableRpmDropoffAngleCompensation) {
+            hoodAngleDeg = getRpmCompensatedHoodAngleDeg(trackingDistance, hoodAngleDeg, shooterRpm, shooter.getFilteredRPM());
+        }
+
         if (MainTeleop.manualTurret) {
             shooterRpm = 3000;
         }
@@ -326,6 +329,68 @@ public class Turret {
 
         motor.set(power);
         lastTime = now;
+    }
+    private double getRpmCompensatedHoodAngleDeg(double distanceIn, double baseHoodAngleDeg, double nominalRpm, double measuredRpm) {
+        if (distanceIn <= 1e-3 || nominalRpm <= 1e-3) {
+            return baseHoodAngleDeg;
+        }
+
+        double effectiveRpm = measuredRpm > minRpmForBallisticComp ? measuredRpm : nominalRpm;
+        double baseAngleAboveHorizDeg = 90.0 - baseHoodAngleDeg;
+
+        // The ballistic equation only depends on v^2, so we can treat RPM as proportional to launch velocity.
+        double baseVelocitySq = getRequiredVelocitySq(distanceIn, targetHeightDisplacementIn, baseAngleAboveHorizDeg);
+        if (Double.isNaN(baseVelocitySq)) {
+            return baseHoodAngleDeg;
+        }
+
+        double rpmRatio = Math.max(1e-3, effectiveRpm / nominalRpm);
+        double effectiveVelocitySq = baseVelocitySq * rpmRatio * rpmRatio;
+        double solvedAngleAboveHorizDeg = solveLaunchAngleDeg(distanceIn, targetHeightDisplacementIn, effectiveVelocitySq, baseAngleAboveHorizDeg);
+
+        if (Double.isNaN(solvedAngleAboveHorizDeg)) {
+            return baseHoodAngleDeg;
+        }
+
+        double compensatedHoodAngleDeg = 90.0 - solvedAngleAboveHorizDeg;
+        double delta = compensatedHoodAngleDeg - baseHoodAngleDeg;
+        delta = Math.max(-maxAngleCompensationDeg, Math.min(maxAngleCompensationDeg, delta));
+        return baseHoodAngleDeg + delta;
+    }
+
+    private static double getRequiredVelocitySq(double rangeIn, double deltaHeightIn, double launchAngleAboveHorizDeg) {
+        final double gInPerSec2 = 386.09;
+        double thetaRad = Math.toRadians(launchAngleAboveHorizDeg);
+        double cos = Math.cos(thetaRad);
+        double tan = Math.tan(thetaRad);
+        double denominator = 2.0 * cos * cos * (rangeIn * tan - deltaHeightIn);
+        if (denominator <= 1e-6) {
+            return Double.NaN;
+        }
+        return (gInPerSec2 * rangeIn * rangeIn) / denominator;
+    }
+
+    private static double solveLaunchAngleDeg(double rangeIn, double deltaHeightIn, double velocitySq, double referenceAngleAboveHorizDeg) {
+        final double gInPerSec2 = 386.09;
+
+        double v2 = Math.max(1e-6, velocitySq);
+        double discriminant = (v2 * v2) - gInPerSec2 * (gInPerSec2 * rangeIn * rangeIn + 2.0 * deltaHeightIn * v2);
+        if (discriminant < 0.0) {
+            return Double.NaN;
+        }
+
+        double sqrtDisc = Math.sqrt(discriminant);
+        double denom = gInPerSec2 * rangeIn;
+        if (Math.abs(denom) < 1e-6) {
+            return Double.NaN;
+        }
+
+        double thetaLow = Math.toDegrees(Math.atan((v2 - sqrtDisc) / denom));
+        double thetaHigh = Math.toDegrees(Math.atan((v2 + sqrtDisc) / denom));
+
+        return Math.abs(thetaLow - referenceAngleAboveHorizDeg) <= Math.abs(thetaHigh - referenceAngleAboveHorizDeg)
+                ? thetaLow
+                : thetaHigh;
     }
 
     public void setShooterVelocity(double rpm) {
