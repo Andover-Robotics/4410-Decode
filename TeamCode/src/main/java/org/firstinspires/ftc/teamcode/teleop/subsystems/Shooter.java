@@ -31,7 +31,7 @@ public class Shooter {
     public static double hoodFarAngleDeg = 44;
     public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
-    public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
+    public static double lowAngleLimit = 32.5, angleRange = 11.5, highAngleLimit = lowAngleLimit + angleRange, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
     private double currentHoodAngle;//debugging
     private double currentServoPos;
     private double requestedHoodPos = 1.0;
@@ -139,6 +139,7 @@ public class Shooter {
 
     private static double angleToPos(double angle) {
 //        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
+        angle = Math.max(lowAngleLimit, Math.min(highAngleLimit, angle));
         return servoPosPerAngle * (angle - lowAngleLimit) + lowServoLimit;
     }
 }
