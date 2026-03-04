@@ -35,6 +35,7 @@ public class Shooter {
     private double currentHoodAngle;//debugging
     private double currentServoPos;
     private double requestedHoodPos = 1.0;
+    public double ff;
 
     public static boolean setPower = true, getVel = true;
 
@@ -43,6 +44,7 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
+
 
     public Shooter(OpMode opMode) {
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
@@ -87,7 +89,7 @@ public class Shooter {
         controller.setPID(p, i, d);
 
         if (closedLoopEnabled) {
-            double ff = f * targetRPM;                                    // feedforward
+            ff = f * targetRPM;                                    // feedforward
             double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
             power = ff + pid;
 
@@ -129,6 +131,7 @@ public class Shooter {
     public double getTargetRPM() { return targetRPM; }
     public double getFilteredRPM() { return filteredRPM; }
     public double getControllerTargetRPM() { return controller.getSetPoint(); }
+    public PIDController getController() { return controller; }
     public double getPower() { return power; }
     public boolean atSpeed() { return Math.abs(targetRPM - filteredRPM) <= toleranceRPM; }
 

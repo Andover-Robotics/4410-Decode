@@ -221,7 +221,7 @@ public class MainTeleop extends LinearOpMode {
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
-                bot.switchShooting();
+                bot.turret.resetEncoder();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
@@ -334,8 +334,13 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Calculated RPM", Turret.shooterRpm);
-            telemetry.addData("Target RPM", bot.turret.shooter.getControllerTargetRPM());
             telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
+
+            telemetry.addLine("Shooter PID Data:");
+            telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
+            telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
+            telemetry.addData("PID Power", bot.turret.shooter.getController().calculate());
+            telemetry.addData("FF Power", bot.turret.shooter.ff);
 //            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
             telemetry.addData("Screen periodic (GP2 R stick)", bot.isScreenPeriodicEnabled());

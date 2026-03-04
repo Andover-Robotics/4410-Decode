@@ -72,6 +72,16 @@ public class Turret {
             44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000
     };
 
+    private double lastVXField = 0.0, lastVYField = 0.0;
+    private double lastTimeSec = Double.NaN;
+
+    private double aXFieldFilt = 0.0, aYFieldFilt = 0.0;
+
+    // Tuning knobs
+    private static final double ACCEL_ALPHA = 0.20;   // accel low-pass (0..1)
+    private static final double T_PRELAUNCH_SEC = 0.20; // "now" -> actual release delay (in seconds)
+    private static final double ACCEL_CLAMP = 130.0;  // B) clamp accel to ±130 in/s^2
+
 
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
@@ -250,7 +260,7 @@ public class Turret {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
         final double heightDisplacement = 26.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 49.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double launchAngleAboveHorizDeg = 52.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
@@ -268,6 +278,7 @@ public class Turret {
         double t = Math.sqrt(tSquared);
         return t;
     }
+//
 
     public void periodic() {
         power = 0;
@@ -371,5 +382,10 @@ public class Turret {
 
     public double getPower() {
         return power;
+    }
+
+
+    private static double clamp(double v, double lo, double hi) {
+        return Math.max(lo, Math.min(hi, v));
     }
 }

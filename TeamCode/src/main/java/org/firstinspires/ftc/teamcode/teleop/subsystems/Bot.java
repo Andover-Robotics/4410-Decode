@@ -218,16 +218,6 @@ public class Bot {
         hoodPosition = HoodPosition.FAR;
     }
 
-    public void switchShooting() {
-        switch(hoodPosition) {
-            case MID:
-                setFarShooting();
-            case FAR:
-                setMidShooting();
-                break;
-        }
-    }
-
     public boolean isScreenPeriodicEnabled() {
         return screenPeriodicEnabled;
     }

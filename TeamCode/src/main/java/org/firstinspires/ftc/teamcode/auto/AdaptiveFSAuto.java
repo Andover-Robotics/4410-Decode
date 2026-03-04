@@ -407,7 +407,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             Pos.blueFarIntake.position.y + Pos.farIntakeFarAuto))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.00, (() -> bot.reverseIntake()))
+                    .afterTime(0.8, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineTo(Pos.farShoot, Math.toRadians(-135))
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
