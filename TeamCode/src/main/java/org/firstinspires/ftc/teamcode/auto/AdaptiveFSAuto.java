@@ -91,10 +91,10 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     cfg.gateCycles, cfg.delayGate);
             addSegmentLine(3, "Close:   run (X) / delay (L/R)", "%b / %ds",
                     cfg.runClose, cfg.delayClose);
-            addSegmentLine(4, "HP:      run (X) / delay (L/R)", "%b / %ds",
-                    cfg.runHp, cfg.delayHp);
-            addSegmentLine(5, "Far:     run (X) / delay (L/R)", "%b / %ds",
+            addSegmentLine(4, "Far:     run (X) / delay (L/R)", "%b / %ds",
                     cfg.runFar, cfg.delayFar);
+            addSegmentLine(5, "HP:      run (X) / delay (L/R)", "%b / %ds",
+                    cfg.runHp, cfg.delayHp);
             addSegmentLine(6, "Tunnel:  cycles (X) / delay (L/R) / interval (LB/RB)", "%d / %ds / %ds",
                     cfg.tunnelCycles, cfg.delayTunnel, cfg.intervalTunnel);
             if (builtAuto == null || addedAction) {
@@ -117,8 +117,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
-        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b hp:%b far:%b tunnel:%d",
-                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runHp, cfg.runFar, cfg.tunnelCycles);
+        telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b far:%b hp:%b tunnel:%d",
+                cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runFar, cfg.runHp, cfg.tunnelCycles);
         telemetry.update();
 
         applyStartingPosition(drive);
@@ -183,10 +183,10 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     cfg.runClose = !cfg.runClose;
                     break;
                 case 4:
-                    cfg.runHp = !cfg.runHp;
+                    cfg.runFar = !cfg.runFar;
                     break;
                 case 5:
-                    cfg.runFar = !cfg.runFar;
+                    cfg.runHp = !cfg.runHp;
                     break;
                 case 6:
                     cfg.tunnelCycles = (cfg.tunnelCycles + 1) % 6;
@@ -223,12 +223,12 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             clampDelay(cfg.delayClose + delta);
                     break;
                 case 4:
-                    cfg.delayHp =
-                            clampDelay(cfg.delayHp + delta);
-                    break;
-                case 5:
                     cfg.delayFar =
                             clampDelay(cfg.delayFar + delta);
+                    break;
+                case 5:
+                    cfg.delayHp =
+                            clampDelay(cfg.delayHp + delta);
                     break;
                 case 6:
                     cfg.delayTunnel =
@@ -370,6 +370,27 @@ public class AdaptiveFSAuto extends LinearOpMode {
             addedAction = true;
         }
 
+        if (cfg.runFar) {
+            if (cfg.delayFar > 0) {
+                builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
+                addedAction = true;
+            }
+            builder = builder
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
+                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
+                            Pos.blueFarIntake.position.y + Pos.farIntakeFarAuto))
+                    .stopAndAdd(bot.enableShooter())
+                    .afterTime(0.4, bot.indexer.jiggleKickers())
+                    .afterTime(0.8, (() -> bot.reverseIntake()))
+                    .setReversed(true)
+                    .splineTo(Pos.farShoot, Math.toRadians(-135))
+                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                    .stopAndAdd(bot.indexer.shootRapidFire())
+                    .stopAndAdd((() -> bot.disableShooter()));
+            addedAction = true;
+        }
+
         if (cfg.runHp) {
             if (cfg.delayHp > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
@@ -392,27 +413,6 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                     .stopAndAdd(bot.indexer.shootRapidFire());
-            addedAction = true;
-        }
-
-        if (cfg.runFar) {
-            if (cfg.delayFar > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
-                addedAction = true;
-            }
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.farIntakeFarAuto))
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(0.8, (() -> bot.reverseIntake()))
-                    .setReversed(true)
-                    .splineTo(Pos.farShoot, Math.toRadians(-135))
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
 
