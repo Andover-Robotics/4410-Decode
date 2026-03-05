@@ -452,7 +452,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 } else {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90))
+                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(89))
                             .stopAndAdd(bot.enableShooter())
                             .afterTime(1.5, (() -> bot.reverseIntake()))
                             .setReversed(true)

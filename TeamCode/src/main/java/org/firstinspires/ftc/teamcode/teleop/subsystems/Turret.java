@@ -48,20 +48,15 @@ public class Turret {
             55.0, 57.5, 60.0, 62.5, 65.0, 67.5, 70.0, 72.5, 75.0, 77.5,
             80.0, 82.5, 85.0, 87.5, 90.0, 92.5, 95.0, 97.5, 100.0, 102.5,
             105.0, 107.5, 110.0, 112.5, 115.0, 117.5, 120.0, 122.5, 125.0,
-            127.5, 130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0
+            127.5, 130.0, 132.5, 135.0, 137.5, 140.0, 142.5, 145.0, 147.5, 150
     };
 
     public static final double[] SHOOTER_RPM = {
-//            2875, 2895, 2910, 2930, 2940, 2950, 2965, 2985, 3050, 3100,
-//            3200, 3250, 3300, 3330, 3360, 3390, 3440, 3480, 3520, 3560,
-//            3600, 3640, 3690, 3740, 3790, 3790, 3850, 3900, 3950, 3990,
-//            4030, 4060, 4100, 4150, 4205, 4250, 4300, 4325, 4350, 4375,
-//            4400, 4425, 4450, 4475, 4500, 4520, 4545
-            2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050,
-            3150, 3200, 3250, 3280, 3310, 3340, 3390, 3430, 3470, 3510,
-            3550, 3590, 3640, 3690, 3740, 3740, 3800, 3850, 3900, 3940,
-            3980, 4010, 4050, 4080, 4135, 4190, 4220, 4205, 4210, 4235,
-            4250, 4270, 4300, 4315, 4360, 4390, 4425
+            2920, 2920, 2925, 2925, 2930, 2935, 2935, 2940, 2945, 2950,
+            2955, 2960, 3000, 3120, 3230, 3320, 3390, 3440, 3480, 3525,
+            3565, 3610, 3650, 3700, 3750, 3790, 3840, 3870, 3910, 3950,
+            3980, 3990, 4020, 4040, 4080, 4110, 4140, 4180, 4220, 4260,
+            4300, 4340, 4370, 4400, 4430, 4470, 4500, 4530, 4570
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
@@ -69,8 +64,18 @@ public class Turret {
             36.682, 37.205, 37.727, 38.250, 38.773, 39.295, 39.818, 40.341, 40.864, 41.386,
             41.909, 42.432, 42.955, 43.477, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000,
             44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000,
-            44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000
+            44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000
     };
+
+    private double lastVXField = 0.0, lastVYField = 0.0;
+    private double lastTimeSec = Double.NaN;
+
+    private double aXFieldFilt = 0.0, aYFieldFilt = 0.0;
+
+    // Tuning knobs
+    private static final double ACCEL_ALPHA = 0.20;   // accel low-pass (0..1)
+    private static final double T_PRELAUNCH_SEC = 0.20; // "now" -> actual release delay (in seconds)
+    private static final double ACCEL_CLAMP = 130.0;  // B) clamp accel to ±130 in/s^2
 
 
     private final LinearInterpolation rpmInterpolator;
@@ -228,7 +233,8 @@ public class Turret {
             double velocityXField = velocity.linearVel.x * Math.cos(heading) - velocity.linearVel.y * Math.sin(heading);
             double velocityYField = velocity.linearVel.x * Math.sin(heading) + velocity.linearVel.y * Math.cos(heading);
 
-            // Offset the target opposite the robot's drift so that the added launch velocity from the robot's motion lands on the goal
+            // Offset the target opposite the robot's drift so that the added launch
+            // velocity from the robot's motion lands on the goal.
             double dispX = velocityXField * time;
             double dispY = velocityYField * time;
             if (velComp) {
@@ -249,7 +255,7 @@ public class Turret {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
         final double heightDisplacement = targetHeightDisplacementIn;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 50;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double launchAngleAboveHorizDeg = 52;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
@@ -327,7 +333,6 @@ public class Turret {
         }
         shooter.periodic();
 
-        motor.set(power);
         lastTime = now;
     }
     private double getRpmCompensatedHoodAngleDeg(double distanceIn, double baseHoodAngleDeg, double nominalRpm, double measuredRpm) {
@@ -436,5 +441,9 @@ public class Turret {
 
     public double getPower() {
         return power;
+    }
+
+    private static double clamp(double v, double lo, double hi) {
+        return Math.max(lo, Math.min(hi, v));
     }
 }
