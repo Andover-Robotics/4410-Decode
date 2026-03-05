@@ -398,8 +398,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
-                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(-180))
+//                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
+                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(176))
                     .waitSeconds(0.15)
 //                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
 //                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)

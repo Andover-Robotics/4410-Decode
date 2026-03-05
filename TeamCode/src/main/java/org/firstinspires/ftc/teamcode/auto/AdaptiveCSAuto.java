@@ -306,7 +306,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
                     .stopAndAdd(new SleepAction(0.2))
-                    .afterTime(1, bot.indexer.shootRapidFire())
+                    .afterTime(1.1, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
                     .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
@@ -351,10 +351,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineToSplineHeading(Pos.gate, Math.toRadians(85))
-                    .waitSeconds(0.5)
+                    .splineToSplineHeading(Pos.gate, Math.toRadians(85), drive.defaultVelConstraint, new ProfileAccelConstraint(-30, 65))
+                    .waitSeconds(0.2)
                     .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
-                    .waitSeconds(0.5)
+                    .waitSeconds(0.2)
+                    .strafeToLinearHeading(Pos.gate.position, Math.toRadians(80))
                     .stopAndAdd(bot.enableShooter());
             builder = (gateIndex != gateCycles - 1) ?
                     builder

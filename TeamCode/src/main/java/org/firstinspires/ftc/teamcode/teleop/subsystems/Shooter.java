@@ -19,7 +19,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.0025, i = 0.0, d = 0.0, f = 0.000180;
+    public static double p = 0.002, i = 0.0, d = 0.0, f = 0.000180;
     public static boolean inverted = false;
 
     // note for interpoilation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
@@ -98,7 +98,7 @@ public class Shooter {
                 power = 0.0;
             } else {
                 double s = Math.signum(targetRPM);
-                power = s * Math.max(Math.abs(power), minPower);
+                power = s * Math.max(Math.abs(power), minPower) * 13.5 / Bot.getBatteryVoltage();
             }
         }
         power = clamp(power, -maxPower, maxPower);

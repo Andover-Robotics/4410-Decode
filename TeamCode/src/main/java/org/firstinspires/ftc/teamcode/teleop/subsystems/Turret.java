@@ -32,12 +32,12 @@ public class Turret {
     public static double POS_TRACK_Y = 0;
     public static double TURRET_OFFSET_BACK_IN = 1; // inches back from robot center
     public static double rapidFireDistanceThresholdIn = 95;
-    public static double rapidFireSleepScalePerIn = 0.0024;
+    public static double rapidFireSleepScalePerIn = 0.0032;
     public static double
             largeP = 0.009, largeI = 0, largeD = 0.0003,
-            smallP = 0.0168 , smallI = 0, smallD = 0.0006,
+            smallP = 0.018 , smallI = 0, smallD = 0.0003,
             errorThresholdDeg = 4, manualPower = 0,
-            targetVelK = 0.0035, targetAccelK = 0.00000;
+            targetVelK = 0.0032, targetAccelK = 0.00000;
 
     public static double feedforwardPower, velFFPower, accelFFPower;
 
@@ -52,7 +52,17 @@ public class Turret {
     };
 
     public static final double[] SHOOTER_RPM = {
-            2920, 2920, 2925, 2925, 2930, 2935, 2935, 2940, 2945, 2950, 2955, 2960, 3000, 3120, 3230, 3320, 3390, 3440, 3480, 3525, 3565, 3610, 3650, 3700, 3750, 3790, 3840, 3870, 3910, 3950, 3980, 3990, 4020, 4040, 4080, 4110, 4140, 4180, 4220, 4260, 4300, 4340, 4370, 4400, 4430, 4470, 4500, 4530, 4570
+            2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050,
+            3150, 3200, 3250, 3280, 3310, 3320, 3390, 3440, 3480, 3525,
+            3565, 3610, 3650, 3700, 3750, 3790, 3840, 3870, 3910, 3950,
+            3980, 3990, 4020, 4040, 4080, 4110, 4140, 4180, 4220, 4260,
+            4300, 4340, 4370, 4400, 4430, 4470, 4500, 4530, 4570
+//
+//            ,2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050, old inter
+//            3150, 3200, 3250, 3280, 3310, 3340, 3390, 3430, 3470, 3510,
+//            3550, 3590, 3640, 3690, 3740, 3740, 3800, 3850, 3900, 3940,
+//            3980, 4010, 4050, 4080, 4135, 4190, 4220, 4205, 4210, 4235,
+//            4250, 4270, 4300, 4315, 4360, 4390, 4425
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
@@ -326,7 +336,7 @@ public class Turret {
         }
         shooter.periodic();
 
-        motor.set(power);
+        motor.set(power * 13.5 / Bot.getBatteryVoltage());
         lastTime = now;
     }
 

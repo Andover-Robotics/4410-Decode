@@ -10,6 +10,8 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
@@ -25,6 +27,7 @@ public class Bot {
     public Indexer indexer;
     public Screen screen;
     public Limelight limelight;
+    public VoltageSensor voltageSensor;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
@@ -33,6 +36,7 @@ public class Bot {
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
     private boolean screenPeriodicEnabled = true;
+    private static double batteryVoltage;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -76,6 +80,7 @@ public class Bot {
         lift = new Lift(opMode);
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
+        voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
         updatePoses();
 
         setMidShooting();
@@ -284,6 +289,7 @@ public class Bot {
         if (screenPeriodicEnabled) {
             screen.periodic();
         }
+        batteryVoltage = voltageSensor.getVoltage();
         drive.updatePoseEstimate();
 //        if (sensorIntaking) {
 //            if (indexer.countBalls()==3) {
@@ -296,6 +302,7 @@ public class Bot {
 
     public void autoPeriodic() {
         clearBulkCache();
+        batteryVoltage = voltageSensor.getVoltage();
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
@@ -329,6 +336,9 @@ public class Bot {
         return Math.atan2(Math.sin(angleRad), Math.cos(angleRad));
     }
 
+    public static double getBatteryVoltage() {
+        return 13.5;
+    }
 
     // get bot instance
     public static Bot getInstance() {

@@ -20,7 +20,7 @@ public class Pos {
     public static double intakeDisp = 31;
 
     public static Pose2d gate = new Pose2d(-11, 63.5, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-12.5, 61, Math.toRadians(45));
+    public static Pose2d gateIntaking = new Pose2d(-14, 61, Math.toRadians(45));
 
     public static Pose2d gateSideOpen = new Pose2d(3, 62, Math.toRadians(-10));
     public static Pose2d gateSideOpenHeadOn = new Pose2d(1, 61, Math.toRadians(90));
