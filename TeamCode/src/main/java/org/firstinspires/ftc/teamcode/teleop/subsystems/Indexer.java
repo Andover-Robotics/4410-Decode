@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 public class Indexer {
 
     /* ================= CONFIG ================= */
-    public static double kickerLeftDown  = 0.222;
+    public static double kickerLeftDown  = 0.214;
     public static double kickerLeftUp    = 0.65;
     public static double kickerRightDown = 0.22;
     public static double kickerRightUp   = 0.65;
@@ -40,7 +40,7 @@ public class Indexer {
     public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
-    public static double motifShootSleep = 0.43;
+    public static double motifShootSleep = 0.40;
 
     public static double proximityThreshold = 28;
     public static boolean staggerSensorUpdates = true;

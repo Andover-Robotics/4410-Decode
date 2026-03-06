@@ -31,7 +31,7 @@ public class Bot {
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
-    public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
+    public static Vector2d goalPose = new Vector2d(62, 59); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
