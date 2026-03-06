@@ -34,10 +34,10 @@ public class Turret {
     public static double rapidFireDistanceThresholdIn = 95;
     public static double rapidFireSleepScalePerIn = 0.0032;
     public static double
-            largeP = 0.009, largeI = 0, largeD = 0.0003,
+            largeP = 0.018, largeI = 0, largeD = 0.0005,
             smallP = 0.018 , smallI = 0, smallD = 0.0003,
-            errorThresholdDeg = 4, manualPower = 0,
-            targetVelK = 0.0032, targetAccelK = 0.00000;
+            errorThresholdDeg = 0, manualPower = 0,
+            targetVelK = 0.0017, targetAccelK = 0.00000;
 
     public static double feedforwardPower, velFFPower, accelFFPower;
 
@@ -76,18 +76,10 @@ public class Turret {
     private double lastVXField = 0.0, lastVYField = 0.0;
     private double lastTimeSec = Double.NaN;
 
-    private double aXFieldFilt = 0.0, aYFieldFilt = 0.0;
-
-    // Tuning knobs
-    private static final double ACCEL_ALPHA = 0.20;   // accel low-pass (0..1)
-    private static final double T_PRELAUNCH_SEC = 0.20; // "now" -> actual release delay (in seconds)
-    private static final double ACCEL_CLAMP = 130.0;  // B) clamp accel to ±130 in/s^2
-
-
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 225, lowLimit = -145;
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
     private int cachedPositionTicks = 0;
 
@@ -385,6 +377,9 @@ public class Turret {
         return power;
     }
 
+    public PIDController getLargeController() {
+        return largeErrorController;
+    }
 
     private static double clamp(double v, double lo, double hi) {
         return Math.max(lo, Math.min(hi, v));

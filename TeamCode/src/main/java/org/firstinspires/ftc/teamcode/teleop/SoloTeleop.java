@@ -314,6 +314,8 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
 
             telemetry.addData("PID Power", bot.turret.getPower() - Turret.feedforwardPower);
+            telemetry.addData("P Power", bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP());
+            telemetry.addData("D Power", bot.turret.getPower() - Turret.feedforwardPower - bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP());
             telemetry.addData("FF Vel Power", Turret.velFFPower);
             telemetry.addData("FF Accel Power", Turret.accelFFPower);
             telemetry.addData("Power", bot.turret.getPower());
