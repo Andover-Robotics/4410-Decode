@@ -135,23 +135,29 @@ public class SoloTeleop extends LinearOpMode {
                         runningActions.add(bot.indexer.leftHolder.resetFastAction());
                         kickersInitialized = true;
                     }
-                    if (bot.indexer.countBalls()==3) {
-                        bot.reverseIntake();
-                        gp1.gamepad.rumble(1, 1, -1);
+                    if (bot.sensorIntaking) {
+                        if (bot.indexer.countBalls() == 3) {
+                            bot.teleopReverseIntake();
+                            gp1.gamepad.rumble(1, 1, -1);
+                        } else {
+                            bot.teleopIntake();
+                            gp1.gamepad.stopRumble();
+                        }
                     } else {
-                        bot.intake();
-                        gp1.gamepad.stopRumble();
+                        bot.teleopIntake();
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                    bot.reverseIntake();
-                    if (bot.indexer.countBalls()==3) {
+                    bot.teleopReverseIntake();
+                    if (bot.indexer.countBalls() == 3) {
                         gp1.gamepad.rumble(1, 1, -1);
                     } else {
-                        bot.reverseIntake();
+                        bot.teleopReverseIntake();
                         gp1.gamepad.stopRumble();
                     }
+                } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    bot.teleopIntake();
                 } else {
-                    bot.stopIntake();
+                    bot.teleopStopIntake();
                     gp1.gamepad.stopRumble();
                 }
             }
@@ -314,8 +320,8 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
 
             telemetry.addData("PID Power", bot.turret.getPower() - Turret.feedforwardPower);
-            telemetry.addData("P Power", bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP());
-            telemetry.addData("D Power", bot.turret.getPower() - Turret.feedforwardPower - bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP());
+            telemetry.addData("P Power", ((bot.turret.getErrorDegs() > Turret.errorThresholdDeg) ? (bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP()) : (bot.turret.getSmallController().getPositionError() * bot.turret.getSmallController().getP())));
+            telemetry.addData("D Power", bot.turret.getPower() - Turret.feedforwardPower - ((bot.turret.getErrorDegs() > Turret.errorThresholdDeg) ? (bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP()) : (bot.turret.getSmallController().getPositionError() * bot.turret.getSmallController().getP())));
             telemetry.addData("FF Vel Power", Turret.velFFPower);
             telemetry.addData("FF Accel Power", Turret.accelFFPower);
             telemetry.addData("Power", bot.turret.getPower());
