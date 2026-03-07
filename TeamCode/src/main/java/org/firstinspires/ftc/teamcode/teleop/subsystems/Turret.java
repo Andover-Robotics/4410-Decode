@@ -91,7 +91,7 @@ public class Turret {
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
     private int cachedPositionTicks = 0;
 
-    public static double shooterRpm = 0, trackingDistance, pureDistance;
+    public static double shooterRpm = 0, trackingDistance, pureDistance, error;
 
     public ArrayList<Double> txArr, tyArr;
 
@@ -318,6 +318,8 @@ public class Turret {
             previousTargetVelDegPerSec = 0;
         }
 
+        error = activeController.getPositionError();
+
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));
 
@@ -336,7 +338,7 @@ public class Turret {
         }
         shooter.periodic();
 
-        motor.set(power * 13.5 / Bot.getBatteryVoltage());
+        motor.set(power);
         lastTime = now;
     }
 

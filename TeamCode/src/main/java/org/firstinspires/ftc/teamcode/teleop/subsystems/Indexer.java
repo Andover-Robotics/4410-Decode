@@ -445,6 +445,9 @@ public class Indexer {
         }
 
         public Action kickResetAction() {
+            if (Turret.error > 8) {
+                return new SequentialAction(new SleepAction(Indexer.kickerSleep));
+            }
             return new SequentialAction(
                     new InstantAction(this::kick),
                     new SleepAction(Indexer.kickerSleep),

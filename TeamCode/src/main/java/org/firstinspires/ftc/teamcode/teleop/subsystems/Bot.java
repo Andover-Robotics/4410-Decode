@@ -36,7 +36,6 @@ public class Bot {
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
     private boolean screenPeriodicEnabled = true;
-    private static double batteryVoltage;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -82,7 +81,6 @@ public class Bot {
         screen = new Screen(opMode, this);
         voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
         updatePoses();
-
         setMidShooting();
     }
 
@@ -289,7 +287,6 @@ public class Bot {
         if (screenPeriodicEnabled) {
             screen.periodic();
         }
-        batteryVoltage = voltageSensor.getVoltage();
         drive.updatePoseEstimate();
 //        if (sensorIntaking) {
 //            if (indexer.countBalls()==3) {
@@ -302,7 +299,6 @@ public class Bot {
 
     public void autoPeriodic() {
         clearBulkCache();
-        batteryVoltage = voltageSensor.getVoltage();
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();

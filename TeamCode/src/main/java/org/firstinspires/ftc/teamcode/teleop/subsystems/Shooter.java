@@ -98,7 +98,7 @@ public class Shooter {
                 power = 0.0;
             } else {
                 double s = Math.signum(targetRPM);
-                power = s * Math.max(Math.abs(power), minPower) * 13.5 / Bot.getBatteryVoltage();
+                power = s * Math.max(Math.abs(power), minPower);
             }
         }
         power = clamp(power, -maxPower, maxPower);

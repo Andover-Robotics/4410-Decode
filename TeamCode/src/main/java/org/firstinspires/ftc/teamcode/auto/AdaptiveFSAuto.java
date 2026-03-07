@@ -401,7 +401,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
                     .splineTo(new Vector2d(Pos.blueHpSideIntake.position.x + 7, Pos.blueHpSideIntake.position.y), Math.toRadians(178))
                     .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(180))
-                    .waitSeconds(0.10)
+                    .waitSeconds(0.05)
 //                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
 //                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)
 //                    .waitSeconds(0.15)
@@ -411,7 +411,9 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             new SleepAction(0.5),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
+//                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
+                    .setReversed(true)
+                    .splineTo(Pos.farShoot, Math.toRadians(-120))
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                     .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
