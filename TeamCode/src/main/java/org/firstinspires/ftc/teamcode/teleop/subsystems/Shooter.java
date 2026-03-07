@@ -22,7 +22,7 @@ public class Shooter {
     public static double p = 0.002, i = 0.0, d = 0.0, f = 0.000180;
     public static boolean inverted = false;
 
-    // note for interpoilation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
+    // note for interpolation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
     // targeting and behavior
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
@@ -98,7 +98,7 @@ public class Shooter {
                 power = 0.0;
             } else {
                 double s = Math.signum(targetRPM);
-                power = s * Math.max(Math.abs(power), minPower);
+                power = s * Math.max(Math.abs(power), minPower) * 13.5 / Bot.getBatteryVoltage();
             }
         }
         power = clamp(power, -maxPower, maxPower);

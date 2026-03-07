@@ -313,11 +313,15 @@ public class SoloTeleop extends LinearOpMode {
 
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
             telemetry.addData("<big><b><u>Ball Count</big></b></u>", "<big><b> "+ bot.indexer.countBalls() + "</big></b></u>");
+            telemetry.addData("\nOdom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
+
 
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("\nError (Degs)", "<big><b>" + bot.turret.getErrorDegs() + "</big></b>\n");
-            telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
+            telemetry.addData("Error (Degs)", Turret.error);
+
+            telemetry.addData("\nDeadzone", Turret.deadzone);
 
             telemetry.addData("PID Power", bot.turret.getPower() - Turret.feedforwardPower);
             telemetry.addData("P Power", ((bot.turret.getErrorDegs() > Turret.errorThresholdDeg) ? (bot.turret.getLargeController().getPositionError() * bot.turret.getLargeController().getP()) : (bot.turret.getSmallController().getPositionError() * bot.turret.getSmallController().getP())));
@@ -333,8 +337,6 @@ public class SoloTeleop extends LinearOpMode {
 //
 //            packet.fieldOverlay().setStroke("#3F51B5");
 //            Drawing.drawRobot(packet.fieldOverlay(), Bot.storedPose);
-            telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
 

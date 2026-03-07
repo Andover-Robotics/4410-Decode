@@ -17,11 +17,13 @@ public final class ManualFeedbackTuner extends LinearOpMode {
             MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
             MotorEx motor1 = new MotorEx(hardwareMap, "shooterL");
             MotorEx motor2 = new MotorEx(hardwareMap, "shooterR");
-            motor1.set(1);
-            motor2.set(-1);
+//            motor1.set(1);
+//            motor2.set(-1);
             waitForStart();
 
-            while (opModeIsActive()) {
+            int i = 0;
+
+            while (opModeIsActive() && i < 100) {
                 Actions.runBlocking(
                     drive.actionBuilder(new Pose2d(0, 0, 0))
 //                            .strafeToConstantHeading(new Pose2d(0, DISTANCE, 0).position)
@@ -29,6 +31,7 @@ public final class ManualFeedbackTuner extends LinearOpMode {
                             .lineToX(DISTANCE)
                             .lineToX(0)
                             .build());
+                i++;
             }
         } else {
             throw new RuntimeException();

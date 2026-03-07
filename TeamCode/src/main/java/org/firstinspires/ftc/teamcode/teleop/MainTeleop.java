@@ -220,13 +220,6 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
-                bot.turret.resetEncoder();
-            }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-                bot.toggleScreenPeriodic();
-            }
 
 
             // CLIMB
@@ -240,6 +233,10 @@ public class MainTeleop extends LinearOpMode {
 
             // FAILSAFES
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.resetPose();
+            }
+
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
                 bot.switchAlliance();
             }
@@ -250,21 +247,22 @@ public class MainTeleop extends LinearOpMode {
                 bot.sensorIntaking = !bot.sensorIntaking;
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.resetPose();
-            }
-
             if (manualTurret) {
                 bot.turret.runManual(gp2.getLeftX());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
+                bot.turret.resetEncoder();
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                bot.toggleScreenPeriodic();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
                 bot.turret.resetEncoder();
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.indexer.jiggleKickers();
-            }
 
             bot.periodic();
             drive();

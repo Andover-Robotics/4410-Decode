@@ -208,15 +208,19 @@ public class Indexer {
 //            actions.add(h.kickResetAction());
 //            actions.add(new SleepAction(sleepSeconds));
 //        }
-
-        for (int i = 0; i < 3; i++) {
-            if (i != 2) {
-                actions.add(holders[i].kickResetAction());
-                actions.add(new SleepAction(sleepSeconds));
-            } else {
-                actions.add(holders[i].longKickResetAction());
+        if (!Turret.deadzone) {
+            for (int i = 0; i < 3; i++) {
+                if (i != 2) {
+                    actions.add(holders[i].kickResetAction());
+                    actions.add(new SleepAction(sleepSeconds));
+                } else {
+                    actions.add(holders[i].longKickResetAction());
+                }
             }
+        } else {
+            actions.add(new SleepAction(0.01));
         }
+
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
@@ -445,9 +449,6 @@ public class Indexer {
         }
 
         public Action kickResetAction() {
-            if (Turret.error > 8) {
-                return new SequentialAction(new SleepAction(Indexer.kickerSleep));
-            }
             return new SequentialAction(
                     new InstantAction(this::kick),
                     new SleepAction(Indexer.kickerSleep),

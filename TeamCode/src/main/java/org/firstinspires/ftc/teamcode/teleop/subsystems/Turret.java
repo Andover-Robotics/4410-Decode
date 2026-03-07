@@ -55,8 +55,8 @@ public class Turret {
             2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050,
             3150, 3200, 3250, 3280, 3310, 3320, 3390, 3440, 3480, 3525,
             3565, 3610, 3650, 3700, 3750, 3790, 3840, 3870, 3910, 3950,
-            3980, 3990, 4020, 4040, 4080, 4110, 4140, 4180, 4220, 4260,
-            4300, 4340, 4370, 4400, 4430, 4470, 4500, 4530, 4570
+            3980, 3990, 3980, 3990, 4000, 4000, 4030, 4080, 4110, 4150,
+            4190, 4230, 4260, 4290, 4320, 4360, 4390, 4420, 4460
 //
 //            ,2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050, old inter
 //            3150, 3200, 3250, 3280, 3310, 3340, 3390, 3430, 3470, 3510,
@@ -73,17 +73,6 @@ public class Turret {
             44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000, 44.000
     };
 
-    private double lastVXField = 0.0, lastVYField = 0.0;
-    private double lastTimeSec = Double.NaN;
-
-    private double aXFieldFilt = 0.0, aYFieldFilt = 0.0;
-
-    // Tuning knobs
-    private static final double ACCEL_ALPHA = 0.20;   // accel low-pass (0..1)
-    private static final double T_PRELAUNCH_SEC = 0.20; // "now" -> actual release delay (in seconds)
-    private static final double ACCEL_CLAMP = 130.0;  // B) clamp accel to ±130 in/s^2
-
-
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
@@ -95,7 +84,7 @@ public class Turret {
 
     public ArrayList<Double> txArr, tyArr;
 
-    public static boolean velComp = true, shooterOverride = false;
+    public static boolean velComp = true, shooterOverride = false, deadzone = false;
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
@@ -312,13 +301,19 @@ public class Turret {
 
             previousTargetTicks = setPoint;
             previousTargetVelDegPerSec = targetVelDegPerSec;
+            double overlap = highLimit - lowLimit - 360;
+            if ((getPositionDegs()) > (highLimit - overlap - 5) || (getPositionDegs()) < ((lowLimit + overlap + 5))) {
+                deadzone = true;
+            } else {
+                deadzone = false;
+            }
         } else {
             power = manualPower;
             previousTargetTicks = setPoint;
             previousTargetVelDegPerSec = 0;
         }
 
-        error = activeController.getPositionError();
+        error = activeController.getPositionError() * degsPerTick;
 
         double maxPower = 1;
         power = Math.max(-maxPower, Math.min(maxPower, power));

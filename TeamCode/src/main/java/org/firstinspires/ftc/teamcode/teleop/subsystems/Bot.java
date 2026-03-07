@@ -27,7 +27,7 @@ public class Bot {
     public Indexer indexer;
     public Screen screen;
     public Limelight limelight;
-    public VoltageSensor voltageSensor;
+    public static VoltageSensor voltageSensor;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
@@ -333,7 +333,7 @@ public class Bot {
     }
 
     public static double getBatteryVoltage() {
-        return 13.5;
+        return voltageSensor.getVoltage();
     }
 
     // get bot instance

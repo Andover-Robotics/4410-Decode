@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.teleop.screen;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Lift;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 
 import team.techtigers.core.display.Color;
@@ -15,7 +16,8 @@ import team.techtigers.core.display.sprites.XSprite;
 public class BallRegion extends DisplayRegion {
     private final CircleSprite circle1, circle2, circle3;
 //    private final CircleOutlineSprite outline1, outline2, outline3;
-    private final RectangleOutlineSprite outline;
+    private final RectangleSprite background;
+//    private final RectangleOutlineSprite outline;
     private final Sprite[] sprites;
     public boolean teleop = false;
     public Bot bot;
@@ -23,6 +25,10 @@ public class BallRegion extends DisplayRegion {
 
     public BallRegion(int x, int y) {
         super(x, y, 24, 8);
+        background = new RectangleSprite(0, 0, 24, 8);
+        background.setColor(Color.BLUE);
+        background.disable();
+
         circle1 = new CircleSprite(0, 0, 8);
         circle1.setColor(Color.GREEN);
         circle1.enable();
@@ -32,9 +38,9 @@ public class BallRegion extends DisplayRegion {
         circle3 = new CircleSprite(16, 0, 8);
         circle3.setColor(Color.GREEN);
         circle3.enable();
-        outline = new RectangleOutlineSprite(0, 0, 24, 8);
-        outline.setColor(Color.BLACK);
-        outline.disable();
+//        outline = new RectangleOutlineSprite(0, 0, 24, 8);
+//        outline.setColor(Color.BLACK);
+//        outline.disable();
 //        outline1 = new CircleOutlineSprite(0, 0, 8);
 //        outline1.setColor(Color.WHITE);
 //        outline1.disable();
@@ -45,12 +51,17 @@ public class BallRegion extends DisplayRegion {
 //        outline3.setColor(Color.WHITE);
 //        outline3.disable();
 
-        sprites = new Sprite[]{circle1, circle2, circle3, outline};
+        sprites = new Sprite[]{background, circle1, circle2, circle3};
     }
 
     @Override
     public void update() {
         if (teleop) {
+            if (Turret.deadzone) {
+                background.enable();
+            } else {
+                background.disable();
+            }
             for (int i = 0; i < 3; i++) {
                 Sprite circle = sprites[i];
                 if (Lift.closedLoopEnabled) {
@@ -65,7 +76,6 @@ public class BallRegion extends DisplayRegion {
                     circle.setColor(Color.BLACK);
                 }
             }
-
         } else if (ScreenTester.changed) {
             for (int i = 0; i < 3; i++) {
                 Sprite circle = sprites[i];
@@ -82,6 +92,11 @@ public class BallRegion extends DisplayRegion {
             }
         }
     }
+
+    //-55 -61 -90
+    //-55 -58 -91
+    // 20/20
+    // 20/20
 
     public void setTeleop(boolean t, Bot bot) {
         teleop = t;
