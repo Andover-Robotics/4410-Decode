@@ -76,7 +76,7 @@ public class Turret {
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150, trackingTarget, runToTargetAngle;
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
     private int cachedPositionTicks = 0;
 
@@ -94,8 +94,8 @@ public class Turret {
         motor.setInverted(false);
         largeErrorController = new PIDController(largeP, largeI, largeD);
         smallErrorController = new PIDController(smallP, smallI, smallD);
-        largeErrorController.setTolerance(tolerance);
-        smallErrorController.setTolerance(tolerance);
+        largeErrorController.setTolerance(0);
+        smallErrorController.setTolerance(0);
         largeErrorController.setSetPoint(0);
         smallErrorController.setSetPoint(0);
         motor.setRunMode(Motor.RunMode.RawPower);
@@ -133,12 +133,15 @@ public class Turret {
     }
 
     public void runToAngle(double angle) {
-        if (angle > highLimit) {
+        if (getPositionDegs() > 0 && ((angle + 360) % 360) > highLimit ) {
             angle = angle - 360;
         } else if (angle < lowLimit) {
             angle = angle + 360;
+        } else if (getPositionDegs() > 0 && angle > lowLimit) {
+            angle = (angle + 360) % 360;
         }
         angle = Math.min(Math.max(lowLimit, angle), highLimit);
+        runToTargetAngle = angle;
         int t = (int) ((angle) / degsPerTick);
         runTo(t);
     }
@@ -279,7 +282,8 @@ public class Turret {
 
         // position tracking mode
         if (positionTracking) {
-            runToAngle(aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y));
+            trackingTarget = aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y);
+            runToAngle(trackingTarget);
 //            runToAngle(aimAtGlobalPoint(goalX, goalY));
             double errorDeg = Math.abs((setPoint - pos) * degsPerTick);
             activeController = errorDeg > errorThresholdDeg ? largeErrorController : smallErrorController;

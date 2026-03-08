@@ -324,6 +324,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
 
+            telemetry.addData("Tracking Target", bot.turret.trackingTarget);
+
 
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
 //            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());

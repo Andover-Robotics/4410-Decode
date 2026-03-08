@@ -60,7 +60,7 @@ public class Lift {
     public final CRServo climbLeft, climbRight;
     private final AnalogInput leftEnc, rightEnc;
 
-    public static double leftScaler = 0.40;
+    public static double leftScaler = 1;//0.40;
 
     private final ContinuousAngleTracker leftTracker, rightTracker;
     private final PIDController leftPID = new PIDController(kP, kI, kD);

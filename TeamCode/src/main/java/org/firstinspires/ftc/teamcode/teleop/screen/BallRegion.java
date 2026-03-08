@@ -57,11 +57,6 @@ public class BallRegion extends DisplayRegion {
     @Override
     public void update() {
         if (teleop) {
-            if (Turret.deadzone) {
-                background.enable();
-            } else {
-                background.disable();
-            }
             for (int i = 0; i < 3; i++) {
                 Sprite circle = sprites[i];
                 if (Lift.closedLoopEnabled) {
@@ -85,14 +80,19 @@ public class BallRegion extends DisplayRegion {
                     circle.setColor(Color.GREEN);
                 }
             }
-            ScreenTester.changed = false;
+            ScreenTester.changed = false;//useless btw
         } else {
             for (Sprite sprite : sprites) {
                 sprite.setColor(sprite.getColor());
             }
         }
+        if (Turret.deadzone) {
+            background.enable();
+            background.setColor(Color.RED);
+        } else {
+            background.disable();
+        }
     }
-
     //-55 -61 -90
     //-55 -58 -91
     // 20/20
