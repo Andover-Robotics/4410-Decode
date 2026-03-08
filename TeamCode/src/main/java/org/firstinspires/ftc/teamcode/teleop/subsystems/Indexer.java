@@ -48,6 +48,8 @@ public class Indexer {
     public static double jiggleKickerDelta = 0.015;
     public static double jiggleKickerSleep = 0.05;
 
+    public static boolean shooting = false;
+
     public static double
             greenHueLow = 153,
             greenHueHigh = 185,
@@ -124,7 +126,6 @@ public class Indexer {
 
         holders = new Holder[]{ rightHolder, backHolder, leftHolder};
         autoMotifPattern = getMotifPattern();
-        resetIndexer();
     }
 
     /* ================= SENSOR GETTERS (TELEMETRY) ================= */
@@ -208,6 +209,8 @@ public class Indexer {
 //            actions.add(h.kickResetAction());
 //            actions.add(new SleepAction(sleepSeconds));
 //        }
+        shooting = true;
+
         if (!Turret.deadzone) {
             for (int i = 0; i < 3; i++) {
                 if (i != 2) {
@@ -221,6 +224,7 @@ public class Indexer {
             actions.add(new SleepAction(0.01));
         }
 
+        shooting = false;
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 
@@ -441,8 +445,13 @@ public class Indexer {
         public void up()   { kicker.setPosition(upPos); }
         public void down() { kicker.setPosition(downPos); }
 
-        private void kick()  { up(); }
-        private void reset() { down(); }
+        private void kick()  {
+            up();
+        }
+
+        private void reset() {
+            down();
+        }
 
         public Action resetAction() {
             return new InstantAction(this::reset);

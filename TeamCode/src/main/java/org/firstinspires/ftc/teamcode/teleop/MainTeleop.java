@@ -142,11 +142,15 @@ public class MainTeleop extends LinearOpMode {
                         bot.teleopReverseIntake();
                         gp1.gamepad.rumble(1, 1, -1);
                     } else {
-                        bot.teleopIntake();
-                        gp1.gamepad.stopRumble();
+                        if (!Indexer.shooting){
+                            bot.teleopIntake();
+                            gp1.gamepad.stopRumble();
+                        }
                     }
                 } else {
-                    bot.teleopIntake();
+                    if (!Indexer.shooting){
+                        bot.teleopIntake();
+                    }
                 }
             } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                 bot.teleopReverseIntake();

@@ -77,6 +77,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         applyStartingPosition(drive);
         bot.setTargetGoalPose();
         Bot.drive.localizer.recalibrateIMU();
+        bot.indexer.resetIndexer();
 
         builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
         bot.limelight.trackObelisk();

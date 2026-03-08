@@ -120,7 +120,7 @@ public class SoloTeleop extends LinearOpMode {
         } else {
             Bot.useStoredPose();
         }
-
+        bot.indexer.resetIndexer();
         loopTimer.reset();
 
         while (opModeIsActive() && !isStopRequested()) {

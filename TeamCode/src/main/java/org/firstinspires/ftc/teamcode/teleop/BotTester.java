@@ -126,6 +126,7 @@ public class BotTester extends LinearOpMode {
 
         loopTimer.reset();
         bot.limelight.trackObelisk();
+        bot.indexer.resetIndexer();
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
