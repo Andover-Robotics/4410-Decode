@@ -34,8 +34,8 @@ public class Turret {
     public static double rapidFireDistanceThresholdIn = 95;
     public static double rapidFireSleepScalePerIn = 0.0032;
     public static double
-            largeP = 0.009, largeI = 0, largeD = 0.00035,
-            smallP = 0.018 , smallI = 0, smallD = 0.0005,
+            largeP = 0.0075, largeI = 0, largeD = 0.00035,
+            smallP = 0.015 , smallI = 0, smallD = 0.00045,
             errorThresholdDeg = 5, manualPower = 0,
             targetVelK = 0.0032, targetAccelK = 0.00000;
 
@@ -52,17 +52,18 @@ public class Turret {
     };
 
     public static final double[] SHOOTER_RPM = {
-            2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050,
+            2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050, //shorter far end
             3150, 3200, 3250, 3280, 3310, 3320, 3390, 3440, 3480, 3525,
             3565, 3610, 3650, 3700, 3750, 3790, 3840, 3870, 3910, 3950,
-            3980, 3990, 3980, 3990, 4000, 4000, 4030, 4080, 4110, 4150,
-            4190, 4230, 4260, 4290, 4320, 4360, 4390, 4420, 4460
+            3980, 3990, 3980, 3990, 4000, 4000, 4030, 4080, 4070, 4110,
+            4150, 4190, 4220, 4250, 4300, 4330, 4360, 4390, 4430
 //
-//            ,2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050, old inter
-//            3150, 3200, 3250, 3280, 3310, 3340, 3390, 3430, 3470, 3510,
-//            3550, 3590, 3640, 3690, 3740, 3740, 3800, 3850, 3900, 3940,
-//            3980, 4010, 4050, 4080, 4135, 4190, 4220, 4205, 4210, 4235,
-//            4250, 4270, 4300, 4315, 4360, 4390, 4425
+//
+//            2825, 2845, 2860, 2880, 2890, 2900, 2915, 2935, 3000, 3050, //shorter far end
+//            3150, 3200, 3250, 3280, 3310, 3320, 3390, 3440, 3480, 3525,
+//            3565, 3610, 3650, 3700, 3750, 3790, 3840, 3870, 3910, 3950,
+//            3980, 3990, 3980, 3990, 4000, 4000, 4030, 4080, 4070, 4110,
+//            4150, 4190, 4220, 4250, 4300, 4330, 4360, 4390, 4430
     };
 
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
@@ -301,7 +302,7 @@ public class Turret {
             accelFFPower = targetAccelK * targetAccelDegPerSec2;
 
             feedforwardPower = velFFPower + accelFFPower;
-            power = activeController.calculate(pos) + feedforwardPower;
+            power = (activeController.calculate(pos) + feedforwardPower);
 
             previousTargetTicks = setPoint;
             previousTargetVelDegPerSec = targetVelDegPerSec;

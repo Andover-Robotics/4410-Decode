@@ -319,6 +319,18 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 bot.sensorIntake(true);
             }
             builder = builder
+//                    .stopAndAdd((() -> bot.sensorIntake(true)))
+//                    .setTangent(Math.toRadians(180))
+//                    .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
+//                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
+//                            Pos.blueMidIntake.position.y + Pos.intakeDisp), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+//                    .setReversed(true)
+//                    .splineToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x + 5,
+//                            Pos.blueMidIntake.position.y + 20), Math.toRadians(90))
+//                    .stopAndAdd(bot.enableShooter())
+//                    .afterTime(0.1, bot.indexer.jiggleKickers())
+//                    .afterTime(0.85, (() -> bot.reverseIntake()));
+////
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .setTangent(Math.toRadians(180))
                     .splineToSplineHeading(Pos.blueMidIntake, Math.toRadians(90))
