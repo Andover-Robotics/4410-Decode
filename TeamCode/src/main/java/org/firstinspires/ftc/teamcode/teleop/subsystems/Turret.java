@@ -272,7 +272,6 @@ public class Turret {
         double t = Math.sqrt(tSquared);
         return t;
     }
-//
 
     public void periodic() {
         power = 0;
@@ -306,12 +305,8 @@ public class Turret {
 
             previousTargetTicks = setPoint;
             previousTargetVelDegPerSec = targetVelDegPerSec;
-            double overlap = highLimit - lowLimit - 360;
-            if ((getPositionDegs()) > (highLimit - overlap - 5) || (getPositionDegs()) < ((lowLimit + overlap + 5))) {
-                deadzone = true;
-            } else {
-                deadzone = false;
-            }
+            double overlap = (highLimit - lowLimit) - 360;
+            deadzone = (getPositionDegs()) > (highLimit - overlap - 5) || (getPositionDegs()) < ((lowLimit + overlap + 5));
         } else {
             power = manualPower;
             previousTargetTicks = setPoint;

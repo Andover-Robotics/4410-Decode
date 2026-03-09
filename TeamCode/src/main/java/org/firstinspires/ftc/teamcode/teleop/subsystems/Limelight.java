@@ -21,7 +21,7 @@ public class Limelight {
             new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0)
     );
 
-    public static double llxRLOffset = 120, llyRLOffset = 108.5;
+    public static double llxRLOffset = 0, llyRLOffset = 0;
     public static boolean obelisk = false;
 
     public Limelight(OpMode opMode) {
@@ -95,10 +95,10 @@ public class Limelight {
     }
 
     public void relocalizeBotPose() {
-//        Bot.drive.localizer.setPose(new Pose2d(
-//                llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset,
-//                llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset,
-//                Math.toRadians(llBotPose.getOrientation().getYaw())
-//        ));
+        Bot.drive.localizer.setPose(new Pose2d(
+                llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset,
+                llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset,
+                Math.toRadians(llBotPose.getOrientation().getYaw())
+        ));
     }
 }

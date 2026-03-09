@@ -13,10 +13,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -245,10 +247,16 @@ public class MainTeleop extends LinearOpMode {
                 bot.switchAlliance();
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-//                bot.limelight.relocalizeBotPose();
-//                headingLockEnabled = !headingLockEnabled;
+            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+                bot.switchAlliance();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
                 bot.sensorIntaking = !bot.sensorIntaking;
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                bot.limelight.relocalizeBotPose();
             }
 
             if (manualTurret) {
@@ -324,7 +332,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 
             telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-//            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("LL Pose", Math.round(Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x) + " " + Math.round(Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw()));
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
 
@@ -351,64 +359,6 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("Sensor Intaking (GP1 Back Button)", bot.sensorIntaking);
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
-
-
-//            // Back A for hue
-//            float backHue = bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorBR()); // Back A sensor
-//            telemetry.addLine("=== BACK SENSOR HUE ===");
-//// Back B for distance
-//            double backDist = bot.indexer.safeDistance(bot.indexer.colorBL()); // Back B sensor
-//            telemetry.addLine("=== BACK SENSOR DISTANCE ===");
-//            telemetry.addData("Back B Distance (mm)", "%.1f", backDist);
-
-////
-//
-//            telemetry.addLine("=== Distance ===");
-//            telemetry.addData("BR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBR()));
-//            telemetry.addData("BL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorBL()));
-//            telemetry.addData("RL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRL()));
-//            telemetry.addData("RR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorRR()));
-//            telemetry.addData("LR Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLR()));
-//            telemetry.addData("LL Distance (mm)", "%.1f", bot.indexer.safeDistance(bot.indexer.colorLL()));
-//
-//            telemetry.addLine("=== HUE ===");
-//            telemetry.addData("BR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorBR()));
-//            telemetry.addData("BL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorBL()));
-//            telemetry.addData("RL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorRL()));
-//            telemetry.addData("RL HSV", bot.indexer.leftHolder.hsvFromSensor(bot.indexer.colorRL()));
-//            telemetry.addData("RR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorRR()));
-//            telemetry.addData("RR HSV", bot.indexer.leftHolder.hsvFromSensor(bot.indexer.colorRR()));
-//            telemetry.addData("LR Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorLR()));
-//            telemetry.addData("LL Hue", "%.1f", bot.indexer.leftHolder.hueFromSensor(bot.indexer.colorLL()));
-
-
-
-
-
-
-
-
-//            telemetry.addData("auto target rpm", Turret.shooterRpm);
-//            telemetry.addData("filtered rpm", bot.turret.shooter.getFilteredRPM());
-//
-//            telemetry.addData("\nLeft Climb Position", bot.lift.getLeftEncContinuousDeg());
-//            telemetry.addData("Right Climb Position", bot.lift.getRightEncContinuousDeg());
-//            telemetry.addData("\nLeft Climb Abs Position", bot.lift.getLeftEncAbsDeg());
-//            telemetry.addData("Right Climb Abs Position", bot.lift.getRightEncAbsDeg());
-//
-////            telemetry.addData("Climb Loop?", bot.lift.isClosedLoopEnabled());
-//            telemetry.addData("Left Power", bot.lift.leftPower);
-//            telemetry.addData("Right Power", bot.lift.rightPower);
-//            telemetry.addData("\nActual Left Power", bot.lift.climbLeft.get());
-//            telemetry.addData("Actual Right Power", bot.lift.climbRight.get());
-
-////            telemetry.addData("Left PID out", bot.lift.leftPidOut);
-//////            telemetry.addData("Right PID out", bot.lift.rightPidOut);
-//            telemetry.addData("Left Climb Target", bot.lift.leftTargetDeg);
-//            telemetry.addData("Right Climb Target", bot.lift.rightTargetDeg);
-////            telemetry.addData("Offset", bot.lift.offset);
-////            telemetry.addData("Roll", Turret.orientation.getRoll(AngleUnit.DEGREES));
-//            telemetry.addData("Velocity", Bot.drive.localizer.update());
 
             telemetry.update();
 
