@@ -77,7 +77,7 @@ public class Turret {
     private final LinearInterpolation rpmInterpolator;
     private final LinearInterpolation hoodAngleInterpolator;
 
-    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 220, lowLimit = -150, trackingTarget, runToTargetAngle;
+    public double power, lastTime, setPoint = 0, pos = 0, highLimit = 210, lowLimit = -160, trackingTarget, runToTargetAngle;
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
     private int cachedPositionTicks = 0;
 
@@ -306,7 +306,7 @@ public class Turret {
             previousTargetTicks = setPoint;
             previousTargetVelDegPerSec = targetVelDegPerSec;
             double overlap = (highLimit - lowLimit) - 360;
-            deadzone = (getPositionDegs()) > (highLimit - overlap - 5) || (getPositionDegs()) < ((lowLimit + overlap + 5));
+            deadzone = (getPositionDegs()) > (highLimit - overlap - 10) || (getPositionDegs()) < ((lowLimit + overlap + 10));
         } else {
             power = manualPower;
             previousTargetTicks = setPoint;
