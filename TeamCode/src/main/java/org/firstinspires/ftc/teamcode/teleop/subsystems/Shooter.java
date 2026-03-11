@@ -35,6 +35,7 @@ public class Shooter {
     private double currentHoodAngle;//debugging
     private double currentServoPos;
     private double requestedHoodPos = 1.0;
+    public static boolean leftEncoder = true;
     public double ff;
 
     public static boolean voltageComp = true;
@@ -84,7 +85,11 @@ public class Shooter {
     }
 
     public void periodic() {
-        filteredRPM = motor1.getVelocity() * 60 / 28;
+        if (leftEncoder) {
+            filteredRPM = motor1.getVelocity() * 60 / 28;
+        } else {
+            filteredRPM = motor2.getVelocity() * 60 / 28 * -1;
+        }
 
         controller.setPID(p, i, d);
 
@@ -126,6 +131,10 @@ public class Shooter {
     protected void setHoodFar() { requestedHoodPos = hoodFarPos; }
 
     protected void setHoodMid() { requestedHoodPos = hoodMidPos; }
+
+    public void switchEncoder() {
+        leftEncoder = !leftEncoder;
+    }
 
     // telemetry
     public double getTargetRPM() { return targetRPM; }
