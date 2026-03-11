@@ -306,7 +306,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .stopAndAdd(new SleepAction(0.2))
+                    .stopAndAdd(new SleepAction(0.1))
                     .afterTime(1.1, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
                     .stopAndAdd((() -> bot.disableShooter()));
@@ -414,7 +414,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .stopAndAdd(bot.indexer.jiggleKickers())
                         .waitSeconds(0.2)
                         .stopAndAdd((() -> bot.reverseIntake()))
-                        .waitSeconds(0.85);
+                        .waitSeconds(0.7);
                 addedAction = true;
             }
 
