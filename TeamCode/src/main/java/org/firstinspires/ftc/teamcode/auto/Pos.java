@@ -31,7 +31,7 @@ public class Pos {
     public static Pose2d blueFarIntake = new Pose2d(-37, 35, Math.toRadians(90)); //todo change this back to 35 when running close 15 auto, changed for far auto at pioneer
     public static double farIntakeFarAuto = 25;
 
-    public static Pose2d pushPark = new Pose2d(-58, 20, Math.toRadians(90));
+    public static Pose2d pushPark = new Pose2d(-58,  20, Math.toRadians(90));
 
     public static Pose2d blueHpIntake = new Pose2d(-53, 65.5, Math.toRadians(179));
     public static Pose2d blueHpSideInterIntake = new Pose2d(-56, 54, Math.toRadians(90));

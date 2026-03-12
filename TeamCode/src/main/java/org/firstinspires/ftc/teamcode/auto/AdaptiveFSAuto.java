@@ -292,7 +292,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd(bot.enableShooter())
-                    .waitSeconds(0.9)
+                    .waitSeconds(1.05)
                     .stopAndAdd(bot.indexer.shootRapidFire())
                     .stopAndAdd(bot.disableShooter());
             addedAction = true;
