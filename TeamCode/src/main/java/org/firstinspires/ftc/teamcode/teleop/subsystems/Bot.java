@@ -7,6 +7,8 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d   ;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -36,6 +38,7 @@ public class Bot {
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
     private boolean screenPeriodicEnabled = true;
+    public boolean actionsRunning = false;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -189,6 +192,23 @@ public class Bot {
     public void stopIntake() {
         intake.stop();
         sensorIntaking = false;
+    }
+
+    public SequentialAction clearJam() {
+        actionsRunning = true;
+        return new SequentialAction(
+                new InstantAction(() -> indexer.rightTooHigh()),
+                new SleepAction(0.3),
+                new InstantAction(() -> intake.intake()),
+                new SleepAction(1.3),
+                new InstantAction(() -> indexer.rightReset()),
+                new SleepAction(0.5),
+                new InstantAction(() -> intake.reverse()),
+                new SleepAction(0.6),
+                indexer.jiggleKickers(),
+                indexer.jiggleKickers(),
+                new InstantAction(() -> actionsRunning = false)
+        );
     }
 
     public void teleopReverseIntake() {

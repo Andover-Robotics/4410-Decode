@@ -378,9 +378,9 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                            Pos.blueFarIntake.position.y + Pos.farIntakeFarAuto))
+                    .splineTo(Pos.blueFarIntakeFarAuto.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeFarAuto.position.x,
+                            Pos.blueFarIntakeFarAuto.position.y + Pos.farIntakeFarAuto))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(0.8, (() -> bot.reverseIntake()))

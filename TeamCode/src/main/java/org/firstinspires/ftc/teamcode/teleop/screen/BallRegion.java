@@ -15,9 +15,9 @@ import team.techtigers.core.display.sprites.XSprite;
 
 public class BallRegion extends DisplayRegion {
     private final CircleSprite circle1, circle2, circle3;
-//    private final CircleOutlineSprite outline1, outline2, outline3;
+    //    private final CircleOutlineSprite outline1, outline2, outline3;
     private final RectangleSprite background;
-//    private final RectangleOutlineSprite outline;
+    private final RectangleOutlineSprite outline;
     private final Sprite[] sprites;
     public boolean teleop = false;
     public Bot bot;
@@ -38,9 +38,9 @@ public class BallRegion extends DisplayRegion {
         circle3 = new CircleSprite(16, 0, 8);
         circle3.setColor(Color.GREEN);
         circle3.enable();
-//        outline = new RectangleOutlineSprite(0, 0, 24, 8);
-//        outline.setColor(Color.BLACK);
-//        outline.disable();
+        outline = new RectangleOutlineSprite(0, 0, 24, 8);
+        outline.setColor(Color.BLACK);
+        outline.disable();
 //        outline1 = new CircleOutlineSprite(0, 0, 8);
 //        outline1.setColor(Color.WHITE);
 //        outline1.disable();
@@ -51,7 +51,7 @@ public class BallRegion extends DisplayRegion {
 //        outline3.setColor(Color.WHITE);
 //        outline3.disable();
 
-        sprites = new Sprite[]{background, circle1, circle2, circle3};
+        sprites = new Sprite[]{background, circle1, circle2, circle3, outline};
     }
 
     @Override

@@ -33,6 +33,8 @@ public class Indexer {
     public static double kickerBackDown  = 0.210;
     public static double kickerBackUp    = 0.65;
 
+    public static double kickerRightTooHigh = 0.7;
+
     public static double kickerSleep = 0.135;
 
     // Rapid fire between shots (normal)
@@ -141,6 +143,14 @@ public class Indexer {
 
     public void resetIndexer() {
         for (Holder h : holders) h.down();
+    }
+
+    public void rightTooHigh() {
+        rightHolder.tooHigh();
+    }
+
+    public void rightReset() {
+        rightHolder.reset();
     }
 
     public int countBalls() {
@@ -451,6 +461,10 @@ public class Indexer {
 
         private void reset() {
             down();
+        }
+
+        private void tooHigh() {
+            kicker.setPosition(Indexer.kickerRightTooHigh);
         }
 
         public Action resetAction() {

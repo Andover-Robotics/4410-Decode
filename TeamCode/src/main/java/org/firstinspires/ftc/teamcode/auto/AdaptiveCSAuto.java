@@ -454,16 +454,16 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
                         .splineToSplineHeading(Pos.pushPark, Math.toRadians(90))
-                        .splineToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                                Pos.blueFarIntake.position.y - 10), Math.toRadians(76))
-                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                                Pos.blueFarIntake.position.y + Pos.intakeDisp));
+                        .splineToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
+                                Pos.blueFarIntakeCloseAuto.position.y - 10), Math.toRadians(76))
+                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
+                                Pos.blueFarIntakeCloseAuto.position.y + Pos.intakeDisp));
             } else {
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueFarIntake.position, Math.toRadians(90))
-                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntake.position.x,
-                                Pos.blueFarIntake.position.y + Pos.intakeDisp));
+                        .splineTo(Pos.blueFarIntakeCloseAuto.position, Math.toRadians(90))
+                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
+                                Pos.blueFarIntakeCloseAuto.position.y + Pos.intakeDisp));
             }
 
             builder = builder

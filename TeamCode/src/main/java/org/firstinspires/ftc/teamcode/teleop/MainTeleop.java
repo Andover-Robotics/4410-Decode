@@ -139,35 +139,37 @@ public class MainTeleop extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
 
-            if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                if (bot.sensorIntaking) {
-                    if (bot.indexer.countBalls()==3) {
-                        bot.teleopReverseIntake();
-                        gp1.gamepad.rumble(1, 1, -1);
+            if (!bot.actionsRunning) {
+                if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                    if (bot.sensorIntaking) {
+                        if (bot.indexer.countBalls()==3) {
+                            bot.teleopReverseIntake();
+                            gp1.gamepad.rumble(1, 1, -1);
+                        } else {
+                            if (!Indexer.shooting){
+                                bot.teleopIntake();
+                                gp1.gamepad.stopRumble();
+                            }
+                        }
                     } else {
                         if (!Indexer.shooting){
                             bot.teleopIntake();
-                            gp1.gamepad.stopRumble();
                         }
                     }
-                } else {
-                    if (!Indexer.shooting){
-                        bot.teleopIntake();
-                    }
-                }
-            } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                bot.teleopReverseIntake();
-                if (bot.indexer.countBalls() == 3) {
-                    gp1.gamepad.rumble(1, 1, -1);
-                } else {
+                } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                     bot.teleopReverseIntake();
+                    if (bot.indexer.countBalls() == 3) {
+                        gp1.gamepad.rumble(1, 1, -1);
+                    } else {
+                        bot.teleopReverseIntake();
+                        gp1.gamepad.stopRumble();
+                    }
+                } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    bot.teleopIntake();
+                } else {
+                    bot.teleopStopIntake();
                     gp1.gamepad.stopRumble();
                 }
-            } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                bot.teleopIntake();
-            } else {
-                bot.teleopStopIntake();
-                gp1.gamepad.stopRumble();
             }
 
             if (bot.turret.shooterInRange()) {
@@ -258,6 +260,11 @@ public class MainTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
                 bot.turret.shooter.switchEncoder();
+            }
+
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                runningActions.add(bot.clearJam());
             }
 
             if (manualTurret) {

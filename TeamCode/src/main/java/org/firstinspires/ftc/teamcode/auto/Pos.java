@@ -28,7 +28,8 @@ public class Pos {
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
     public static double closeIntake = 24;
 
-    public static Pose2d blueFarIntake = new Pose2d(-37, 35, Math.toRadians(90)); //todo change this back to 35 when running close 15 auto, changed for far auto at pioneer
+    public static Pose2d blueFarIntakeFarAuto = new Pose2d(-37, 35, Math.toRadians(90)); //todo change this back to 35 when running close 15 auto, changed for far auto at pioneer
+    public static Pose2d blueFarIntakeCloseAuto = new Pose2d(-35, 35, Math.toRadians(90)); //todo change this back to 35 when running close 15 auto, changed for far auto at pioneer
     public static double farIntakeFarAuto = 25;
 
     public static Pose2d pushPark = new Pose2d(-58,  20, Math.toRadians(90));
