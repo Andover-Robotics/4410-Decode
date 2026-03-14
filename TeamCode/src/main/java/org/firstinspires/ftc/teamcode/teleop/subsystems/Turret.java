@@ -306,7 +306,7 @@ public class Turret {
             previousTargetTicks = setPoint;
             previousTargetVelDegPerSec = targetVelDegPerSec;
             double overlap = (highLimit - lowLimit) - 360;
-            deadzone = (getPositionDegs()) > (highLimit - overlap - 10) || (getPositionDegs()) < ((lowLimit + overlap + 10));
+            deadzone = (getPositionDegs()) > (highLimit - overlap - 10) || (getPositionDegs()) < ((lowLimit + overlap + 13));
         } else {
             power = manualPower;
             previousTargetTicks = setPoint;

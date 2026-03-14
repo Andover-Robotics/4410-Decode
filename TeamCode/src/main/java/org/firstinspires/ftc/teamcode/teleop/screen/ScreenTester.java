@@ -2,12 +2,13 @@ package org.firstinspires.ftc.teamcode.teleop.screen;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import team.techtigers.core.display.AdafruitNeoPixel;
 import team.techtigers.core.display.VisualDisplay;
-
+@Disabled
 @TeleOp(name = "Screen Testing OpMode", group = "Test")
 public class ScreenTester extends LinearOpMode {
 
