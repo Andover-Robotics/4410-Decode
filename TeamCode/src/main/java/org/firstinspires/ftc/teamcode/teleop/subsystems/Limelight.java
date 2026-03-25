@@ -8,14 +8,17 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 @Config
 public class Limelight {
     private final Limelight3A limelight;
     public LLResult llResult;
+    private Turret turret;
     public static Pose3D llBotPose = new Pose3D(
             new Position(DistanceUnit.INCH, 0, 0, 0, 0),
             new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0)
@@ -74,7 +77,8 @@ public class Limelight {
         llResult = limelight.getLatestResult();
 
         if (!obelisk) {
-            limelight.updateRobotOrientation(Math.toDegrees(Bot.storedPose.heading.log()));
+            // when not looking at the obelisk (add condition for when tracking specific goals?) get robot pos using turret pos and current heading
+            limelight.updateRobotOrientation(Math.toDegrees(Bot.storedPose.heading.log()) + turret.getPositionDegs());
             if (llResult != null && llResult.isValid()) {
                 llBotPose = llResult.getBotpose_MT2();
             }
@@ -95,10 +99,6 @@ public class Limelight {
     }
 
     public void relocalizeBotPose() {
-        Bot.drive.localizer.setPose(new Pose2d(
-                llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset,
-                llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset,
-                Math.toRadians(llBotPose.getOrientation().getYaw())
-        ));
+        Bot.drive.localizer.setPose(Bot.pose3D2pose2D(llBotPose));
     }
 }
