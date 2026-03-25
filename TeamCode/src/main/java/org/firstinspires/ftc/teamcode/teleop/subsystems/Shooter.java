@@ -32,6 +32,7 @@ public class Shooter {
     public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
     public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
+    public double currentVelocity;
     private double currentHoodAngle;//debugging
     private double currentServoPos;
     private double requestedHoodPos = 1.0;
@@ -45,6 +46,8 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
+    private double lastPos,lastTime;
+
 
 
     public Shooter(OpMode opMode) {
@@ -85,11 +88,8 @@ public class Shooter {
     }
 
     public void periodic() {
-        if (leftEncoder) {
-            filteredRPM = motor1.getVelocity() * 60 / 28;
-        } else {
-            filteredRPM = motor2.getVelocity() * 60 / 28 * -1;
-        }
+        calcVelocity();
+        filteredRPM = currentVelocity;
 
         controller.setPID(p, i, d);
 
@@ -152,5 +152,18 @@ public class Shooter {
     private static double angleToPos(double angle) {
 //        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
         return servoPosPerAngle * (angle - lowAngleLimit) + lowServoLimit;
+    }
+
+    public void calcVelocity(){
+        // differentiates current position of the encoder with respect to time, must run periodically
+        double time = System.currentTimeMillis();
+        double pos = leftEncoder ? motor1.getCurrentPosition() : motor2.getCurrentPosition();
+
+        double dx = pos - lastPos; // gives change in pos in ticks
+        double dt = time - lastTime; // gives change in time in ms
+        lastTime = time;
+        lastPos = pos;
+        if (dt <=0 ) currentVelocity= 0;
+        else currentVelocity = leftEncoder ? dx/(dt/1000) : -1*(dx/(dt/1000));
     }
 }
