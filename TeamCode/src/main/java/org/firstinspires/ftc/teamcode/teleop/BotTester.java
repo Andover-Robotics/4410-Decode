@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -56,7 +57,8 @@ public class BotTester extends LinearOpMode {
 
         // Initialize bot
 
-        bot.limelight.trackObelisk();
+//        bot.limelight.trackObelisk();
+        bot.limelight.trackNumBalls();
 
         while (!isStarted()) {
             bot.clearBulkCache();
@@ -125,7 +127,8 @@ public class BotTester extends LinearOpMode {
         }
 
         loopTimer.reset();
-        bot.limelight.trackObelisk();
+//        bot.limelight.trackObelisk();
+        bot.limelight.trackNumBalls();
         bot.indexer.resetIndexer();
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -136,7 +139,8 @@ public class BotTester extends LinearOpMode {
 //            bot.shooting = false;
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                bot.limelight.setObelisk(!bot.limelight.isObelisk());
+//                bot.limelight.setObelisk(!bot.limelight.isObelisk());
+                bot.limelight.setBallDetection(!bot.limelight.isBallDetection());
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
@@ -340,10 +344,10 @@ public class BotTester extends LinearOpMode {
 
 //            telemetry.addData("Odom Pose", Math.round(Bot.drive.localizer.getPose().position.x) + " " + Math.round(Bot.drive.localizer.getPose().position.y) + " " + Math.round(Math.toDegrees(Bot.drive.localizer.getPose().heading.log())));
 //            telemetry.addData("LL Pose", Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + Turret.llxRLOffset) + " " + Math.round(Turret.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + Turret.llyRLOffset) + " " + Math.round(Turret.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("Artifact Detection Pipeline On", bot.limelight.isBallDetection());
+            telemetry.addData("Number of Balls Detected in Frame", bot.limelight.numArtifactsDetected());
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("starting pos", Bot.getStartingPos());
-
-
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());

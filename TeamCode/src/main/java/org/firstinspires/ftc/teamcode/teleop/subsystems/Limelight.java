@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes.DetectorResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -11,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import java.util.List;
 
 @Config
 public class Limelight {
@@ -23,6 +26,8 @@ public class Limelight {
 
     public static double llxRLOffset = 0, llyRLOffset = 0;
     public static boolean obelisk = false;
+    public boolean balldetection = false;
+    public int numberofballs = -1;
 
     public Limelight(OpMode opMode) {
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
@@ -36,17 +41,20 @@ public class Limelight {
             0 is blue alliance
             1 is red alliance
             2 is obelisk tracking
+            3 is artifact detection
          */
     }
 
     public void trackRedAlliance() {
         setPipeline(1);
         obelisk = false;
+        balldetection = false;
     }
 
     public void trackBlueAlliance() {
         setPipeline(0);
         obelisk = false;
+        balldetection = false;
     }
 
     public void trackAlliance() {
@@ -60,6 +68,7 @@ public class Limelight {
     public void trackObelisk() {
         setPipeline(2);
         obelisk = true;
+        balldetection = false;
     }
 
     public void setObelisk(boolean enable) {
@@ -68,6 +77,29 @@ public class Limelight {
 
     public boolean isObelisk() {
         return obelisk;
+    }
+
+    public void trackNumBalls() {
+        setPipeline(3);
+        balldetection = true;
+        numberofballs = 0;
+        obelisk = false;
+    }
+
+    public void setBallDetection(boolean enable) {
+        balldetection = enable;
+    }
+
+    public boolean isBallDetection() {
+        return balldetection;
+    }
+
+    public int numArtifactsDetected() {
+        return numberofballs;
+    }
+
+    private List<DetectorResult> findArtifacts(LLResult result) {
+        return result.getDetectorResults();
     }
 
     public void periodic() {
@@ -91,6 +123,15 @@ public class Limelight {
                     Bot.motif = Bot.Motif.PPG;
                 }
             }
+        }
+
+        if (balldetection) {
+            trackNumBalls();
+            if (llResult != null && llResult.isValid()) {
+                numberofballs = findArtifacts(llResult).size();
+            }
+        } else {
+            numberofballs = -1;
         }
     }
 
