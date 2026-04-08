@@ -75,7 +75,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         bot.enableShooter(false);
         bot.setAllianceBlue();
         applyStartingPosition(drive);
-        bot.setTargetGoalPose();
+        bot.setObeliskTracking();
         Bot.drive.localizer.recalibrateIMU();
         bot.indexer.resetIndexer();
 
@@ -120,6 +120,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
+        bot.setTargetGoalPose();
         if (builtAuto == null || addedAction) {
             builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
         }
