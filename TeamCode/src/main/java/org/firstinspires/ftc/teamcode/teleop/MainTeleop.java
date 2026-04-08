@@ -15,9 +15,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.auto.Pos;
-import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
@@ -264,7 +264,7 @@ public class MainTeleop extends LinearOpMode {
 
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                runningActions.add(bot.clearJam());
+                runningActions.add(bot.clearKickerJam());
             }
 
             if (manualTurret) {
@@ -368,8 +368,10 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addLine("Shooter PID Data:");
             telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
             telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
-            telemetry.addData("<big><b><u>Intake Current Over Threshold</big></b></u>", "<big><b> "+ bot.intake.isAboveCurrentThreshold() + "</big></b></u>");
+            telemetry.addData("Intake Current Threshold?", bot.intake.isAboveCurrentThreshold());
+            telemetry.addData("<Intake Jammed?", "<big><b> "+ Intake.intakeJammed + "</big></b></u>");
             telemetry.addData("<big><b><u>Intake Current</big></b></u>", "<big><b> "+ bot.intake.getCurrent() + "</big></b></u>");
+            telemetry.addData("Current", bot.intake.getCurrent());
 
 
 //            telemetry.addData("PID Power", bot.turret.shooter.getController().calculate());

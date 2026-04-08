@@ -203,7 +203,7 @@ public class Bot {
         sensorIntaking = false;
     }
 
-    public SequentialAction clearJam() {
+    public SequentialAction clearKickerJam() {
         actionsRunning = true;
         return new SequentialAction(
                 new InstantAction(() -> indexer.rightTooHigh()),
@@ -215,6 +215,16 @@ public class Bot {
                 new InstantAction(() -> intake.reverse()),
                 new SleepAction(0.6),
                 indexer.jiggleKickers(),
+                indexer.jiggleKickers(),
+                new InstantAction(() -> actionsRunning = false)
+        );
+    }
+
+    public SequentialAction clearIntakeJam() {
+        actionsRunning = true;
+        return new SequentialAction(
+                new InstantAction(() -> intake.reverse()),
+                new SleepAction(0.3),
                 indexer.jiggleKickers(),
                 new InstantAction(() -> actionsRunning = false)
         );
@@ -324,8 +334,12 @@ public class Bot {
         limelight.periodic();
         turret.periodic();
         lift.periodic();
+        intake.periodic();
         if (screenPeriodicEnabled) {
             screen.periodic();
+        }
+        if (Intake.intakeJammed){
+            clearIntakeJam();
         }
         drive.updatePoseEstimate();
 //        if (sensorIntaking) {

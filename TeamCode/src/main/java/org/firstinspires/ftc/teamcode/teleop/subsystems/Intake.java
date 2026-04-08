@@ -18,7 +18,7 @@ public class Intake {
     public static double confidence = 0.7;
     public static boolean intakeJammed = false;
 
-    private static final int JAM_SAMPLE_COUNT = 20;
+    public static int JAM_SAMPLE_COUNT = 20;
     private final boolean[] jamSamples = new boolean[JAM_SAMPLE_COUNT];
     private int jamSampleIndex = 0;
     private int jammedSampleTotal = 0;
