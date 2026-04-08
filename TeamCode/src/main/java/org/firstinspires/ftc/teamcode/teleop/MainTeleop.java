@@ -368,13 +368,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addLine("Shooter PID Data:");
             telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
             telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
-//            telemetry.addData("Current X Pose", Bot.storedPose.position.x%.2f);
-//            telemetry.addData("Current Y Pose", Bot.storedPose.position.y%.2f);
-//            telemetry.addData("Current Heading", Math.toDegrees(Bot.storedPose.heading.log())%.2f);
-//            telemetry.addData("limelight Heading", Math.toDegrees(bot.limelight.headingInput)%.2f);
-//            telemetry.addData("limelight Pose x", Bot.pose3D2pose2D(Limelight.llBotPose).position.x%.2f);
-//            telemetry.addData("limelight Pose y", Bot.pose3D2pose2D(Limelight.llBotPose).position.y%.2f);
-
+            telemetry.addData("<big><b><u>Intake Current Over Threshold</big></b></u>", "<big><b> "+ bot.intake.isAboveCurrentThreshold() + "</big></b></u>");
+            telemetry.addData("<big><b><u>Intake Current</big></b></u>", "<big><b> "+ bot.intake.getCurrent() + "</big></b></u>");
 
 
 //            telemetry.addData("PID Power", bot.turret.shooter.getController().calculate());
