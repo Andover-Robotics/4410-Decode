@@ -33,6 +33,7 @@ public class Bot {
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
+    public static Vector2d obeliskPose = new Vector2d(0, 0);
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
@@ -118,10 +119,12 @@ public class Bot {
     public static void updatePoses() {
         if (isRed()) {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
+            obeliskPose = new Vector2d(obeliskPose.x, -1 * Math.abs(obeliskPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
 
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
+            obeliskPose = new Vector2d(obeliskPose.x, Math.abs(obeliskPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
         }
         targetPose = goalPose;
@@ -133,6 +136,10 @@ public class Bot {
 
     public void setTargetGoalPose() {
         targetPose = goalPose;
+    }
+
+    public void setObeliskTracking() {
+        targetPose = obeliskPose;
     }
 
     public void resetPose() {
