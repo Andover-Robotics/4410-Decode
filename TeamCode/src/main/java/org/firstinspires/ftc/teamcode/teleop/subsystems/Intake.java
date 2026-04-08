@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
 public class Intake {
@@ -11,6 +14,7 @@ public class Intake {
     public static double intakePower = -1, storagePower = 0.32, reversePower = 1;
 
     private final MotorEx motor;
+    public static double currentThreshold = 3000;//mA
 
 
     private IntakeMode currentMode = IntakeMode.STOPPED;
@@ -59,5 +63,9 @@ public class Intake {
 
     public boolean isRunning() {
         return currentMode != IntakeMode.STOPPED;
+    }
+    public boolean isAboveCurrentThreshold(){
+        return motor.motorEx.getCurrent(CurrentUnit.MILLIAMPS) > currentThreshold;
+
     }
 }

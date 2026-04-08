@@ -19,7 +19,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.002, i = 0.0, d = 0.0, f = 0.000160;
+    public static double p = 0.0018, i = 0.0, d = 0.0, f = 0.000185;
     public static boolean inverted = false;
 
     // note for interpolation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
@@ -31,8 +31,7 @@ public class Shooter {
     public static double hoodFarAngleDeg = 44;
     public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
-    public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
-    public double currentVelocity;
+    public static double lowAngleLimit = 35, angleRange = 15, highServoLimit = 0.68, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
     private double currentHoodAngle;//debugging
     private double currentServoPos;
     private double requestedHoodPos = 1.0;
@@ -46,8 +45,6 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
-    private double lastPos,lastTime;
-
 
 
     public Shooter(OpMode opMode) {
@@ -88,8 +85,11 @@ public class Shooter {
     }
 
     public void periodic() {
-        calcVelocity();
-        filteredRPM = currentVelocity;
+        if (leftEncoder) {
+            filteredRPM = motor1.getVelocity() * 60 / 28;
+        } else {
+            filteredRPM = motor2.getVelocity() * 60 / 28 * -1;
+        }
 
         controller.setPID(p, i, d);
 
@@ -113,6 +113,7 @@ public class Shooter {
     }
 
     public void setHoodAngle(double angle) {
+        angle = clamp(angle, lowAngleLimit, lowAngleLimit + angleRange);
         currentHoodAngle = angle;   // stores the angle for telemetry
         currentServoPos = angleToPos(angle);
         requestedHoodPos = currentServoPos;
@@ -152,18 +153,5 @@ public class Shooter {
     private static double angleToPos(double angle) {
 //        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
         return servoPosPerAngle * (angle - lowAngleLimit) + lowServoLimit;
-    }
-
-    public void calcVelocity(){
-        // differentiates current position of the encoder with respect to time, must run periodically
-        double time = System.currentTimeMillis();
-        double pos = leftEncoder ? motor1.getCurrentPosition() : motor2.getCurrentPosition();
-
-        double dx = pos - lastPos; // gives change in pos in ticks
-        double dt = time - lastTime; // gives change in time in ms
-        lastTime = time;
-        lastPos = pos;
-        if (dt <=0 ) currentVelocity= 0;
-        else currentVelocity = leftEncoder ? dx/(dt/1000) : -1*(dx/(dt/1000));
     }
 }
