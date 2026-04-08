@@ -19,7 +19,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.002, i = 0.0, d = 0.0, f = 0.000160;
+    public static double p = 0.0018, i = 0.0, d = 0.0, f = 0.000185;
     public static boolean inverted = false;
 
     // note for interpolation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
@@ -31,7 +31,7 @@ public class Shooter {
     public static double hoodFarAngleDeg = 44;
     public static double hoodMidPos = angleToPos(hoodMidAngleDeg);
     public static double hoodFarPos = angleToPos(hoodFarAngleDeg);
-    public static double lowAngleLimit = 32.5, angleRange = 11.5, highServoLimit = 0.735, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
+    public static double lowAngleLimit = 35, angleRange = 15, highServoLimit = 0.68, lowServoLimit = 1, servoPosPerAngle = (highServoLimit - lowServoLimit) / angleRange;
     private double currentHoodAngle;//debugging
     private double currentServoPos;
     private double requestedHoodPos = 1.0;
@@ -113,6 +113,7 @@ public class Shooter {
     }
 
     public void setHoodAngle(double angle) {
+        angle = clamp(angle, lowAngleLimit, lowAngleLimit + angleRange);
         currentHoodAngle = angle;   // stores the angle for telemetry
         currentServoPos = angleToPos(angle);
         requestedHoodPos = currentServoPos;

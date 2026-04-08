@@ -211,8 +211,8 @@ public class Indexer {
         double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
 
         Bot bot = Bot.getInstance();
-        if (bot.intake.isRunning() && Turret.trackingDistance > 120) {
-            sleepSeconds = 0.1;
+        if (bot.intake.isRunning() && Turret.trackingDistance > 135) {
+            sleepSeconds += 0.06;
         }
 
 //        for (Holder h : holders) {
