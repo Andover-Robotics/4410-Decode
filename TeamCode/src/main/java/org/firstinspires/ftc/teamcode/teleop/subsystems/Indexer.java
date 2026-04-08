@@ -222,12 +222,14 @@ public class Indexer {
         shooting = true;
 
         if (!Turret.deadzone) {
+            int[] rapidFireOrder = buildRapidFireMotifOrder(getMotifPattern());
             for (int i = 0; i < 3; i++) {
+                Holder holder = holders[rapidFireOrder[i]];
                 if (i != 2) {
-                    actions.add(holders[i].kickResetAction());
+                    actions.add(holder.kickResetAction());
                     actions.add(new SleepAction(sleepSeconds));
                 } else {
-                    actions.add(holders[i].longKickResetAction());
+                    actions.add(holder.longKickResetAction());
                 }
             }
         } else {
@@ -236,6 +238,67 @@ public class Indexer {
 
         shooting = false;
         return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
+    private int[] buildRapidFireMotifOrder(String motifPattern) {
+        List<Integer> unmatchedBallIndices = new ArrayList<>();
+        List<Integer> purpleBallIndices = new ArrayList<>();
+        List<Integer> greenBallIndices = new ArrayList<>();
+        boolean[] used = new boolean[holders.length];
+
+        for (int i = 0; i < holders.length; i++) {
+            if (!holders[i].ballPresent()) continue;
+
+            String color = holders[i].getColor();
+            if ("PURPLE".equals(color)) {
+                purpleBallIndices.add(i);
+            } else if ("GREEN".equals(color)) {
+                greenBallIndices.add(i);
+            } else {
+                unmatchedBallIndices.add(i);
+            }
+        }
+
+        List<Integer> order = new ArrayList<>(holders.length);
+        int targetLength = Math.min(motifPattern.length(), holders.length);
+
+        for (int i = 0; i < targetLength; i++) {
+            char target = motifPattern.charAt(i);
+            Integer picked = null;
+
+            if (target == 'P' && !purpleBallIndices.isEmpty()) {
+                picked = purpleBallIndices.remove(0);
+            } else if (target == 'G' && !greenBallIndices.isEmpty()) {
+                picked = greenBallIndices.remove(0);
+            }
+
+            if (picked == null && !purpleBallIndices.isEmpty()) {
+                picked = purpleBallIndices.remove(0);
+            }
+            if (picked == null && !greenBallIndices.isEmpty()) {
+                picked = greenBallIndices.remove(0);
+            }
+            if (picked == null && !unmatchedBallIndices.isEmpty()) {
+                picked = unmatchedBallIndices.remove(0);
+            }
+
+            if (picked != null && !used[picked]) {
+                used[picked] = true;
+                order.add(picked);
+            }
+        }
+
+        for (int i = 0; i < holders.length; i++) {
+            if (!used[i]) {
+                order.add(i);
+            }
+        }
+
+        int[] rapidFireOrder = new int[holders.length];
+        for (int i = 0; i < holders.length; i++) {
+            rapidFireOrder[i] = order.get(i);
+        }
+        return rapidFireOrder;
     }
 
     public Action shootRapidFireSensor() {
