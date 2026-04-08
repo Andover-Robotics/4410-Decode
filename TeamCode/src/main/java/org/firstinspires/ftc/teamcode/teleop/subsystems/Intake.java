@@ -15,6 +15,13 @@ public class Intake {
 
     private final MotorEx motor;
     public static double currentThreshold = 3000;//mA
+    public static double confidence = 0.7;
+    public static boolean intakeJammed = false;
+
+    private static final int JAM_SAMPLE_COUNT = 20;
+    private final boolean[] jamSamples = new boolean[JAM_SAMPLE_COUNT];
+    private int jamSampleIndex = 0;
+    private int jammedSampleTotal = 0;
 
 
     private IntakeMode currentMode = IntakeMode.STOPPED;
@@ -70,5 +77,25 @@ public class Intake {
     public boolean isAboveCurrentThreshold(){
         return motor.motorEx.getCurrent(CurrentUnit.MILLIAMPS) > currentThreshold;
 
+    }
+
+    public void periodic() {
+        boolean isOverCurrent = isAboveCurrentThreshold();
+        boolean previousValue = jamSamples[jamSampleIndex];
+
+        if (previousValue) {
+            jammedSampleTotal--;
+        }
+
+        jamSamples[jamSampleIndex] = isOverCurrent;
+
+        if (isOverCurrent) {
+            jammedSampleTotal++;
+        }
+
+        jamSampleIndex = (jamSampleIndex + 1) % JAM_SAMPLE_COUNT;
+
+        double jamRatio = (double) jammedSampleTotal / JAM_SAMPLE_COUNT;
+        intakeJammed = jamRatio >= confidence;
     }
 }
