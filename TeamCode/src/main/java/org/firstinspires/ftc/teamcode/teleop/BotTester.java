@@ -362,8 +362,6 @@ public class BotTester extends LinearOpMode {
             telemetry.addData("avg rpm error:", rpmTotalError/n);
             telemetry.addData("shooting override:", shooting);
 
-            telemetry.addData("<big><b><u>Intake Current Over Threshold</big></b></u>", "<big><b> "+ bot.intake.isAboveCurrentThreshold() + "</big></b></u>");
-
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             packet.fieldOverlay().setStroke("#3F51B5");
             Drawing.drawRobot(packet.fieldOverlay(), Bot.storedPose);

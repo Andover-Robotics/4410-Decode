@@ -64,6 +64,9 @@ public class Intake {
     public boolean isRunning() {
         return currentMode != IntakeMode.STOPPED;
     }
+    public double getCurrent(){
+        return motor.motorEx.getCurrent(CurrentUnit.MILLIAMPS);
+    }
     public boolean isAboveCurrentThreshold(){
         return motor.motorEx.getCurrent(CurrentUnit.MILLIAMPS) > currentThreshold;
 
