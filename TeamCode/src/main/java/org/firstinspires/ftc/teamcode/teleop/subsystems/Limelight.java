@@ -1,24 +1,20 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 @Config
 public class Limelight {
     private final Limelight3A limelight;
     public LLResult llResult;
-    private Turret turret;
     public static Pose3D llBotPose = new Pose3D(
             new Position(DistanceUnit.INCH, 0, 0, 0, 0),
             new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0)
@@ -26,6 +22,7 @@ public class Limelight {
 
     public static double llxRLOffset = 0, llyRLOffset = 0;
     public static boolean obelisk = false;
+    public double headingInput;
 
     public Limelight(OpMode opMode) {
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
@@ -75,10 +72,11 @@ public class Limelight {
 
     public void periodic() {
         llResult = limelight.getLatestResult();
+         headingInput = Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) - Turret.getPositionDegs();
 
         if (!obelisk) {
             // when not looking at the obelisk (add condition for when tracking specific goals?) get robot pos using turret pos and current heading
-            limelight.updateRobotOrientation(Math.toDegrees(Bot.storedPose.heading.log()) + turret.getPositionDegs());
+            limelight.updateRobotOrientation(Math.toDegrees(headingInput));
             if (llResult != null && llResult.isValid()) {
                 llBotPose = llResult.getBotpose_MT2();
             }

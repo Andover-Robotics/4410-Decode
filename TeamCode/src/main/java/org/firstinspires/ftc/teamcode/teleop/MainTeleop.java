@@ -54,7 +54,9 @@ public class MainTeleop extends LinearOpMode {
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
+        bot.limelight.setPipeline(1);
         bot.turret.setShooterOverride(false);
+        bot.limelight.setObelisk(false);
         stallIntake = true;
 
 
@@ -274,9 +276,12 @@ public class MainTeleop extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
                 bot.turret.resetEncoder();
             }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            //|| gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) ) {
                 bot.toggleScreenPeriodic();
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
+                bot.limelight.relocalizeBotPose();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
@@ -361,6 +366,15 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addLine("Shooter PID Data:");
             telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
             telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
+//            telemetry.addData("Current X Pose", Bot.storedPose.position.x%.2f);
+//            telemetry.addData("Current Y Pose", Bot.storedPose.position.y%.2f);
+//            telemetry.addData("Current Heading", Math.toDegrees(Bot.storedPose.heading.log())%.2f);
+//            telemetry.addData("limelight Heading", Math.toDegrees(bot.limelight.headingInput)%.2f);
+//            telemetry.addData("limelight Pose x", Bot.pose3D2pose2D(Limelight.llBotPose).position.x%.2f);
+//            telemetry.addData("limelight Pose y", Bot.pose3D2pose2D(Limelight.llBotPose).position.y%.2f);
+
+
+
 //            telemetry.addData("PID Power", bot.turret.shooter.getController().calculate());
 //            telemetry.addData("FF Power", bot.turret.shooter.ff);
 //            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());

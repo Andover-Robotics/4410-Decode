@@ -81,7 +81,7 @@ public class Turret {
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
     private int cachedPositionTicks = 0;
 
-    public static double shooterRpm = 0, trackingDistance, pureDistance, error;
+    public static double shooterRpm = 0, trackingDistance, pureDistance, error, currentPosDegs;
 
     public ArrayList<Double> txArr, tyArr;
 
