@@ -219,6 +219,7 @@ public class Indexer {
 //            actions.add(h.kickResetAction());
 //            actions.add(new SleepAction(sleepSeconds));
 //        }
+
         shooting = true;
 
         if (!Turret.deadzone) {

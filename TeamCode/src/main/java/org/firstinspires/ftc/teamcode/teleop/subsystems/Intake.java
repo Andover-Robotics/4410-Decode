@@ -14,8 +14,8 @@ public class Intake {
     public static double intakePower = -1, storagePower = 0.32, reversePower = 1;
 
     private final MotorEx motor;
-    public static double currentThreshold = 3000;//mA
-    public static double confidence = 0.7;
+    public static double currentThreshold = 2150;//mA
+    public static double confidence = 0.75;
     public static boolean intakeJammed = false;
 
     public static int JAM_SAMPLE_COUNT = 20;
@@ -87,9 +87,9 @@ public class Intake {
             jammedSampleTotal--;
         }
 
-        jamSamples[jamSampleIndex] = isOverCurrent;
+        jamSamples[jamSampleIndex] = !Bot.unjamming && isOverCurrent;
 
-        if (isOverCurrent) {
+        if (!Bot.unjamming && isOverCurrent) {
             jammedSampleTotal++;
         }
 
@@ -97,5 +97,8 @@ public class Intake {
 
         double jamRatio = (double) jammedSampleTotal / JAM_SAMPLE_COUNT;
         intakeJammed = jamRatio >= confidence;
+        if (Bot.unjamming) {
+            intakeJammed = false;
+        }
     }
 }
