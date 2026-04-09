@@ -16,6 +16,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class SoloTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = false, kickersInitialized = false;
+    private boolean headingLockEnabled = false, kickersInitialized = false, intakeCurrentOverride = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
     public static boolean stallIntake = true, manualTurret = false;
@@ -128,35 +130,39 @@ public class SoloTeleop extends LinearOpMode {
 
             gp1.readButtons();
 
-
-            if (!bot.shooting) {
+            if (!bot.actionsRunning && !Bot.unjamming) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
-                    if (!kickersInitialized) {
-                        runningActions.add(bot.indexer.leftHolder.resetFastAction());
-                        kickersInitialized = true;
-                    }
+                    intakeCurrentOverride = false;
                     if (bot.sensorIntaking) {
-                        if (bot.indexer.countBalls() == 3) {
+                        if (bot.indexer.countBalls()==3) {
                             bot.teleopReverseIntake();
                             gp1.gamepad.rumble(1, 1, -1);
                         } else {
-                            bot.teleopIntake();
-                            gp1.gamepad.stopRumble();
+                            if (!Indexer.shooting){
+                                bot.teleopIntake();
+                                gp1.gamepad.stopRumble();
+                            }
                         }
                     } else {
-                        bot.teleopIntake();
+                        if (!Indexer.shooting){
+                            bot.teleopIntake();
+                        }
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    intakeCurrentOverride = true;
                     bot.teleopReverseIntake();
                     if (bot.indexer.countBalls() == 3) {
                         gp1.gamepad.rumble(1, 1, -1);
                     } else {
+                        intakeCurrentOverride = true;
                         bot.teleopReverseIntake();
                         gp1.gamepad.stopRumble();
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    intakeCurrentOverride = false;
                     bot.teleopIntake();
                 } else {
+                    intakeCurrentOverride = false;
                     bot.teleopStopIntake();
                     gp1.gamepad.stopRumble();
                 }
@@ -260,6 +266,11 @@ public class SoloTeleop extends LinearOpMode {
 
             bot.periodic();
             drive();
+
+            if (Intake.intakeJammed && !intakeCurrentOverride){
+                runningActions.add(bot.clearIntakeJam());
+            }
+
 
             List<Action> newActions = new ArrayList<>();
             for (Action action : runningActions) {

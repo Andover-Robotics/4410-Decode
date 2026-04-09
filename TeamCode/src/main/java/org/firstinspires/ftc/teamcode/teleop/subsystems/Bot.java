@@ -33,13 +33,14 @@ public class Bot {
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
-    public static Vector2d obeliskPose = new Vector2d(0, 0);
+    public static Vector2d obeliskPose = new Vector2d(66, 0);
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
     private boolean screenPeriodicEnabled = true;
     public boolean actionsRunning = false;
+    public static boolean unjamming = false, dontDoAgain = false;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -220,13 +221,46 @@ public class Bot {
 
     public SequentialAction clearIntakeJam() {
         actionsRunning = true;
+        unjamming = true;
+//        stopIntake();
         return new SequentialAction(
                 new InstantAction(() -> intake.reverse()),
                 new SleepAction(0.3),
                 indexer.jiggleKickers(),
+                new InstantAction(() -> unjamming = false),
                 new InstantAction(() -> actionsRunning = false)
         );
     }
+
+    public void periodic() {
+        clearBulkCache();
+        indexer.updateSensorCache();
+        limelight.periodic();
+        turret.periodic();
+        lift.periodic();
+        intake.periodic();
+        if (screenPeriodicEnabled) {
+            screen.periodic();
+        }
+        drive.updatePoseEstimate();
+    }
+
+    public void autoPeriodic() {
+        clearBulkCache();
+        indexer.updateSensorCache();
+        limelight.periodic();
+        turret.periodic();
+        lift.periodic();
+        drive.updatePoseEstimate();
+        if (sensorIntaking) {
+            if (indexer.countBalls()==3) {
+                intake.reverse();
+            } else {
+                intake.intake();
+            }
+        }
+    }
+
 
     public void teleopReverseIntake() {
         intake.reverse();
@@ -313,45 +347,6 @@ public class Bot {
 
     public Action disableShooter() {
         return new InstantAction(() -> enableShooter(false));
-    }
-
-    public void periodic() {
-        clearBulkCache();
-        indexer.updateSensorCache();
-        limelight.periodic();
-        turret.periodic();
-        lift.periodic();
-        intake.periodic();
-        if (screenPeriodicEnabled) {
-            screen.periodic();
-        }
-        if (Intake.intakeJammed){
-            clearIntakeJam();
-        }
-        drive.updatePoseEstimate();
-//        if (sensorIntaking) {
-//            if (indexer.countBalls()==3) {
-//                intake.reverse();
-//            } else {
-//                intake.intake();
-//            }
-//        }
-    }
-
-    public void autoPeriodic() {
-        clearBulkCache();
-        indexer.updateSensorCache();
-        limelight.periodic();
-        turret.periodic();
-        lift.periodic();
-        drive.updatePoseEstimate();
-        if (sensorIntaking) {
-            if (indexer.countBalls()==3) {
-                intake.reverse();
-            } else {
-                intake.intake();
-            }
-        }
     }
 
     public void clearBulkCache() {

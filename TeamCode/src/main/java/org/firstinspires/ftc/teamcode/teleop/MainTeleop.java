@@ -35,7 +35,7 @@ public class MainTeleop extends LinearOpMode {
     private Thread thread;
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
-    private boolean headingLockEnabled = false;
+    private boolean headingLockEnabled = false, intakeCurrentOverride = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
 
     private boolean kickersInitialized = false;
@@ -139,8 +139,9 @@ public class MainTeleop extends LinearOpMode {
             gp1.readButtons();
             gp2.readButtons();
 
-            if (!bot.actionsRunning) {
+            if (!bot.actionsRunning && !Bot.unjamming) {
                 if (gp1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2) {
+                    intakeCurrentOverride = false;
                     if (bot.sensorIntaking) {
                         if (bot.indexer.countBalls()==3) {
                             bot.teleopReverseIntake();
@@ -157,20 +158,25 @@ public class MainTeleop extends LinearOpMode {
                         }
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    intakeCurrentOverride = true;
                     bot.teleopReverseIntake();
                     if (bot.indexer.countBalls() == 3) {
                         gp1.gamepad.rumble(1, 1, -1);
                     } else {
+                    intakeCurrentOverride = true;
                         bot.teleopReverseIntake();
                         gp1.gamepad.stopRumble();
                     }
                 } else if (gp1.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    intakeCurrentOverride = false;
                     bot.teleopIntake();
                 } else {
+                    intakeCurrentOverride = false;
                     bot.teleopStopIntake();
                     gp1.gamepad.stopRumble();
                 }
             }
+
 
             if (bot.turret.shooterInRange()) {
                 gp2.gamepad.rumble(1, 1, -1);
@@ -275,7 +281,8 @@ public class MainTeleop extends LinearOpMode {
                 bot.turret.resetEncoder();
             }
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            //|| gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) ) {
                 bot.toggleScreenPeriodic();
             }
 
@@ -286,6 +293,11 @@ public class MainTeleop extends LinearOpMode {
 
             bot.periodic();
             drive();
+
+
+            if (Intake.intakeJammed && !intakeCurrentOverride){
+                runningActions.add(bot.clearIntakeJam());
+            }
 
             List<Action> newActions = new ArrayList<>();
             for (Action action : runningActions) {
@@ -362,7 +374,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
             telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
             telemetry.addData("Intake Current Threshold?", bot.intake.isAboveCurrentThreshold());
-            telemetry.addData("<Intake Jammed?", "<big><b> "+ Intake.intakeJammed + "</big></b></u>");
+            telemetry.addData("Intake Jammed?", "<big><b> "+ Intake.intakeJammed + "</big></b></u>");
+            telemetry.addData("Unjamming?", "<big><b> "+ Bot.unjamming + "</big></b></u>");
             telemetry.addData("<big><b><u>Intake Current</big></b></u>", "<big><b> "+ bot.intake.getCurrent() + "</big></b></u>");
             telemetry.addData("Current", bot.intake.getCurrent());
 
