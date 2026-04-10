@@ -54,9 +54,7 @@ public class MainTeleop extends LinearOpMode {
         gp2 = new GamepadEx(gamepad2);
         bot.enableFullAuto(true);
         bot.setTargetGoalPose();
-        bot.limelight.setPipeline(1);
         bot.turret.setShooterOverride(false);
-        bot.limelight.setObelisk(false);
         stallIntake = true;
 
 
@@ -345,7 +343,11 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 
             telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-            telemetry.addData("LL Pose", Math.round(Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x) + " " + Math.round(Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("LL Edited Pose", -Math.round(Limelight.llxoffset + Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x) + " " + -Math.round(Limelight.llyoffset + Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw() - 180));
+            telemetry.addData("X", Bot.storedPose.position.x);
+            telemetry.addData("Y", Bot.storedPose.position.y);
+
+
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("\nError (Degs)", "<big><b>" + bot.turret.getErrorDegs() + "</big></b>\n");
             telemetry.addData("\nSensor Intaking", "<big>" + bot.sensorIntaking + "</big>");

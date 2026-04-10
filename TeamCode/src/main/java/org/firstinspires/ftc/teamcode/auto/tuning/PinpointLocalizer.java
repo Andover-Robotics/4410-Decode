@@ -22,7 +22,7 @@ public final class PinpointLocalizer implements Localizer {
 
     public final GoBildaPinpointDriver driver;
     public final GoBildaPinpointDriver.EncoderDirection initialParDirection, initialPerpDirection;
-    public static double xOffset = -3.03, yOffset = -6.9;
+    public static double xOffset = -3.03, yOffset = -5.9;
     public static PoseVelocity2d robotPosVel;
 
     private Pose2d txWorldPinpoint;
@@ -73,6 +73,7 @@ public final class PinpointLocalizer implements Localizer {
 
     @Override
     public PoseVelocity2d update() {
+        updateOffsets();
         driver.update();
         if (Objects.requireNonNull(driver.getDeviceStatus()) == GoBildaPinpointDriver.DeviceStatus.READY) {
             txPinpointRobot = new Pose2d(driver.getPosX(DistanceUnit.INCH), driver.getPosY(DistanceUnit.INCH), driver.getHeading(UnnormalizedAngleUnit.RADIANS));

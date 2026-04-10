@@ -279,6 +279,7 @@ public class Turret {
         pos = cachedPositionTicks;
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);
+        currentPosDegs = getPositionDegs();
 
         // position tracking mode
         if (positionTracking) {
