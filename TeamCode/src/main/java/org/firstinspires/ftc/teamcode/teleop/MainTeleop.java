@@ -353,7 +353,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 
             telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-            telemetry.addData("LL Edited Pose", -Math.round(Limelight.llxoffset + Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x) + " " + -Math.round(Limelight.llyoffset + Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw() - 180));
+            telemetry.addData("LL Edited Pose", Math.round(Limelight.transformedBotPose.position.x) + " " + Math.round(Limelight.transformedBotPose.position.y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw() - 180));
             telemetry.addData("X", Bot.storedPose.position.x);
             telemetry.addData("Y", Bot.storedPose.position.y);
 

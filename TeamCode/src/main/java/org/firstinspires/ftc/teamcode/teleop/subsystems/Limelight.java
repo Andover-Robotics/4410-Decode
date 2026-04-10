@@ -16,6 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 public class Limelight {
     private final Limelight3A limelight;
     public LLResult llResult;
+    public static Pose2d transformedBotPose;
+    public static Pose2d llBotPose2d;
     public static Pose3D llBotPose = new Pose3D(
             new Position(DistanceUnit.INCH, 0, 0, 0, 0),
             new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0)
@@ -91,6 +93,8 @@ public class Limelight {
             limelight.updateRobotOrientation(headingInput);
             if (llResult != null && llResult.isValid()) {
                 llBotPose = llResult.getBotpose_MT2();
+                llBotPose2d = Bot.pose3D2pose2D(llBotPose);
+                transformedBotPose = new Pose2d(-(llxoffset+llBotPose2d.position.x),-(llyoffset+llBotPose2d.position.y),Bot.drive.localizer.getPose().heading.log());
             }
         } else {
             if (llResult != null && llResult.isValid()
@@ -109,10 +113,6 @@ public class Limelight {
     }
 
     public void relocalizeBotPose() {
-        Bot.drive.localizer.setPose(new Pose2d(
-                -(llxoffset + llBotPose.getPosition().toUnit(DistanceUnit.INCH).x),
-                -(llyoffset+llBotPose.getPosition().toUnit(DistanceUnit.INCH).y),
-                Bot.drive.localizer.getPose().heading.log()
-        ));
+        Bot.drive.localizer.setPose(transformedBotPose);
     }
 }

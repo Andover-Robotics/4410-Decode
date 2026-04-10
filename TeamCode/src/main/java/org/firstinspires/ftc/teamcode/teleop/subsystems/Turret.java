@@ -235,7 +235,7 @@ public class Turret {
         // Constants
         final double G = 386.09;                 // in/s^2 (gravity in inches)
         final double heightDisplacement = 26.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 52.0;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        final double launchAngleAboveHorizDeg = 90 - 48;  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
         final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)

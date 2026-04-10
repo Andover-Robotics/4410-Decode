@@ -16,17 +16,17 @@ public class Pos {
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueMidIntake = new Pose2d(-14, 32, Math.toRadians(90));
+    public static Pose2d blueMidIntake = new Pose2d(-2, 32, Math.toRadians(90)); //change X back to -14 if diagonal doesn't work
     public static double intakeDisp = 21;
 
-    public static Pose2d gate = new Pose2d(-10.5, 67, GATE_INTAKE_ANGLE);
+    public static Pose2d gate = new Pose2d(-10, 67, GATE_INTAKE_ANGLE);
     public static Pose2d gateIntaking = new Pose2d(-14, 61, Math.toRadians(45));
 
     public static Pose2d gateSideOpen = new Pose2d(3, 62, Math.toRadians(-10));
     public static Pose2d gateSideOpenHeadOn = new Pose2d(1, 61, Math.toRadians(90));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
-    public static double closeIntake = 19;
+    public static double closeIntake = 14;
 
     public static Pose2d blueFarIntakeFarAuto = new Pose2d(-37, 35, Math.toRadians(90));
     public static Pose2d blueFarIntakeCloseAuto = new Pose2d(-35, 35, Math.toRadians(90));
@@ -44,8 +44,9 @@ public class Pos {
     public static Pose2d blueHpCycle = new Pose2d(-64, 62, Math.toRadians(90));
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
+    public static Vector2d firstShoot = new Vector2d(30, 27);
     public static Vector2d closeShoot = new Vector2d(7, 17);
-    public static Vector2d closeShootPark = new Vector2d(27, 15);
+    public static Vector2d closeShootPark = new Vector2d(30, 18);
     public static Vector2d closeGateCycleShoot = new Vector2d(4, 22);
     public static Vector2d closePark = new Vector2d(-1, 21);
     public static Vector2d farShoot = new Vector2d(-55, 15);
