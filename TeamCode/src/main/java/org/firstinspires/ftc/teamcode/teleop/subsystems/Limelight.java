@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 public class Limelight {
     private final Limelight3A limelight;
     public LLResult llResult;
-    public static Pose2d transformedBotPose;
+    public static Pose2d transformedBotPose = new Pose2d(0, 0, 0);
     public static Pose2d llBotPose2d;
     public static Pose3D llBotPose = new Pose3D(
             new Position(DistanceUnit.INCH, 0, 0, 0, 0),

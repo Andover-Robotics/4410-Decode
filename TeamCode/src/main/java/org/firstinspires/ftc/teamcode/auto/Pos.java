@@ -16,8 +16,8 @@ public class Pos {
     public static Pose2d initialCloseRedPose = transformRed(initialCloseBluePose);
 
     // INTAKE
-    public static Pose2d blueMidIntake = new Pose2d(-2, 32, Math.toRadians(90)); //change X back to -14 if diagonal doesn't work
-    public static double intakeDisp = 21;
+    public static Pose2d blueMidIntake = new Pose2d(-14, 32, Math.toRadians(90)); //change X back to -14 if diagonal doesn't work
+    public static double intakeDisp = 27;
 
     public static Pose2d gate = new Pose2d(-10, 67, GATE_INTAKE_ANGLE);
     public static Pose2d gateIntaking = new Pose2d(-14, 61, Math.toRadians(45));
@@ -26,7 +26,7 @@ public class Pos {
     public static Pose2d gateSideOpenHeadOn = new Pose2d(1, 61, Math.toRadians(90));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
-    public static double closeIntake = 14;
+    public static double closeIntake = 18;
 
     public static Pose2d blueFarIntakeFarAuto = new Pose2d(-37, 35, Math.toRadians(90));
     public static Pose2d blueFarIntakeCloseAuto = new Pose2d(-35, 35, Math.toRadians(90));

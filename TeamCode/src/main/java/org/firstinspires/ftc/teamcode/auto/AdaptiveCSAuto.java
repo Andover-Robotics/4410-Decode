@@ -306,12 +306,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .stopAndAdd(new SleepAction(0.5))
-                    .afterTime(0.5, bot.indexer.shootRapidFire())
-//                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
-//                    .splineTo(Pos.firstShoot, Math.toRadians(200), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 40));
-                    .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(200), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 40));
-//                    .stopAndAdd((() -> bot.disableShooter()));
+                    .stopAndAdd(new SleepAction(0.1))
+                    .afterTime(1.1, bot.indexer.shootRapidFire())
+                    .strafeToConstantHeading(Pos.closeShoot); //shoot once we've entered close zone
             addedAction = true;
         }
 
@@ -322,12 +319,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 bot.sensorIntake(true);
             }
             builder = builder
-//                    .splineTo(Pos.blueMidIntake.component1(), Math.toRadians(95))
-//                    .splineTo(new Vector2d(Pos.blueMidIntake.position.x,
-//                            Pos.blueMidIntake.position.y + Pos.intakeDisp), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-//                    .splineTo(Pos.blueMidIntake.component1(), Math.toRadians(125))
-//                    .splineTo(new Vector2d(Pos.blueMidIntake.position.x - 9,//todo didnt work :(
-//                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 12), Math.toRadians(120), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
+                    .setTangent(Math.toRadians(180))
+                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
+                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));

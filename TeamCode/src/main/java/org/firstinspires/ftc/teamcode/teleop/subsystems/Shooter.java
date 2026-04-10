@@ -102,7 +102,7 @@ public class Shooter {
             if (Math.abs(targetRPM) < 1e-3) {
                 power = 0.0;
             } else {
-                double s = Math.signum(targetRPM);
+                double s = Math.signum(power);
                 power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
             }
         }
