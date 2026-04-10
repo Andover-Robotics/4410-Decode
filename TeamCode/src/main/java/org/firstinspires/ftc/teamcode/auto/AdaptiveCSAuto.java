@@ -121,7 +121,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
         bot.setTargetGoalPose();
-        bot.enableShooter();
+        bot.enableShooter(true);
         if (builtAuto == null || addedAction) {
             builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
         }
@@ -306,11 +306,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .stopAndAdd(new SleepAction(3.7))
-                    .afterTime(0.7, bot.indexer.shootRapidFire())
+                    .stopAndAdd(new SleepAction(0.5))
+                    .afterTime(0.5, bot.indexer.shootRapidFire())
 //                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.firstShoot, Math.toRadians(200));
+//                    .splineTo(Pos.firstShoot, Math.toRadians(200), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 40));
+                    .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(200), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 40));
 //                    .stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
@@ -326,8 +326,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
 //                    .splineTo(new Vector2d(Pos.blueMidIntake.position.x,
 //                            Pos.blueMidIntake.position.y + Pos.intakeDisp), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
 //                    .splineTo(Pos.blueMidIntake.component1(), Math.toRadians(125))
-                    .splineTo(new Vector2d(Pos.blueMidIntake.position.x - 6,
-                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 12), Math.toRadians(125), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+//                    .splineTo(new Vector2d(Pos.blueMidIntake.position.x - 9,//todo didnt work :(
+//                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 12), Math.toRadians(120), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.1, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));
@@ -367,15 +367,13 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .afterTime(0.9, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .strafeToSplineHeading(Pos.closeGateCycleShoot, Math.toRadians(110), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter())) :
+                    .stopAndAdd(bot.indexer.shootRapidFire()) :
                     builder
                     .afterTime(0.2, bot.indexer.jiggleKickers())
                     .afterTime(0.9, (() -> bot.reverseIntake()))
                     .setReversed(true)
                     .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-52.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                    .stopAndAdd(bot.indexer.shootRapidFire())
-                    .stopAndAdd((() -> bot.disableShooter()));
+                    .stopAndAdd(bot.indexer.shootRapidFire()) ;
             addedAction = true;
         }
 
@@ -407,7 +405,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .stopAndAdd(bot.indexer.jiggleKickers())
                         .waitSeconds(0.2)
                         .stopAndAdd((() -> bot.reverseIntake()))
-                        .stopAndAdd((() -> bot.enableShooter()))
+                        .stopAndAdd((bot.enableShooter()))
                         .waitSeconds(0.7);
 
                 addedAction = true;
