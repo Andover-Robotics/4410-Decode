@@ -14,7 +14,7 @@ public class Intake {
     public static double intakePower = -1, storagePower = 0.32, reversePower = 1;
 
     private final MotorEx motor;
-    public static double currentThreshold = 2150;//mA
+    public static double currentThreshold = 2500;//mA
     public static double confidence = 0.75;
     public static boolean intakeJammed = false;
 
