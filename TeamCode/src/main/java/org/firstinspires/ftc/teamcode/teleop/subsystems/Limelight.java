@@ -23,6 +23,9 @@ public class Limelight {
 
     public static double llxRLOffset = 0, llyRLOffset = 0;
     public static boolean obelisk = false;
+    public double headingInput;
+    public static double llxoffset=0,llyoffset=0;
+
 
     public Limelight(OpMode opMode) {
         limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
@@ -30,7 +33,7 @@ public class Limelight {
         limelight.start();
     }
 
-    public void setPipeline(int i) {
+    private void setPipeline(int i) {
         limelight.pipelineSwitch(i);
         /*
             0 is blue alliance
@@ -71,10 +74,21 @@ public class Limelight {
     }
 
     public void periodic() {
+
         llResult = limelight.getLatestResult();
+         headingInput = Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) - Turret.currentPosDegs + 180;
 
         if (!obelisk) {
-            limelight.updateRobotOrientation(Math.toDegrees(Bot.storedPose.heading.log()));
+            if(Bot.getAlliance() == Bot.allianceOptions.RED_ALLIANCE){
+                llxoffset = -7;
+                llyoffset = -1;
+            } else if (Bot.getAlliance() == Bot.allianceOptions.BLUE_ALLIANCE) {
+                llxoffset = -4;
+                llyoffset = -6;
+
+            }
+            // when not looking at the obelisk (add condition for when tracking specific goals?) get robot pos using turret pos and current heading
+            limelight.updateRobotOrientation(headingInput);
             if (llResult != null && llResult.isValid()) {
                 llBotPose = llResult.getBotpose_MT2();
             }
@@ -96,9 +110,9 @@ public class Limelight {
 
     public void relocalizeBotPose() {
         Bot.drive.localizer.setPose(new Pose2d(
-                llBotPose.getPosition().toUnit(DistanceUnit.INCH).x + llxRLOffset,
-                llBotPose.getPosition().toUnit(DistanceUnit.INCH).y + llyRLOffset,
-                Math.toRadians(llBotPose.getOrientation().getYaw())
+                -(llxoffset + llBotPose.getPosition().toUnit(DistanceUnit.INCH).x),
+                -(llyoffset+llBotPose.getPosition().toUnit(DistanceUnit.INCH).y),
+                Bot.drive.localizer.getPose().heading.log()
         ));
     }
 }

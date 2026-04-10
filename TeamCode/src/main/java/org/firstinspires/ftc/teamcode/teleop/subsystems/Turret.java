@@ -81,7 +81,7 @@ public class Turret {
     private double previousTargetTicks = 0, previousTargetVelDegPerSec = 0;
     private int cachedPositionTicks = 0;
 
-    public static double shooterRpm = 0, trackingDistance, pureDistance, error;
+    public static double shooterRpm = 0, trackingDistance, pureDistance, error, currentPosDegs;
 
     public ArrayList<Double> txArr, tyArr;
 
@@ -279,6 +279,7 @@ public class Turret {
         pos = cachedPositionTicks;
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);
+        currentPosDegs = getPositionDegs();
 
         // position tracking mode
         if (positionTracking) {

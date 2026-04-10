@@ -274,9 +274,12 @@ public class MainTeleop extends LinearOpMode {
             if (gp2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) && !bot.shooting) {
                 bot.turret.resetEncoder();
             }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            //|| gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)
+            if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) ) {
                 bot.toggleScreenPeriodic();
+            }
+            if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
+                bot.limelight.relocalizeBotPose();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.BACK)) {
@@ -340,7 +343,11 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 
             telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
-            telemetry.addData("LL Pose", Math.round(Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x) + " " + Math.round(Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw()));
+            telemetry.addData("LL Edited Pose", -Math.round(Limelight.llxoffset + Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).x) + " " + -Math.round(Limelight.llyoffset + Limelight.llBotPose.getPosition().toUnit(DistanceUnit.INCH).y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw() - 180));
+            telemetry.addData("X", Bot.storedPose.position.x);
+            telemetry.addData("Y", Bot.storedPose.position.y);
+
+
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("\nError (Degs)", "<big><b>" + bot.turret.getErrorDegs() + "</big></b>\n");
             telemetry.addData("\nSensor Intaking", "<big>" + bot.sensorIntaking + "</big>");
@@ -361,6 +368,15 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addLine("Shooter PID Data:");
             telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
             telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
+//            telemetry.addData("Current X Pose", Bot.storedPose.position.x%.2f);
+//            telemetry.addData("Current Y Pose", Bot.storedPose.position.y%.2f);
+//            telemetry.addData("Current Heading", Math.toDegrees(Bot.storedPose.heading.log())%.2f);
+//            telemetry.addData("limelight Heading", Math.toDegrees(bot.limelight.headingInput)%.2f);
+//            telemetry.addData("limelight Pose x", Bot.pose3D2pose2D(Limelight.llBotPose).position.x%.2f);
+//            telemetry.addData("limelight Pose y", Bot.pose3D2pose2D(Limelight.llBotPose).position.y%.2f);
+
+
+
 //            telemetry.addData("PID Power", bot.turret.shooter.getController().calculate());
 //            telemetry.addData("FF Power", bot.turret.shooter.ff);
 //            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());

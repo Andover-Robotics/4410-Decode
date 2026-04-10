@@ -16,6 +16,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import com.acmerobotics.dashboard.config.Config;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 
 @Config
@@ -253,6 +255,17 @@ public class Bot {
         screenPeriodicEnabled = !screenPeriodicEnabled;
     }
 
+    public void checkBotPose(){
+        //takes dy and dx of ll pose and current bot pose, and sees if delta is >4 inches
+        Pose2d pose = storedPose;
+        Pose2d llPose = pose3D2pose2D(Limelight.llBotPose);
+
+        double dx = llPose.position.x - pose.position.x;
+        double dy = llPose.position.y-pose.position.y;
+        if(Math.abs(dx)>=4 || Math.abs(dy)>=4){
+            limelight.relocalizeBotPose();
+        }
+    }
     public void driveRobotCentric(double forwardInput, double strafeInput, double turnInput, double driveSpeed) {
         drive.setDrivePowers(new PoseVelocity2d(
                 new Vector2d(driveSpeed * forwardInput, driveSpeed * strafeInput),
@@ -355,6 +368,15 @@ public class Bot {
     public static double getBatteryVoltage() {
         return voltageSensor.getVoltage();
     }
+    public static Pose2d pose3D2pose2D(Pose3D pose){
+        double x = pose.getPosition().toUnit(DistanceUnit.INCH).x;
+        double y = pose.getPosition().toUnit(DistanceUnit.INCH).y;
+        double heading = Math.toRadians(pose.getOrientation().getYaw());
+        return new Pose2d(x,y,heading);
+    }
+
+
+
 
     // get bot instance
     public static Bot getInstance() {
