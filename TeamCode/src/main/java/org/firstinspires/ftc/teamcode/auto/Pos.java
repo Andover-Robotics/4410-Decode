@@ -26,7 +26,7 @@ public class Pos {
     public static Pose2d gateSideOpenHeadOn = new Pose2d(1, 61, Math.toRadians(90));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
-    public static double closeIntake = 18;
+    public static double closeIntake = 23;
 
     public static Pose2d blueFarIntakeFarAuto = new Pose2d(-37, 35, Math.toRadians(90));
     public static Pose2d blueFarIntakeCloseAuto = new Pose2d(-35, 35, Math.toRadians(90));
