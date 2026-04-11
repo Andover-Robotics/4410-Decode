@@ -45,13 +45,6 @@ public class Shooter {
     private double filteredRPM = 0.0;
     private double power = 0.0;
     private boolean closedLoopEnabled = true;
-    private static final double TICKS_PER_REV = 28.0;
-
-    // manual velocity estimation state (ticks + wall clock)
-    private int lastLeftTicks = 0;
-    private int lastRightTicks = 0;
-    private long lastLeftTimeNanos = 0L;
-    private long lastRightTimeNanos = 0L;
 
 
     public Shooter(OpMode opMode) {
@@ -92,9 +85,11 @@ public class Shooter {
     }
 
     public void periodic() {
-        double leftRpm = calculateShooterRPM(motor1, true);
-        double rightRpm = calculateShooterRPM(motor2, false);
-        filteredRPM = leftEncoder ? leftRpm : rightRpm;
+        if (leftEncoder) {
+            filteredRPM = motor1.getVelocity() * 60 / 28;
+        } else {
+            filteredRPM = motor2.getVelocity() * 60 / 28 * -1;
+        }
 
         controller.setPID(p, i, d);
 
@@ -158,37 +153,5 @@ public class Shooter {
     private static double angleToPos(double angle) {
 //        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
         return servoPosPerAngle * (angle - lowAngleLimit) + lowServoLimit;
-    }
-
-    /**
-     * Manual shooter RPM estimate from encoder position deltas.
-     * Uses seconds between samples and converts ticks/sec to RPM.
-     */
-    private double calculateShooterRPM(MotorEx motor, boolean leftSide) {
-        long now = System.nanoTime();
-        int ticks = motor.getCurrentPosition();
-
-        long previousTime = leftSide ? lastLeftTimeNanos : lastRightTimeNanos;
-        int previousTicks = leftSide ? lastLeftTicks : lastRightTicks;
-
-        double rpm = 0.0;
-        if (previousTime != 0L) {
-            double dtSec = (now - previousTime) / 1_000_000_000.0;
-            if (dtSec > 1e-6) {
-                int deltaTicks = ticks - previousTicks;
-                double ticksPerSecond = deltaTicks / dtSec;
-                rpm = ticksPerSecond * 60.0 / TICKS_PER_REV;
-                if (!leftSide) rpm *= -1.0;
-            }
-        }
-
-        if (leftSide) {
-            lastLeftTicks = ticks;
-            lastLeftTimeNanos = now;
-        } else {
-            lastRightTicks = ticks;
-            lastRightTimeNanos = now;
-        }
-        return rpm;
     }
 }
