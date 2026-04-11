@@ -141,8 +141,9 @@ public class Bot {
         targetPose = goalPose;
     }
 
-    public void setObeliskTracking() {
+    public void trackObelisk() {
         targetPose = obeliskPose;
+        limelight.trackObelisk();
     }
 
     public void resetPose() {

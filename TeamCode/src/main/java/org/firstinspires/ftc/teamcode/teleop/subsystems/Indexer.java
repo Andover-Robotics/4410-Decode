@@ -31,7 +31,7 @@ public class Indexer {
     public static double kickerRightDown = 0.22;
     public static double kickerRightUp   = 0.65;
     public static double kickerBackDown  = 0.210;
-    public static double kickerBackUp    = 0.65;
+    public static double kickerBackUp    = 0.66;
 
     public static double kickerRightTooHigh = 0.7;
 
