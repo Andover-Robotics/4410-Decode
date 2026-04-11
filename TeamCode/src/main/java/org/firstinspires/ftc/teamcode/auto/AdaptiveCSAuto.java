@@ -308,14 +308,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
                     .stopAndAdd(new SleepAction(0.7))
-//                    .afterTime(1.2, bot.indexer.shootRapidFire())
-//                    .strafeToConstantHeading(Pos.closeShoot); //shoot once we've entered close zone
-//
                     .afterTime(0.45, bot.indexer.shootRapidFire())
-//                    .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(-8)) //shoot once we've entered close zone
-//                    .splineTo(Pos.firstShoot, Math.toRadians(200), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 40));
                     .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(175));
-//                    .stopAndAdd((() -> bot.disableShooter()));//TODO DIAG CODE
 
             addedAction = true;
         }
@@ -329,12 +323,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .afterTime(0.01, (() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(new Pose2d(Pos.blueMidIntake.position.x - 8,
-                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 6, Math.toRadians(90)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-
-//                    .setTangent(Math.toRadians(180))
-//                    .splineTo(Pos.blueMidIntake.position, Math.toRadians(90))
-//                    .strafeToConstantHeading(new Vector2d(Pos.blueMidIntake.position.x,
-//             todo bring this back up 4 lines if diag doesn't work               Pos.blueMidIntake.position.y + Pos.intakeDisp), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 6,
+                            Math.toRadians(90)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.25, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));
@@ -362,11 +352,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 65))//was -30
-                    .waitSeconds(0.725)//was 0.2
-//                    .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
-//                    .waitSeconds(0.2)
-//                    .strafeToLinearHeading(Pos.gate.position, Math.toRadians(80))
+                    .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 65))
+                    .waitSeconds(0.725)
                     .stopAndAdd(bot.enableShooter());
             builder = (gateIndex != gateCycles - 1) ?
                     builder
@@ -405,7 +392,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
 //                        .setReversed(true)
 //                        .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
-                        .strafeToLinearHeading(Pos.gateSideOpen.position, Pos.gateSideOpen.heading)
+                        .strafeToLinearHeading(Pos.gateSideOpen.position, Pos.gateSideOpen.heading) //TODO: switch to head on for time savings
 //                        .setReversed(true)
 //                        .splineToLinearHeading(Pos.gateSideOpenHeadOn, Math.toRadians(90))
                         .waitSeconds(0.5)
