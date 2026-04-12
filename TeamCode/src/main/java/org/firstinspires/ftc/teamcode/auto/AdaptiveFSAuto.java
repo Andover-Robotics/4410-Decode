@@ -382,7 +382,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeFarAuto.position.x,
 //                            Pos.blueFarIntakeFarAuto.position.y + Pos.farIntakeFarAuto))
                     .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(0.8, (() -> bot.reverseIntake()))
+                    .afterTime(1.2, (() -> bot.reverseIntake()))
 //                    .setReversed(true)
                     .splineToSplineHeading(new Pose2d(Pos.farShoot.x, Pos.farShoot.y, Math.toRadians(45)), Math.toRadians(-135))
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
@@ -398,9 +398,6 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
 
-//                    .splineToSplineHeading(new Pose2d(Pos.blueHpAngledIntake.position.x + 17, Pos.blueHpAngledIntake.position.y, Pos.blueHpAngledIntake.heading.log()), Math.toRadians(120))
-//                    .splineToConstantHeading(Pos.blueHpAngledIntake.position, Math.toRadians(180))
-//                    .splineToSplineHeading(Pos.blueHpSideIntake, Math.toRadians(100))
                     .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70))
 
                     .afterTime(0.01, new SequentialAction(
@@ -408,7 +405,6 @@ public class AdaptiveFSAuto extends LinearOpMode {
                             new SleepAction(1.3),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-//                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
                     .setReversed(true)
                     .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(75)), Math.toRadians(-90), drive.defaultVelConstraint, new ProfileAccelConstraint(-65, 65))
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
@@ -426,14 +422,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex > 0 && cfg.intervalTunnel > 0) {
                     builder = builder.stopAndAdd(new SleepAction(cfg.intervalTunnel));
                 }
-                if (tunnelIndex == 0 || tunnelIndex == 2) {
+                if (tunnelIndex % 2 == 1) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
                             .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90))
                             .afterTime(1.3, (() -> bot.reverseIntake()))
                             .setReversed(true)
-                            .setTangent(Math.toRadians(-100))
-                            .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(90)), Math.toRadians(-100))
+                            .splineTo(Pos.farShoot, Math.toRadians(-100))
                             .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                             .stopAndAdd(bot.indexer.shootRapidFire());
                 } else {
