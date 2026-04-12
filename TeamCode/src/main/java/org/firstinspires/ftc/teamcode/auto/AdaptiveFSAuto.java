@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -34,7 +35,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
         public boolean runClose   = false;
         public boolean runHp      = true;
         public boolean runFar     = true;
-        public int tunnelCycles   = 3;
+        public int tunnelCycles   = 5;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
@@ -377,7 +378,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueFarIntakeFarAuto.position, Math.toRadians(78))
+                    .splineTo(Pos.blueFarIntakeFarAuto.position, Math.toRadians(83))
 //                    .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeFarAuto.position.x,
 //                            Pos.blueFarIntakeFarAuto.position.y + Pos.farIntakeFarAuto))
                     .afterTime(0.4, bot.indexer.jiggleKickers())
@@ -396,22 +397,20 @@ public class AdaptiveFSAuto extends LinearOpMode {
             }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-//                    .splineTo(Pos.blueHpSideInterIntake.position, Math.toRadians(90)) //gov cup hp intakes
-                    .splineTo(new Vector2d(Pos.blueHpSideIntake.position.x + 7, Pos.blueHpSideIntake.position.y), Math.toRadians(178))
-                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(180))
-                    .waitSeconds(0.15)
-//                    .splineTo(Pos.blueHpFarInterIntake.position, Pos.blueHpFarInterIntake.heading)
-//                    .splineTo(Pos.blueHpFarIntake.position, Pos.blueHpFarIntake.heading)
-//                    .waitSeconds(0.15)
+
+//                    .splineToSplineHeading(new Pose2d(Pos.blueHpAngledIntake.position.x + 17, Pos.blueHpAngledIntake.position.y, Pos.blueHpAngledIntake.heading.log()), Math.toRadians(120))
+//                    .splineToConstantHeading(Pos.blueHpAngledIntake.position, Math.toRadians(180))
+//                    .splineToSplineHeading(Pos.blueHpSideIntake, Math.toRadians(100))
+                    .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70))
 
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
-                            new SleepAction(0.85),
+                            new SleepAction(1.3),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
 //                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
                     .setReversed(true)
-                    .splineTo(Pos.farShoot, Math.toRadians(-120))
+                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(75)), Math.toRadians(-90), drive.defaultVelConstraint, new ProfileAccelConstraint(-65, 65))
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                     .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
@@ -430,20 +429,30 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex == 0 || tunnelIndex == 2) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(new Vector2d(Pos.blueSecretTunnelStart.position.x + 12, Pos.blueSecretTunnelStart.position.y), Math.toRadians(150))
-                            .strafeToLinearHeading(Pos.blueSecretTunnelStart.position, Math.toRadians(-180))
-                            .afterTime(1.2, (() -> bot.reverseIntake()))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90))
+                            .afterTime(1.3, (() -> bot.reverseIntake()))
                             .setReversed(true)
-                            .splineTo(Pos.farShoot, Math.toRadians(-100))
+                            .setTangent(Math.toRadians(-100))
+                            .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(90)), Math.toRadians(-100))
                             .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                             .stopAndAdd(bot.indexer.shootRapidFire());
                 } else {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90))
+                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-58, 70))
                             .afterTime(1.5, (() -> bot.reverseIntake()))
-                            .setReversed(true)
-                            .splineTo(Pos.farShoot, Math.toRadians(-135))
+                            .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100))
+//                            .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-40, 70))
+//
+//                            .afterTime(0.01, new SequentialAction(
+//                                    bot.enableShooter(),
+//                                    new SleepAction(0.85),
+//                                    new InstantAction((() -> bot.reverseIntake()))
+//                            ))
+////                    .strafeToSplineHeading(Pos.farShoot, Math.toRadians(60))
+//                            .setReversed(true)
+//                            .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(75)), Math.toRadians(-90), drive.defaultVelConstraint, new ProfileAccelConstraint(-65, 50))
+
                             .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                             .stopAndAdd(bot.indexer.shootRapidFire());
                 }

@@ -323,8 +323,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .afterTime(0.01, (() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(new Pose2d(Pos.blueMidIntake.position.x - 8,
-                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 6,
-                            Math.toRadians(90)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 2.5,
+                            Math.toRadians(80)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.25, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));
@@ -395,12 +395,12 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .strafeToLinearHeading(Pos.gateSideOpen.position, Pos.gateSideOpen.heading) //TODO: switch to head on for time savings
 //                        .setReversed(true)
 //                        .splineToLinearHeading(Pos.gateSideOpenHeadOn, Math.toRadians(90))
-                        .waitSeconds(0.5)
+//                        .waitSeconds(0.5)
                         .stopAndAdd(bot.indexer.jiggleKickers())
                         .waitSeconds(0.2)
                         .stopAndAdd((() -> bot.reverseIntake()))
                         .stopAndAdd((bot.enableShooter()))
-                        .waitSeconds(0.7);
+                        .waitSeconds(0.6);
 
                 addedAction = true;
             } else {
@@ -415,7 +415,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
             builder = builder
                     .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(0.6, (() -> bot.reverseIntake()));
+                    .afterTime(0.9, (() -> bot.reverseIntake()));
 
             builder = cfg.runFar ?
                     builder

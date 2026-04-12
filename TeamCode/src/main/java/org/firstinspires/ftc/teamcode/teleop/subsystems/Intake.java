@@ -14,11 +14,11 @@ public class Intake {
     public static double intakePower = -1, storagePower = 0.32, reversePower = 1;
 
     private final MotorEx motor;
-    public static double currentThreshold = 3300;//mA
+    public static double currentThreshold = 4500000;//mA 3300
     public static double confidence = 0.70;
     public static boolean intakeJammed = false;
 
-    public static int JAM_SAMPLE_COUNT = 23;
+    public static int JAM_SAMPLE_COUNT = 20;
     private final boolean[] jamSamples = new boolean[JAM_SAMPLE_COUNT];
     private int jamSampleIndex = 0;
     private int jammedSampleTotal = 0;
