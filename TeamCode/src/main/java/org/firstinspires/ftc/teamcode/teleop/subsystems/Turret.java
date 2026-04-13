@@ -34,9 +34,9 @@ public class Turret {
     public static double rapidFireDistanceThresholdIn = 130;
     public static double rapidFireSleepScalePerIn = 0.004;
     public static double
-            largeP = 0.0075, largeI = 0, largeD = 0.00035,
-            smallP = 0.015 , smallI = 0, smallD = 0.00045,
-            errorThresholdDeg = 5, manualPower = 0,
+            largeP = 0.0062, largeI = 0, largeD = 0.00035,
+            smallP = 0.016 , smallI = 0, smallD = 0.00028,
+            errorThresholdDeg = 6.5, manualPower = 0,
             targetVelK = 0.0032, targetAccelK = 0.00000;
 
     public static double feedforwardPower, velFFPower, accelFFPower;
