@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
 public class ConfigureColorRangefinder extends LinearOpMode {
 
     public static double purpleLower = 133, purpleHigher = 150, greenLower = 110, greenHigher = 132;
+    public static double degreesToBits = (double) 255 / 360;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -20,10 +21,18 @@ public class ConfigureColorRangefinder extends LinearOpMode {
         /* Using this example configuration, you can detect both artifact colors based on which pin is reading true:
             pin0 --> purple
             pin1 --> green */
-        crf.setPin0Digital(ColorRangefinder.DigitalMode.HSV, purpleLower / 360.0 * 255, purpleHigher / 360.0 * 255); // purple
-        crf.setPin0DigitalMaxDistance(ColorRangefinder.DigitalMode.HSV, 15); // 10mm or closer requirement
-        crf.setPin1Digital(ColorRangefinder.DigitalMode.HSV, greenLower / 360.0 * 255, greenHigher / 360.0 * 255); // green
-        crf.setPin1DigitalMaxDistance(ColorRangefinder.DigitalMode.HSV, 15); // 60mm or closer requirement
+        crf.setLedBrightness(100);
+//        crf.setPin0Analog(ColorRangefinder.AnalogMode.HSV);
+//        crf.setPin1Digital(ColorRangefinder.DigitalMode.HSV, 90 * degreesToBits, 150 * degreesToBits);
+        crf.setPin0Digital(ColorRangefinder.DigitalMode.HSV, 160 / 360.0 * 255, 190 / 360.0 * 255); // purple
+        crf.setPin1Digital(ColorRangefinder.DigitalMode.HSV, 110 / 360.0 * 255, 140 / 360.0 * 255); // green
+        crf.setPin0DigitalMaxDistance(ColorRangefinder.DigitalMode.HSV, 90);
+        crf.setPin1DigitalMaxDistance(ColorRangefinder.DigitalMode.HSV, 90);
+
+//        crf.setPin0Digital(ColorRangefinder.DigitalMode.HSV, purpleLower / 360.0 * 255, purpleHigher / 360.0 * 255); // purple
+//        crf.setPin0DigitalMaxDistance(ColorRangefinder.DigitalMode.HSV, 15); // 10mm or closer requirement
+//        crf.setPin1Digital(ColorRangefinder.DigitalMode.HSV, greenLower / 360.0 * 255, greenHigher / 360.0 * 255); // green
+//        crf.setPin1DigitalMaxDistance(ColorRangefinder.DigitalMode.HSV, 15); // 60mm or closer requirement
     }
 }
 

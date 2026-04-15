@@ -35,11 +35,12 @@ public class Turret {
     public static double rapidFireSleepScalePerIn = 0.004;
     public static double
             largeP = 0.0062, largeI = 0, largeD = 0.00035,
-            smallP = 0.016 , smallI = 0, smallD = 0.00028,
-            errorThresholdDeg = 6.5, manualPower = 0,
-            targetVelK = 0.0032, targetAccelK = 0.00000;
+            smallP = 0.008 , smallI = 0, smallD = 0.0005,
+            errorThresholdDeg = 650, manualPower = 0,
+            targetVelK = 0.0038, targetAccelK = 0.00000,
+            staticF = 0.05, staticFErrorDeg = 0.75;
 
-    public static double feedforwardPower, velFFPower, accelFFPower;
+    public static double feedforwardPower, velFFPower, accelFFPower, staticFFPower;
 
     private double tolerance = 1, powerMin = 0.05, degsPerTick = 360.0 / (145.1 * 104.0/10.0), ticksPerRev = 360 / degsPerTick;
 
@@ -278,7 +279,12 @@ public class Turret {
             velFFPower = targetVelK * targetVelDegPerSec;
             accelFFPower = targetAccelK * targetAccelDegPerSec2;
 
-            feedforwardPower = velFFPower + accelFFPower;
+            staticFFPower = 0;
+            if (Math.abs(activeController.getPositionError() * degsPerTick) > staticFErrorDeg) {
+                staticFFPower = staticF * Math.signum(activeController.getPositionError());
+            }
+
+            feedforwardPower = velFFPower + accelFFPower + staticFFPower;
             power = (activeController.calculate(pos) + feedforwardPower);
 
             previousTargetTicks = setPoint;
