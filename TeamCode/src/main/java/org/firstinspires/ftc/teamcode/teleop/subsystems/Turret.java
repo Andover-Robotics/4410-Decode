@@ -304,7 +304,7 @@ public class Turret {
 
             staticFFPower = 0;
             if (Math.abs(activeController.getPositionError() * degsPerTick) > staticFErrorDeg) {
-                staticFFPower = staticF * Math.signum(targetVelDegPerSec != 0 ? targetVelDegPerSec : activeController.getPositionError());
+                staticFFPower = staticF * Math.signum(activeController.getPositionError());
             }
 
             feedforwardPower = velFFPower + accelFFPower + staticFFPower;
