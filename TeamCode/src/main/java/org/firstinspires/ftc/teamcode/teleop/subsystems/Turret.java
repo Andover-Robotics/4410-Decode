@@ -38,7 +38,7 @@ public class Turret {
             smallP = 0.008 , smallI = 0, smallD = 0.0005,
             errorThresholdDeg = 650, manualPower = 0,
             targetVelK = 0.0038, targetAccelK = 0.00000,
-            staticF = 0.05, staticFErrorDeg = 0.75;
+            staticF = 0.05, staticFErrorDeg = 0.50;
 
     public static double feedforwardPower, velFFPower, accelFFPower, staticFFPower;
 

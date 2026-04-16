@@ -425,7 +425,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex % 2 == 1) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-70, 70))
                             .afterTime(1.3, (() -> bot.reverseIntake()))
                             .setReversed(true)
                             .splineTo(Pos.farShoot, Math.toRadians(-100))
@@ -434,7 +434,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 } else {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-58, 70))
+                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-70, 70))
                             .afterTime(1.5, (() -> bot.reverseIntake()))
                             .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100))
 //                            .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-40, 70))
