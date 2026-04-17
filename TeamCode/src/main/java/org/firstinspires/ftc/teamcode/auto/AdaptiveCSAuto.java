@@ -392,10 +392,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .setReversed(true)
                         .splineToConstantHeading(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)) //TODO: switch to head on for time savings
                         .stopAndAdd(bot.indexer.jiggleKickers())
-                        .waitSeconds(0.2)
+                        .waitSeconds(0.3)
                         .stopAndAdd((() -> bot.reverseIntake()))
                         .stopAndAdd((bot.enableShooter()))
-                        .waitSeconds(0.4);
+                        .waitSeconds(0.3);
 
                 addedAction = true;
             } else {
