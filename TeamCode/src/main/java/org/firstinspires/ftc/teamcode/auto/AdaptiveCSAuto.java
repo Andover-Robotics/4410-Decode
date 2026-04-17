@@ -322,8 +322,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             builder = builder
                     .afterTime(0.01, (() -> bot.sensorIntake(true)))
-                    .splineToSplineHeading(new Pose2d(Pos.blueMidIntake.position.x - 8,
-                            Pos.blueMidIntake.position.y + Pos.intakeDisp + 2.5,
+                    .splineToSplineHeading(new Pose2d(Pos.blueMidIntake.position.x,
+                            Pos.blueMidIntake.position.y + Pos.intakeDisp,
                             Math.toRadians(80)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.25, bot.indexer.jiggleKickers())
@@ -380,27 +380,22 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)));
 
             if (cfg.runOpenGate) {
-                builder = builder
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
-                        .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
-                                Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90));
                 if (cfg.delayOpenGate > 0) {
                     builder = builder.stopAndAdd(new SleepAction(cfg.delayOpenGate));
                     addedAction = true;
                 }
                 builder = builder
-//                        .setReversed(true)
-//                        .splineToLinearHeading(Pos.gateSideOpen, Math.toRadians(90))
-                        .strafeToLinearHeading(Pos.gateSideOpen.position, Pos.gateSideOpen.heading) //TODO: switch to head on for time savings
-//                        .setReversed(true)
-//                        .splineToLinearHeading(Pos.gateSideOpenHeadOn, Math.toRadians(90))
-//                        .waitSeconds(0.5)
+                        .stopAndAdd((() -> bot.sensorIntake(true)))
+                        .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
+                        .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
+                                Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90))
+                        .setReversed(true)
+                        .splineToConstantHeading(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)) //TODO: switch to head on for time savings
                         .stopAndAdd(bot.indexer.jiggleKickers())
                         .waitSeconds(0.2)
                         .stopAndAdd((() -> bot.reverseIntake()))
                         .stopAndAdd((bot.enableShooter()))
-                        .waitSeconds(0.6);
+                        .waitSeconds(0.4);
 
                 addedAction = true;
             } else {
