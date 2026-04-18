@@ -201,7 +201,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     cfg.runMid = !cfg.runMid;
                     break;
                 case 3:
-                    cfg.gateCycles = (cfg.gateCycles + 1) % 50;
+                    cfg.gateCycles = (cfg.gateCycles + 1) % 6;
                     break;
                 case 4:
                     cfg.runClose = !cfg.runClose;
@@ -330,10 +330,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .afterTime(0.85, (() -> bot.reverseIntake()));
             if (cfg.runClose && cfg.gateCycles == 0) {
                 builder = builder
-//                        .afterTime(1.5, bot.indexer.shootRapidFire())
                         .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.closeShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                         .stopAndAdd(bot.indexer.shootRapidFire());
-                //.stopAndAdd((() -> bot.disableShooter()));
             } else {
                 builder = builder
                         .afterTime(1.4, bot.indexer.shootRapidFire())
@@ -366,7 +364,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             .afterTime(0.2, bot.indexer.jiggleKickers())
                             .afterTime(0.9, (() -> bot.reverseIntake()))
                             .setReversed(true)
-                            .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-52.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                            .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-47.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
                             .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
@@ -388,14 +386,13 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .stopAndAdd((() -> bot.sensorIntake(true)))
                         .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
                         .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
-                                Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90))
+                                Pos.blueCloseIntake.position.y + Pos.closeIntake + 4), Math.toRadians(90))
                         .setReversed(true)
                         .splineToConstantHeading(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)) //TODO: switch to head on for time savings
                         .stopAndAdd(bot.indexer.jiggleKickers())
                         .waitSeconds(0.3)
                         .stopAndAdd((() -> bot.reverseIntake()))
-                        .stopAndAdd((bot.enableShooter()))
-                        .waitSeconds(0.3);
+                        .stopAndAdd((bot.enableShooter()));
 
                 addedAction = true;
             } else {
@@ -404,8 +401,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
                                 Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90))
                         .afterTime(0.01, bot.enableShooter());
-//                    .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
-//                            Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90));
             }
 
             builder = builder
@@ -461,7 +456,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .afterTime(0.4, bot.indexer.jiggleKickers())
                     .afterTime(1.00, (() -> bot.reverseIntake()));
 
-            if (cfg.gateCycles > 0) {
+            if (cfg.gateCycles > 1) {
                 builder = builder
                         .setReversed(true)
                         .splineTo(Pos.closeShootPark, Math.toRadians(-25))
