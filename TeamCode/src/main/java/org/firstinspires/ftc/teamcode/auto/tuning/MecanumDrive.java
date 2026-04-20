@@ -45,6 +45,7 @@ import org.firstinspires.ftc.teamcode.auto.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.PoseMessage;
+import org.firstinspires.ftc.teamcode.util.PhotonBootstrap;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 import java.lang.Math;
@@ -226,11 +227,16 @@ public final class MecanumDrive {
     }
 
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
+        boolean photonEnabled = PhotonBootstrap.initialize();
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
+
+        LynxModule.BulkCachingMode cachingMode = photonEnabled
+                ? LynxModule.BulkCachingMode.AUTO
+                : LynxModule.BulkCachingMode.MANUAL;
 
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : hubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+            module.setBulkCachingMode(cachingMode);
         }
 
         // TODO: make sure your config has motors with these names (or change them)
@@ -475,6 +481,10 @@ public final class MecanumDrive {
     }
 
     public void clearBulkCache() {
+        if (PhotonBootstrap.isEnabled()) {
+            return;
+        }
+
         for (LynxModule module : hubs) {
             module.clearBulkCache();
         }

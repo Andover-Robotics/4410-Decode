@@ -1,13 +1,13 @@
 //package org.firstinspires.ftc.teamcode.teleop.subsystems;
 //
 //import com.acmerobotics.dashboard.config.Config;
-//import com.arcrobotics.ftclib.controller.PIDController;
-//import com.arcrobotics.ftclib.hardware.motors.Motor;
-//import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+//import com.seattlesolvers.solverslib.controller.PIDController;
+//import com.seattlesolvers.solverslib.hardware.motors.Motor;
+//import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 //import com.qualcomm.hardware.limelightvision.Limelight3A;
 //import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 //import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-//import com.arcrobotics.ftclib.hardware.motors.CRServo;
+//import com.seattlesolvers.solverslib.hardware.motors.CRServo;
 //import com.qualcomm.robotcore.hardware.AnalogInput;
 //import com.qualcomm.robotcore.hardware.IMU;
 //import com.qualcomm.robotcore.util.ElapsedTime;
@@ -38,8 +38,8 @@
 package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.hardware.motors.CRServo;
+import com.seattlesolvers.solverslib.controller.PIDController;
+import com.seattlesolvers.solverslib.hardware.motors.CRServo;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
