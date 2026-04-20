@@ -230,7 +230,7 @@ public final class MecanumDrive {
 
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : hubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
         // TODO: make sure your config has motors with these names (or change them)

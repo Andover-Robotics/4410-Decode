@@ -10,11 +10,13 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -79,16 +81,22 @@ public class Bot {
     private Bot(OpMode opMode) {
         this.opMode = opMode;
 
+
         drive = new MecanumDrive(opMode.hardwareMap, storedPose);
         limelight = new Limelight(opMode);
         turret = new Turret(opMode);
         intake = new Intake(opMode);
-        lift = new Lift(opMode);
+        //lift = new Lift(opMode);
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
         voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
         updatePoses();
         setMidShooting();
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        PhotonCore.experimental.setMaximumParallelCommands(4); // Can be adjusted based on user preference - but raising this number further can cause issues
+        PhotonCore.enable();
+        PhotonCore.PARALLELIZE_SERVOS = false;
     }
 
     public void switchAlliance() {
@@ -240,7 +248,7 @@ public class Bot {
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
-        lift.periodic();
+        //lift.periodic();
         intake.periodic();
         if (screenPeriodicEnabled) {
             screen.periodic();
@@ -253,7 +261,7 @@ public class Bot {
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
-        lift.periodic();
+        //lift.periodic();
         drive.updatePoseEstimate();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {
