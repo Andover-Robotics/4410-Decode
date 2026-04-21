@@ -22,6 +22,18 @@ import org.firstinspires.ftc.teamcode.auto.tuning.MecanumDrive;
 
 @Config
 public class Bot {
+    public static class PeriodicTiming {
+        public double clearBulkCacheMs;
+        public double updateSensorCacheMs;
+        public double limelightMs;
+        public double turretMs;
+        public double liftMs;
+        public double intakeMs;
+        public double screenMs;
+        public double drivePoseEstimateMs;
+        public double totalMs;
+    }
+
     public static Bot instance;
     public OpMode opMode;
 
@@ -41,6 +53,7 @@ public class Bot {
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
     private boolean screenPeriodicEnabled = true;
+    private final PeriodicTiming periodicTiming = new PeriodicTiming();
     public boolean actionsRunning = false;
     public static boolean unjamming = false, dontDoAgain = false;
 
@@ -236,16 +249,52 @@ public class Bot {
     }
 
     public void periodic() {
+        long loopStartNs = System.nanoTime();
+        long markNs = loopStartNs;
+
         clearBulkCache();
+        long nextMarkNs = System.nanoTime();
+        periodicTiming.clearBulkCacheMs = (nextMarkNs - markNs) * 1e-6;
+        markNs = nextMarkNs;
+
         indexer.updateSensorCache();
+        nextMarkNs = System.nanoTime();
+        periodicTiming.updateSensorCacheMs = (nextMarkNs - markNs) * 1e-6;
+        markNs = nextMarkNs;
+
         limelight.periodic();
+        nextMarkNs = System.nanoTime();
+        periodicTiming.limelightMs = (nextMarkNs - markNs) * 1e-6;
+        markNs = nextMarkNs;
+
         turret.periodic();
+        nextMarkNs = System.nanoTime();
+        periodicTiming.turretMs = (nextMarkNs - markNs) * 1e-6;
+        markNs = nextMarkNs;
+
         lift.periodic();
+        nextMarkNs = System.nanoTime();
+        periodicTiming.liftMs = (nextMarkNs - markNs) * 1e-6;
+        markNs = nextMarkNs;
+
         intake.periodic();
+        nextMarkNs = System.nanoTime();
+        periodicTiming.intakeMs = (nextMarkNs - markNs) * 1e-6;
+        markNs = nextMarkNs;
+
         if (screenPeriodicEnabled) {
             screen.periodic();
+            nextMarkNs = System.nanoTime();
+            periodicTiming.screenMs = (nextMarkNs - markNs) * 1e-6;
+            markNs = nextMarkNs;
+        } else {
+            periodicTiming.screenMs = 0;
         }
+
         drive.updatePoseEstimate();
+        nextMarkNs = System.nanoTime();
+        periodicTiming.drivePoseEstimateMs = (nextMarkNs - markNs) * 1e-6;
+        periodicTiming.totalMs = (nextMarkNs - loopStartNs) * 1e-6;
     }
 
     public void autoPeriodic() {
@@ -305,6 +354,10 @@ public class Bot {
 
     public void toggleScreenPeriodic() {
         screenPeriodicEnabled = !screenPeriodicEnabled;
+    }
+
+    public PeriodicTiming getPeriodicTiming() {
+        return periodicTiming;
     }
 
     public void checkBotPose(){

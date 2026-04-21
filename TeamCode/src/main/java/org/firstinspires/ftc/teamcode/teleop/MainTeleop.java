@@ -390,6 +390,17 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
             telemetry.addData("Screen periodic (GP2 R stick)", bot.isScreenPeriodicEnabled());
+            Bot.PeriodicTiming periodicTiming = bot.getPeriodicTiming();
+            telemetry.addLine("Periodic timing (ms):");
+            telemetry.addData(" - clearBulkCache", "%.2f", periodicTiming.clearBulkCacheMs);
+            telemetry.addData(" - updateSensorCache", "%.2f", periodicTiming.updateSensorCacheMs);
+            telemetry.addData(" - limelight", "%.2f", periodicTiming.limelightMs);
+            telemetry.addData(" - turret", "%.2f", periodicTiming.turretMs);
+            telemetry.addData(" - lift", "%.2f", periodicTiming.liftMs);
+            telemetry.addData(" - intake", "%.2f", periodicTiming.intakeMs);
+            telemetry.addData(" - screen", "%.2f", periodicTiming.screenMs);
+            telemetry.addData(" - drive.updatePoseEstimate", "%.2f", periodicTiming.drivePoseEstimateMs);
+            telemetry.addData(" - periodic total", "%.2f", periodicTiming.totalMs);
             telemetry.addData("Loop ms", "%.1f", loopTimer.milliseconds());
             loopTimer.reset();
 
