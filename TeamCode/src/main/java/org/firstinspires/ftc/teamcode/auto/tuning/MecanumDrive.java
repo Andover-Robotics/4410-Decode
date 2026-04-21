@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -229,9 +230,9 @@ public final class MecanumDrive {
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
         hubs = hardwareMap.getAll(LynxModule.class);
-        for (LynxModule module : hubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        }
+//        for (LynxModule module : hubs) {
+//            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+//        }
 
         // TODO: make sure your config has motors with these names (or change them)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
@@ -475,9 +476,11 @@ public final class MecanumDrive {
     }
 
     public void clearBulkCache() {
-        for (LynxModule module : hubs) {
-            module.clearBulkCache();
-        }
+//        for (LynxModule module : hubs) {
+//            module.clearBulkCache();
+//        }
+        PhotonCore.CONTROL_HUB.clearBulkCache();
+        PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
 
     private void drawPoseHistory(Canvas c) {

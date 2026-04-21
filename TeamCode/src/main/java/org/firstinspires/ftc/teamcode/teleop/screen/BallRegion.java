@@ -333,7 +333,6 @@ package org.firstinspires.ftc.teamcode.teleop.screen;
 
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.teleop.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 
@@ -381,9 +380,7 @@ public class BallRegion extends DisplayRegion {
         if (teleop) {
             for (int i = 0; i < 3; i++) {
                 Sprite circle = sprites[i];
-                if (Lift.closedLoopEnabled) {
-                    circle.setColor(Color.RED);
-                } else if (bot.indexer.holders[i].getColor().equals("GREEN")) {
+                if (bot.indexer.holders[i].getColor().equals("GREEN")) {
                     circle.setColor(Color.GREEN);
                 } else if (bot.indexer.holders[i].getColor().equals("PURPLE")) {
                     circle.setColor(Color.PURPLE);

@@ -39,7 +39,7 @@ public class Shooter {
     public static boolean leftEncoder = true;
     public double ff;
 
-    public static boolean voltageComp = true;
+    public static boolean voltageComp = true, angleCaching = true, powerCaching = true;
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -108,9 +108,13 @@ public class Shooter {
             }
         }
         power = clamp(power, -maxPower, maxPower);
-//        motor1.set(power);
-//        motor2.set(-power);
-        hood.setPosition(requestedHoodPos);
+        if (power != motor1.getRawPower() || !powerCaching) {
+            motor1.set(power);
+            motor2.set(-power);
+        }
+        if (requestedHoodPos != getHoodAngle() ||!angleCaching) {
+            hood.setPosition(requestedHoodPos);
+        }
     }
 
     public void setHoodAngle(double angle) {

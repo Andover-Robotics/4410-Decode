@@ -244,14 +244,6 @@ public class BotTester extends LinearOpMode {
                 bot.turret.shooter.setHoodAngle(angle);
             }
 
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.Y)) {
-                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
-            }
-
-            if (gp2.wasJustPressed(GamepadKeys.Button.X)) {
-                bot.lift.liftUp();
-            }
             // FAILSAFES
 
 //            if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {

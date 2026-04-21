@@ -29,11 +29,10 @@ public class Bot {
 
     public Turret turret;
     public Intake intake;
-    public Lift lift;
     public Indexer indexer;
     public Screen screen;
     public Limelight limelight;
-    public static VoltageSensor voltageSensor;
+//    public static VoltageSensor voltageSensor;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
@@ -81,20 +80,18 @@ public class Bot {
     private Bot(OpMode opMode) {
         this.opMode = opMode;
 
-
         drive = new MecanumDrive(opMode.hardwareMap, storedPose);
         limelight = new Limelight(opMode);
         turret = new Turret(opMode);
         intake = new Intake(opMode);
-        //lift = new Lift(opMode);
         indexer = new Indexer(opMode);
         screen = new Screen(opMode, this);
-        voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
+//        voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
         updatePoses();
         setMidShooting();
         PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.experimental.setMaximumParallelCommands(4); // Can be adjusted based on user preference - but raising this number further can cause issues
+        PhotonCore.experimental.setMaximumParallelCommands(8);
         PhotonCore.enable();
         PhotonCore.PARALLELIZE_SERVOS = false;
     }
@@ -248,7 +245,6 @@ public class Bot {
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
-        //lift.periodic();
         intake.periodic();
         if (screenPeriodicEnabled) {
             screen.periodic();
@@ -261,7 +257,6 @@ public class Bot {
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
-        //lift.periodic();
         drive.updatePoseEstimate();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {
@@ -391,8 +386,10 @@ public class Bot {
     }
 
     public static double getBatteryVoltage() {
-        return voltageSensor.getVoltage();
+        return drive.voltageSensor.getVoltage();
+//        return 13;
     }
+
     public static Pose2d pose3D2pose2D(Pose3D pose){
         double x = pose.getPosition().toUnit(DistanceUnit.INCH).x;
         double y = pose.getPosition().toUnit(DistanceUnit.INCH).y;

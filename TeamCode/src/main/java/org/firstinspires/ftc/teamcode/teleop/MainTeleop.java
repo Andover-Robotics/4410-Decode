@@ -233,17 +233,6 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
 
-
-
-            // CLIMB
-//            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
-//                bot.lift.enableClosedLoop(!bot.lift.isClosedLoopEnabled());
-//            }
-//
-//            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
-//                bot.lift.liftUp();
-//            }
-
             // FAILSAFES
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
