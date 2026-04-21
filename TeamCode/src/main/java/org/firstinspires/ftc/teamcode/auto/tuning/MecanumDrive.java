@@ -466,7 +466,6 @@ public final class MecanumDrive {
         Pose2d pose = localizer.getPose();
         poseHistory.add(pose);
         Bot.storedPose = pose;
-        
         while (poseHistory.size() > 100) {
             poseHistory.removeFirst();
         }
@@ -477,9 +476,6 @@ public final class MecanumDrive {
     }
 
     public void clearBulkCache() {
-//        for (LynxModule module : hubs) {
-//            module.clearBulkCache();
-//        }
         PhotonCore.CONTROL_HUB.clearBulkCache();
         PhotonCore.EXPANSION_HUB.clearBulkCache();
     }

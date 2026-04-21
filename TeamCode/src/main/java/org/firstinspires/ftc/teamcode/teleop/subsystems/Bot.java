@@ -252,7 +252,7 @@ public class Bot {
         long loopStartNs = System.nanoTime();
 
         long sectionStartNs = loopStartNs;
-        clearBulkCache();
+//        clearBulkCache(); drive.updatePoseEstimate does this
         bulkCacheMs = nanosToMillis(System.nanoTime() - sectionStartNs);
 
         sectionStartNs = System.nanoTime();
@@ -260,7 +260,7 @@ public class Bot {
         sensorCacheMs = nanosToMillis(System.nanoTime() - sectionStartNs);
 
         sectionStartNs = System.nanoTime();
-        limelight.periodic();
+//        limelight.periodic();
         limelightMs = nanosToMillis(System.nanoTime() - sectionStartNs);
 
         sectionStartNs = System.nanoTime();
@@ -285,7 +285,7 @@ public class Bot {
     }
 
     public void autoPeriodic() {
-        clearBulkCache();
+//        clearBulkCache(); //drive.updatePoseEstimate does this
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();

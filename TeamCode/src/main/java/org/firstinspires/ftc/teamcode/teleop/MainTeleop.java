@@ -248,6 +248,7 @@ public class MainTeleop extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                bot.limelight.periodic();
                 bot.limelight.relocalizeBotPose();
             }
 
