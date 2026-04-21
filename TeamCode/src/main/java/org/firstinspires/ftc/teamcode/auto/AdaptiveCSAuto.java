@@ -35,7 +35,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         public boolean startFar = false;
         public boolean runPreload = true;
         public boolean runMid     = true;
-        public int gateCycles = 0;
+        public int gateCycles = 1;
         public boolean runClose   = true;
         public boolean runOpenGate = true;
         public boolean runFar     = true;
@@ -307,7 +307,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .stopAndAdd(new SleepAction(0.7))
+                    .stopAndAdd(new SleepAction(0.6))
                     .afterTime(0.55, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(175));
 
