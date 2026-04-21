@@ -308,7 +308,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
                     .stopAndAdd(new SleepAction(0.7))
-                    .afterTime(0.45, bot.indexer.shootRapidFire())
+                    .afterTime(0.55, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(175));
 
             addedAction = true;
