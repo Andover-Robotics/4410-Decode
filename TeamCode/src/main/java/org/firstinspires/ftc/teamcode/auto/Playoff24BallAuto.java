@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -24,7 +23,7 @@ import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 
 @Config
 @Autonomous(name = "24 Ball Auto", group = "Competition")
-public class PlayoffCloseAuto extends LinearOpMode {
+public class Playoff24BallAuto extends LinearOpMode {
     Bot bot;
     private GamepadEx gp1;
 
@@ -33,12 +32,12 @@ public class PlayoffCloseAuto extends LinearOpMode {
         public boolean startFar = false;
         public boolean runPreload = true;
         public boolean runMid     = true;
-        public int gateCycles = 0;
+        public int gateCycles = 5;
         public boolean runClose   = true;
-        public boolean runOpenGate = true;
-        public boolean runFar     = true;
+        public boolean runOpenGate = false;
+        public boolean runFar     = false;
         public boolean runPushPark = false;
-        public boolean runHp      = true;
+        public boolean runHp      = false;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
@@ -305,7 +304,7 @@ public class PlayoffCloseAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .stopAndAdd(new SleepAction(0.7))
+                    .stopAndAdd(new SleepAction(0.3))
                     .afterTime(0.45, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(175));
 
@@ -322,7 +321,7 @@ public class PlayoffCloseAuto extends LinearOpMode {
                     .afterTime(0.01, (() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(new Pose2d(Pos.blueMidIntake.position.x,
                             Pos.blueMidIntake.position.y + Pos.intakeDisp,
-                            Math.toRadians(80)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
+                            Math.toRadians(80)), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-75, 80))
                     .stopAndAdd(bot.enableShooter())
                     .afterTime(0.25, bot.indexer.jiggleKickers())
                     .afterTime(0.85, (() -> bot.reverseIntake()));
@@ -332,9 +331,8 @@ public class PlayoffCloseAuto extends LinearOpMode {
                         .stopAndAdd(bot.indexer.shootRapidFire());
             } else {
                 builder = builder
-                        .afterTime(1.4, bot.indexer.shootRapidFire())
-                        .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((cfg.gateCycles == 0 ? 135 : 110)))
-                        .waitSeconds(0.1);
+                        .afterTime(1.2, bot.indexer.shootRapidFire())
+                        .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((cfg.gateCycles == 0 ? 135 : 110)), drive.defaultVelConstraint, new ProfileAccelConstraint(-60, 80));
             }
             addedAction = true;
         }
@@ -348,154 +346,44 @@ public class PlayoffCloseAuto extends LinearOpMode {
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 65))
-                    .waitSeconds(0.725)
-                    .stopAndAdd(bot.enableShooter());
+                    .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 72))
+                    .waitSeconds(0.6);
             builder = (gateIndex != gateCycles - 1) ?
                     builder
                             .afterTime(0.2, bot.indexer.jiggleKickers())
                             .afterTime(0.9, (() -> bot.reverseIntake()))
                             .setReversed(true)
-                            .strafeToSplineHeading(Pos.closeGateCycleShoot, Math.toRadians(110), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                            .stopAndAdd(bot.indexer.shootRapidFire()) :
+                            .afterTime(1.3, bot.indexer.shootRapidFire())
+                            .strafeToSplineHeading(Pos.closeGateCycleShoot, Math.toRadians(110), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80))
+                    :
                     builder
                             .afterTime(0.2, bot.indexer.jiggleKickers())
                             .afterTime(0.9, (() -> bot.reverseIntake()))
                             .setReversed(true)
-                            .splineToLinearHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-47.5), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 70))
-                            .stopAndAdd(bot.indexer.shootRapidFire());
+                            .afterTime(1.45, bot.indexer.shootRapidFire())
+                            .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80));
+//                            .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
 
         if (cfg.runClose) {
-            if (cfg.delayClose > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayClose));
-                addedAction = true;
-            }
             builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)));
-
-            if (cfg.runOpenGate) {
-                if (cfg.delayOpenGate > 0) {
-                    builder = builder.stopAndAdd(new SleepAction(cfg.delayOpenGate));
-                    addedAction = true;
-                }
-                builder = builder
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
-                        .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
-                                Pos.blueCloseIntake.position.y + Pos.closeIntake + 4), Math.toRadians(90))
-                        .setReversed(true)
-                        .splineToConstantHeading(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)) //TODO: switch to head on for time savings
-                        .stopAndAdd(bot.indexer.jiggleKickers())
-                        .waitSeconds(0.3)
-                        .stopAndAdd((() -> bot.reverseIntake()))
-                        .stopAndAdd((bot.enableShooter()));
-
-                addedAction = true;
-            } else {
-                builder = builder
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
-                                Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90))
-                        .afterTime(0.01, bot.enableShooter());
-            }
+                    .stopAndAdd((() -> bot.sensorIntake(true)))
+                    .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
+                            Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80))
+                    .afterTime(0.01, bot.enableShooter());
 
             builder = builder
                     .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(0.9, (() -> bot.reverseIntake()));
+                    .afterTime(0.8, bot.indexer.shootRapidFire())
+                    .afterTime(0.9, (() -> bot.reverseIntake()))
+                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(-45), drive.defaultVelConstraint, new ProfileAccelConstraint(-90, 90));
 
-            builder = cfg.runFar ?
-                    builder
-                            .strafeToSplineHeading(Pos.closeShoot, Math.toRadians(165)) :
-                    cfg.gateCycles < 3 ?
-                            builder
-                                    .setReversed(true)
-                                    .splineTo(Pos.closeShoot, Math.toRadians(-90)) :
-                            builder
-////                                .setReversed(true)
-//                                .splineTo(Pos.closeShootPark, Math.toRadians(-45));
-//                                .setReversed(true)
-                                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark.component1(), Pos.closeShootPark.component2(), Math.toRadians(135)), Math.toRadians(-20));
-
-            builder = (cfg.gateCycles < 2) ?
-                    builder
-                            .stopAndAdd(bot.indexer.shootMotifAuto()) :
-                    //.stopAndAdd((() -> bot.disableShooter())) :
-                    builder
-                            .stopAndAdd(bot.indexer.shootRapidFire());
+            builder = builder.waitSeconds(0.3);
             //.stopAndAdd((() -> bot.disableShooter()));
             addedAction = true;
         }
 
-        if (cfg.runFar) {
-            if (cfg.delayFar > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
-                addedAction = true;
-            }
-            if (cfg.runPushPark) {
-                builder = builder
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineToSplineHeading(Pos.pushPark, Math.toRadians(90))
-                        .splineToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
-                                Pos.blueFarIntakeCloseAuto.position.y - 10), Math.toRadians(76))
-                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
-                                Pos.blueFarIntakeCloseAuto.position.y + Pos.intakeDisp));
-            } else {
-                builder = builder
-                        .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueFarIntakeCloseAuto.position, Math.toRadians(90))
-                        .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
-                                Pos.blueFarIntakeCloseAuto.position.y + Pos.intakeDisp));
-            }
-
-            builder = builder
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.00, (() -> bot.reverseIntake()));
-
-            if (cfg.gateCycles > 1) {
-                builder = builder
-                        .setReversed(true)
-                        .splineTo(Pos.closeShootPark, Math.toRadians(-25))
-                        .stopAndAdd(bot.indexer.shootRapidFire());
-                //.stopAndAdd((() -> bot.disableShooter()));
-            } else {
-                builder = builder
-                        .setReversed(true)
-                        .splineTo(Pos.closeShoot, Math.toRadians(-25))
-                        .stopAndAdd(bot.indexer.shootMotifAuto());
-                //.stopAndAdd((() -> bot.disableShooter()));
-            }
-            addedAction = true;
-        }
-
-        if (cfg.runHp) {
-            if (cfg.delayHp > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
-                addedAction = true;
-            }
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
-                    .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 10.5, Pos.blueHpIntake.position.y), Math.toRadians(180));
-
-            builder = builder
-                    .waitSeconds(0.2)
-                    .setReversed(true)
-                    .afterTime(0.01, new SequentialAction(
-                            bot.enableShooter(),
-                            new SleepAction(0.5),
-                            new InstantAction((() -> bot.reverseIntake()))
-                    ))
-                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
-                    .waitSeconds(0.2)
-                    .stopAndAdd(bot.indexer.shootMotifAuto());
-            addedAction = true;
-        }
-        if (!cfg.runHp && cfg.gateCycles == 0) {
-            builder = builder.strafeToConstantHeading(Pos.closePark);
-        }
 
         if (!addedAction) {
             builder = builder.stopAndAdd((() -> telemetry.addData("Auto", "No segments enabled")));
