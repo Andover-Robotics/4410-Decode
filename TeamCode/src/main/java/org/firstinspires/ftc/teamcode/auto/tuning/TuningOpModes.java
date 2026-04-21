@@ -28,7 +28,6 @@ import com.acmerobotics.roadrunner.ftc.OTOSPositionOffsetTuner;
 import com.acmerobotics.roadrunner.ftc.PinpointEncoderGroup;
 import com.acmerobotics.roadrunner.ftc.PinpointIMU;
 import com.acmerobotics.roadrunner.ftc.PinpointView;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
@@ -36,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.util.SRSHubSensorLayout;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 
 import java.util.ArrayList;
@@ -60,55 +60,51 @@ public final class TuningOpModes {
 
     private static PinpointView makePinpointView(PinpointLocalizer pl) {
         return new PinpointView() {
-            GoBildaPinpointDriver.EncoderDirection parDirection = pl.initialParDirection;
-            GoBildaPinpointDriver.EncoderDirection perpDirection = pl.initialPerpDirection;
+            DcMotorSimple.Direction parDirection = DcMotorSimple.Direction.FORWARD;
+            DcMotorSimple.Direction perpDirection = DcMotorSimple.Direction.REVERSE;
 
             @Override
             public void update() {
-                pl.driver.update();
+                pl.update();
             }
 
             @Override
             public int getParEncoderPosition() {
-                return pl.driver.getEncoderX();
+                return (int) Math.round(
+                        pl.getPose().position.x * 25.4 * SRSHubSensorLayout.GO_BILDA_4_BAR_TICKS_PER_MM
+                );
             }
 
             @Override
             public int getPerpEncoderPosition() {
-                return pl.driver.getEncoderY();
+                return (int) Math.round(
+                        pl.getPose().position.y * 25.4 * SRSHubSensorLayout.GO_BILDA_4_BAR_TICKS_PER_MM
+                );
             }
 
             @Override
             public float getHeadingVelocity(UnnormalizedAngleUnit unit) {
-                return (float) pl.driver.getHeadingVelocity(unit);
+                return (float) unit.fromRadians(pl.getPoseVelocity().angVel);
             }
 
             @Override
             public void setParDirection(@NonNull DcMotorSimple.Direction direction) {
-                parDirection = direction == DcMotorSimple.Direction.FORWARD ?
-                        GoBildaPinpointDriver.EncoderDirection.FORWARD :
-                        GoBildaPinpointDriver.EncoderDirection.REVERSED;
-                pl.driver.setEncoderDirections(parDirection, perpDirection);
+                parDirection = direction;
             }
 
             @Override
             public DcMotorSimple.Direction getParDirection() {
-                return parDirection == GoBildaPinpointDriver.EncoderDirection.FORWARD ?
-                        DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+                return parDirection;
             }
 
             @Override
             public void setPerpDirection(@NonNull DcMotorSimple.Direction direction) {
-                perpDirection = direction == DcMotorSimple.Direction.FORWARD ?
-                        GoBildaPinpointDriver.EncoderDirection.FORWARD :
-                        GoBildaPinpointDriver.EncoderDirection.REVERSED;
-                pl.driver.setEncoderDirections(parDirection, perpDirection);
+                perpDirection = direction;
             }
 
             @Override
             public DcMotorSimple.Direction getPerpDirection() {
-                return perpDirection == GoBildaPinpointDriver.EncoderDirection.FORWARD ?
-                        DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
+                return perpDirection;
             }
         };
     }
