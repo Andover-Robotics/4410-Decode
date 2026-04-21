@@ -47,12 +47,12 @@ public final class SRSHubSensorLayout {
 
         SRSHub.Config leftConfig = new SRSHub.Config();
         leftConfig.addI2CDevice(1, rightFront);
+        leftConfig.addI2CDevice(1, pinpoint);
         leftConfig.addI2CDevice(2, rightBack);
         leftConfig.addI2CDevice(3, backBottom);
 
         SRSHub.Config rightConfig = new SRSHub.Config();
         rightConfig.addI2CDevice(1, leftFront);
-        rightConfig.addI2CDevice(1, pinpoint);
         rightConfig.addI2CDevice(2, leftBack);
         rightConfig.addI2CDevice(3, backRight);
 
@@ -71,6 +71,6 @@ public final class SRSHubSensorLayout {
     }
 
     public static SRSHub getPinpointHub() {
-        return srsHubRight;
+        return srsHubLeft;
     }
 }
