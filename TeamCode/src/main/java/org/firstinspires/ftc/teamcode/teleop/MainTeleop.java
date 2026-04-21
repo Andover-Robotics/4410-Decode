@@ -296,7 +296,7 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
             runningActions = newActions;
-
+//
             telemetry.addLine("=== BALL COLORS ===");
 //            telemetry.addData("Right", bot.indexer.getRightColor());
 //            telemetry.addData("Left", bot.indexer.getLeftColor());
@@ -337,45 +337,45 @@ public class MainTeleop extends LinearOpMode {
                     backColor != null
                             ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
                             : back);
-
-            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
-
+//
+//            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
+//
             telemetry.addData("Odom Pose", Math.round(Bot.storedPose.position.x) + " " + Math.round(Bot.storedPose.position.y) + " " + Math.round(Math.toDegrees(Bot.storedPose.heading.log())));
             telemetry.addData("LL Edited Pose", Math.round(Limelight.transformedBotPose.position.x) + " " + Math.round(Limelight.transformedBotPose.position.y) + " " + Math.round(Limelight.llBotPose.getOrientation().getYaw() - 180));
-            telemetry.addData("X", Bot.storedPose.position.x);
-            telemetry.addData("Y", Bot.storedPose.position.y);
-
-
+//            telemetry.addData("X", Bot.storedPose.position.x);
+//            telemetry.addData("Y", Bot.storedPose.position.y);
+//
+//
             telemetry.addData("\nalliance", Bot.getAlliance());
             telemetry.addData("\nError (Degs)", "<big><b>" + bot.turret.getErrorDegs() + "</big></b>\n");
             telemetry.addData("\nSensor Intaking", "<big>" + bot.sensorIntaking + "</big>");
-
-            telemetry.addData("Tracking Target", bot.turret.trackingTarget);
-
-
+//
+//            telemetry.addData("Tracking Target", bot.turret.trackingTarget);
+//
+//
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
-//            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());
-//            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getServoPosition());
+////            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());
+////            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getServoPosition());
             telemetry.addData("Pos (Degs)", bot.turret.getPositionDegs());
             telemetry.addData("Error (Degs)", bot.turret.getErrorDegs());
             telemetry.addData("Power", bot.turret.getPower());
             telemetry.addData("Shooter Encoder", Shooter.leftEncoder ? "<big>Left</big>" : "<big>Right</big>");
             telemetry.addData("Calculated RPM", Turret.shooterRpm);
             telemetry.addData("Current RPM", bot.turret.shooter.getFilteredRPM());
-
-            telemetry.addLine("Shooter PID Data:");
-            telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
-            telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
-            telemetry.addData("Intake Current Threshold?", bot.intake.isAboveCurrentThreshold());
-            telemetry.addData("Intake Jammed?", "<big><b> "+ Intake.intakeJammed + "</big></b></u>");
-            telemetry.addData("Unjamming?", "<big><b> "+ Bot.unjamming + "</big></b></u>");
-            telemetry.addData("<big><b><u>Intake Current</big></b></u>", "<big><b> "+ bot.intake.getCurrent() + "</big></b></u>");
-            telemetry.addData("Current", bot.intake.getCurrent());
+//
+//            telemetry.addLine("Shooter PID Data:");
+//            telemetry.addData("RPM Error", bot.turret.shooter.getController().getPositionError());
+//            telemetry.addData("RPM Target", bot.turret.shooter.getController().getSetPoint());
+//            telemetry.addData("Intake Current Threshold?", bot.intake.isAboveCurrentThreshold());
+//            telemetry.addData("Intake Jammed?", "<big><b> "+ Intake.intakeJammed + "</big></b></u>");
+//            telemetry.addData("Unjamming?", "<big><b> "+ Bot.unjamming + "</big></b></u>");
+//            telemetry.addData("<big><b><u>Intake Current</big></b></u>", "<big><b> "+ bot.intake.getCurrent() + "</big></b></u>");
+//            telemetry.addData("Current", bot.intake.getCurrent());
 
 
 //            telemetry.addData("PID Power", bot.turret.shooter.getController().calculate());
 //            telemetry.addData("FF Power", bot.turret.shooter.ff);
-//            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
+            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
 
             telemetry.addData("Screen periodic (GP2 R stick)", bot.isScreenPeriodicEnabled());
             telemetry.addLine("Loop timing (ms):");

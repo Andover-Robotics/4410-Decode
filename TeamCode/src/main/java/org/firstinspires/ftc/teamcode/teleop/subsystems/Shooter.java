@@ -39,7 +39,7 @@ public class Shooter {
     public static boolean leftEncoder = true;
     public double ff;
 
-    public static boolean voltageComp = true, angleCaching = true, powerCaching = true;
+    public static boolean voltageComp = true, angleCaching = false, powerCaching = false;
 
     // state estimation and data
     private double targetRPM = 0.0;
