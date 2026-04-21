@@ -44,6 +44,14 @@ public class Bot {
     private boolean screenPeriodicEnabled = true;
     public boolean actionsRunning = false;
     public static boolean unjamming = false, dontDoAgain = false;
+    private double bulkCacheMs = 0;
+    private double sensorCacheMs = 0;
+    private double limelightMs = 0;
+    private double turretMs = 0;
+    private double intakeMs = 0;
+    private double screenMs = 0;
+    private double drivePoseMs = 0;
+    private double periodicTotalMs = 0;
 
     public static MecanumDrive drive;
     public static double headingLockGain = 4.5, positionLockGain = 4.5;
@@ -241,19 +249,43 @@ public class Bot {
     }
 
     public void periodic() {
-        clearBulkCache();
+        long loopStartNs = System.nanoTime();
+
+        long sectionStartNs = loopStartNs;
+//        clearBulkCache(); drive.updatePoseEstimate does this
+        bulkCacheMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+
+        sectionStartNs = System.nanoTime();
         indexer.updateSensorCache();
-        limelight.periodic();
+        sensorCacheMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+
+        sectionStartNs = System.nanoTime();
+//        limelight.periodic();
+        limelightMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+
+        sectionStartNs = System.nanoTime();
         turret.periodic();
+        turretMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+
+        sectionStartNs = System.nanoTime();
         intake.periodic();
+        intakeMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+
+        screenMs = 0;
         if (screenPeriodicEnabled) {
+            sectionStartNs = System.nanoTime();
             screen.periodic();
+            screenMs = nanosToMillis(System.nanoTime() - sectionStartNs);
         }
+
+        sectionStartNs = System.nanoTime();
         drive.updatePoseEstimate();
+        drivePoseMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+        periodicTotalMs = nanosToMillis(System.nanoTime() - loopStartNs);
     }
 
     public void autoPeriodic() {
-        clearBulkCache();
+//        clearBulkCache(); //drive.updatePoseEstimate does this
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();
@@ -300,6 +332,38 @@ public class Bot {
 
     public boolean isScreenPeriodicEnabled() {
         return screenPeriodicEnabled;
+    }
+
+    public double getBulkCacheMs() {
+        return bulkCacheMs;
+    }
+
+    public double getSensorCacheMs() {
+        return sensorCacheMs;
+    }
+
+    public double getLimelightMs() {
+        return limelightMs;
+    }
+
+    public double getTurretMs() {
+        return turretMs;
+    }
+
+    public double getIntakeMs() {
+        return intakeMs;
+    }
+
+    public double getScreenMs() {
+        return screenMs;
+    }
+
+    public double getDrivePoseMs() {
+        return drivePoseMs;
+    }
+
+    public double getPeriodicTotalMs() {
+        return periodicTotalMs;
     }
 
     public void setScreenPeriodicEnabled(boolean enabled) {
@@ -395,6 +459,10 @@ public class Bot {
         double y = pose.getPosition().toUnit(DistanceUnit.INCH).y;
         double heading = Math.toRadians(pose.getOrientation().getYaw());
         return new Pose2d(x,y,heading);
+    }
+
+    private double nanosToMillis(long nanos) {
+        return nanos / 1_000_000.0;
     }
 
 

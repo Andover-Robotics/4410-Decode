@@ -259,10 +259,11 @@ public class SoloTeleop extends LinearOpMode {
                 bot.turret.runManual(gp1.getLeftX());
             }
 //
-//            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
-////                bot.limelight.relocalizeBotPose();
+            if (gp1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                bot.limelight.periodic();
+                bot.limelight.relocalizeBotPose();
 //                headingLockEnabled = !headingLockEnabled;
-//            }
+            }
 
             bot.periodic();
             drive();
