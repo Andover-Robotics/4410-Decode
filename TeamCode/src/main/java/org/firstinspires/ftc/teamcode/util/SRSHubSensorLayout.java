@@ -12,7 +12,7 @@ public final class SRSHubSensorLayout {
     public static final SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
     public static final SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
 
-    private static final float GO_BILDA_4_BAR_TICKS_PER_MM = 19.89436789f;
+    public static final float GO_BILDA_4_BAR_TICKS_PER_MM = 19.89436789f;
 
     public static SRSHub.GoBildaPinpoint pinpoint;
 
