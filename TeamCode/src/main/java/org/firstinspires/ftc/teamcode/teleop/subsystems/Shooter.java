@@ -20,7 +20,7 @@ public class Shooter {
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.005, i = 0.0, d = 0.0, f = 0.00018;
+    public static double p = 0.004, i = 0.0, d = 0.0, f = 0.00018, bangBangTolerance = 20;
     public static boolean inverted = false;
 
     // note for interpolation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
@@ -38,9 +38,9 @@ public class Shooter {
     private double requestedHoodPos = 1.0;
     public static boolean leftEncoder = true;
     public double ff;
-    public static double bangBangVelocityThresholdInPerSec = 5.0;
+    public static double bangBangVelocityThresholdInPerSec = 5;
 
-    public static boolean voltageComp = true, angleCaching = false, powerCaching = false;
+    public static boolean voltageComp = true, angleCaching = false, fullPower = false;
 
     // state estimation and data
     private double targetRPM = 0.0;
@@ -94,25 +94,31 @@ public class Shooter {
 
     public void periodic() {
         if (leftEncoder) {
-            filteredRPM = srsHubs.getShooterLeftVelocityTicksPerSecond() * 60 / 28;
+//            filteredRPM = srsHubs.getShooterLeftVelocityTicksPerSecond() * 60 / 28;
+            filteredRPM = motor1.getCorrectedVelocity() * 60 / 28;
         } else {
-            filteredRPM = srsHubs.getShooterRightVelocityTicksPerSecond() * 60 / 28;
+//            filteredRPM = srsHubs.getShooterRightVelocityTicksPerSecond() * 60 / 28;
+            filteredRPM = motor1.getCorrectedVelocity() * 60 / 28;
         }
 
         controller.setPID(p, i, d);
 
-        if (closedLoopEnabled) {
-            if (Math.abs(targetRPM) < 1e-3) {
-                power = 0.0;
-            } else if (robotVelocityInPerSec < bangBangVelocityThresholdInPerSec) {
-                power = filteredRPM < targetRPM ? 1.0 : 0.0;
-                ff = 0.0;
-            } else {
-                ff = f * targetRPM;                                    // feedforward
-                double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
-                power = ff + pid;
-                double s = Math.signum(power);
-                power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
+        if (fullPower && Turret.trackingDistance > 110) {
+            power = 1;
+        } else {
+            if (closedLoopEnabled) {
+                if (Math.abs(targetRPM) < 1e-3) {
+                    power = 0.0;
+                } else if (robotVelocityInPerSec < bangBangVelocityThresholdInPerSec) {
+                    power = (filteredRPM - targetRPM) < -(bangBangTolerance) ? 1.0 : 0.0;
+                    ff = 0.0;
+                } else {
+                    ff = f * targetRPM;                                    // feedforward
+                    double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
+                    power = ff + pid;
+                    double s = Math.signum(power);
+                    power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
+                }
             }
         }
         power = clamp(power, -maxPower, maxPower);//
@@ -123,6 +129,10 @@ public class Shooter {
             currentHoodAngle = posToAngle(requestedHoodPos);
             currentServoPos = requestedHoodPos;
         }
+    }
+
+    public static void setFullPower(boolean t) {
+        fullPower = t;
     }
 
     public void setHoodAngle(double angle) {

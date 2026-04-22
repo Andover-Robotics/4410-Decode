@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 
@@ -179,15 +180,6 @@ public class Indexer {
         double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
 
         Bot bot = Bot.getInstance();
-        if (bot.intake.isRunning() && Turret.trackingDistance > 135) {
-            sleepSeconds += 0.06;
-        }
-
-//        for (Holder h : holders) {
-//            actions.add(h.kickResetAction());
-//            actions.add(new SleepAction(sleepSeconds));
-//        }
-
         shooting = true;
 
         if (!Turret.deadzone) {
@@ -199,6 +191,36 @@ public class Indexer {
                     actions.add(new SleepAction(sleepSeconds));
                 } else {
                     actions.add(holder.longKickResetAction());
+                    actions.add(new InstantAction(() -> Shooter.setFullPower(false)));
+                }
+            }
+        } else {
+            actions.add(new SleepAction(0.01));
+        }
+
+        shooting = false;
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
+
+    /**
+     * Rapid-fire all present holders, using rapidShootSleep between shots.
+     */
+    public Action shootRapidFireAutoFar() {
+        List<Action> actions = new ArrayList<>();
+
+        Bot bot = Bot.getInstance();
+        shooting = true;
+
+        if (!Turret.deadzone) {
+            int[] rapidFireOrder = buildRapidFireMotifOrder(getMotifPattern());
+            for (int i = 0; i < 3; i++) {
+                Holder holder = holders[rapidFireOrder[i]];
+                if (i != 2) {
+                    actions.add(holder.kickResetAction());
+                } else {
+                    actions.add(holder.longKickResetAction());
+                    actions.add(new InstantAction(() -> Shooter.setFullPower(false)));
                 }
             }
         } else {

@@ -348,6 +348,7 @@ public class SoloTeleop extends LinearOpMode {
             telemetry.addData("Calculated \tRPM", Turret.shooterRpm);
             telemetry.addData("Target \t\t\tRPM", bot.turret.shooter.getControllerTargetRPM());
             telemetry.addData("Current \t\tRPM", bot.turret.shooter.getFilteredRPM());
+            telemetry.addData("Shooter Power", bot.turret.shooter.getPower());
             telemetry.addData("Shooter Active?", Turret.shooterActive);
 //
 //            packet.fieldOverlay().setStroke("#3F51B5");
