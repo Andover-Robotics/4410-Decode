@@ -253,6 +253,13 @@ public class Turret {
 
     public void periodic() {
         power = 0;
+        PoseVelocity2d poseVelocity = Bot.drive.localizer.getPoseVelocity();
+        double robotSpeedInPerSec = 0.0;
+        if (poseVelocity != null) {
+            robotSpeedInPerSec = Math.hypot(poseVelocity.linearVel.x, poseVelocity.linearVel.y);
+        }
+        shooter.setRobotVelocityInPerSec(robotSpeedInPerSec);
+
         cachedPositionTicks = motor.getCurrentPosition();
         pos = cachedPositionTicks;
         double now = timer.seconds();
