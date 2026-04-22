@@ -31,6 +31,7 @@ public final class PinpointLocalizer implements Localizer {
     private Pose2d txPinpointRobot = new Pose2d(0, 0, 0);
 
     public PinpointLocalizer(SRSHubs srshubs, Pose2d initialPose) {
+        this.srshubs = srshubs;
         pinpoint = srshubs.getPinpoint();
 
         srshubs.getPinpointHub().runCommand(new SRSHub.GoBildaPinpoint.ResetIMUCommand(1));

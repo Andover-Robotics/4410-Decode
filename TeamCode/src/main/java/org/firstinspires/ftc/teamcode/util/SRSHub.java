@@ -793,7 +793,7 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
 
         public boolean disconnected = false;
 
-        public short deviceStatus;
+        public int deviceStatus;
 
         public float xPosition;
         public float yPosition;
@@ -847,7 +847,8 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
         }
 
         protected int getUpdateLength() {
-            return 201;
+            // disconnected (1 bit) + device status (32 bits) + 6 floats (6 * 32 bits)
+            return 225;
         }
 
         protected int getAddress() {
@@ -866,11 +867,11 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
             byte[] deviceStatusChunk = data
                     .get(
                             index,
-                            index + 8
+                            index + 32
                     )
                     .toByteArray();
 
-            byte[] paddedDeviceStatusChunk = new byte[2];
+            byte[] paddedDeviceStatusChunk = new byte[4];
 
             System.arraycopy(
                     deviceStatusChunk,
@@ -883,9 +884,9 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
             deviceStatus = ByteBuffer
                     .wrap(paddedDeviceStatusChunk)
                     .order(BYTE_ORDER)
-                    .getShort();
+                    .getInt();
 
-            index += 8;
+            index += 32;
 
             byte[] xPositionChunk = data
                     .get(
