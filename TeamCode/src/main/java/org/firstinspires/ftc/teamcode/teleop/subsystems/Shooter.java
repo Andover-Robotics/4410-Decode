@@ -14,6 +14,7 @@ public class Shooter {
     private final MotorEx motor1;
     private final MotorEx motor2;
     public final Servo hood;
+    private final SRSHubs srsHubs;
 
     // basic control objects
     private final PIDController controller;
@@ -47,7 +48,8 @@ public class Shooter {
     private boolean closedLoopEnabled = true;
 
 
-    public Shooter(OpMode opMode) {
+    public Shooter(OpMode opMode, SRSHubs srsHubs) {
+        this.srsHubs = srsHubs;
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
         motor1.setInverted(inverted);
         motor1.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
@@ -85,10 +87,10 @@ public class Shooter {
     }
 
     public void periodic() {
-        if (leftEncoder) { //todo make this srshub
-            filteredRPM = motor1.getVelocity() * 60 / 28;
+        if (leftEncoder) {
+            filteredRPM = srsHubs.getShooterLeftVelocityTicksPerSecond() * 60 / 28;
         } else {
-            filteredRPM = motor2.getVelocity() * 60 / 28 * -1;
+            filteredRPM = srsHubs.getShooterRightVelocityTicksPerSecond() * 60 / 28;
         }
 
         controller.setPID(p, i, d);

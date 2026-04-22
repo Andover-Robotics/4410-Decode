@@ -67,8 +67,10 @@ public class Turret {
 
     public Pose2d pose;
     public PoseVelocity2d velocity;
+    private final SRSHubs srsHubs;
 
-    public Turret(OpMode opMode) {
+    public Turret(OpMode opMode, SRSHubs srsHubs) {
+        this.srsHubs = srsHubs;
         motor = new MotorEx(opMode.hardwareMap, "turret", Motor.GoBILDA.RPM_1150);
         motor.setInverted(false);
         largeErrorController = new PIDController(largeP, largeI, largeD);
@@ -80,7 +82,7 @@ public class Turret {
         motor.setRunMode(Motor.RunMode.RawPower);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        shooter = new Shooter(opMode);
+        shooter = new Shooter(opMode, srsHubs);
         rpmInterpolator = new LinearInterpolation(SHOOTER_DISTANCE_IN, SHOOTER_RPM);
         hoodAngleInterpolator = new LinearInterpolation(SHOOTER_DISTANCE_IN, SHOOTER_HOOD_ANGLE_DEG);
 
@@ -251,7 +253,7 @@ public class Turret {
 
     public void periodic() {
         power = 0;
-        cachedPositionTicks = motor.getCurrentPosition(); //todo put this in srshub
+        cachedPositionTicks = srsHubs.getTurretPositionTicks();
         pos = cachedPositionTicks;
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);

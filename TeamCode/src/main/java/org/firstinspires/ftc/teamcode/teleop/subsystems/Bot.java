@@ -30,6 +30,7 @@ public class Bot {
     public Indexer indexer;
     public Screen screen;
     public Limelight limelight;
+    public SRSHubs srsHubs;
 //    public static VoltageSensor voltageSensor;
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
@@ -87,10 +88,11 @@ public class Bot {
         this.opMode = opMode;
 
         drive = new MecanumDrive(opMode.hardwareMap, storedPose);
+        srsHubs = new SRSHubs(opMode);
         limelight = new Limelight(opMode);
-        turret = new Turret(opMode);
+        turret = new Turret(opMode, srsHubs);
         intake = new Intake(opMode);
-        indexer = new Indexer(opMode);
+        indexer = new Indexer(opMode, srsHubs);
         screen = new Screen(opMode, this);
 //        voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
         updatePoses();
@@ -249,8 +251,12 @@ public class Bot {
         bulkCacheMs = nanosToMillis(System.nanoTime() - sectionStartNs);
 
         sectionStartNs = System.nanoTime();
-        indexer.updateSensorCache();
+        srsHubs.update();
         sensorCacheMs = nanosToMillis(System.nanoTime() - sectionStartNs);
+
+        sectionStartNs = System.nanoTime();
+        indexer.updateSensorCache();
+        sensorCacheMs += nanosToMillis(System.nanoTime() - sectionStartNs);
 
         sectionStartNs = System.nanoTime();
 //        limelight.periodic();
@@ -279,6 +285,7 @@ public class Bot {
 
     public void autoPeriodic() {
 //        clearBulkCache(); //drive.updatePoseEstimate does this
+        srsHubs.update();
         indexer.updateSensorCache();
         limelight.periodic();
         turret.periodic();

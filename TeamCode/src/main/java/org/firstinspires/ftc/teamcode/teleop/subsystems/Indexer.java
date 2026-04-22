@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
 import org.firstinspires.ftc.teamcode.util.SRSHub;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.util.SRSHub;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -67,43 +66,16 @@ public class Indexer {
     public final Holder[] holders;
     private String autoMotifPattern;
     private boolean autoMotifInitialized = false;
-    private static SRSHub srsHubLeft;
-    private static SRSHub srsHubRight;
     private boolean updateLeftNext = true;
-    private static boolean srsInit = false;
-    static SRSHub.APDS9151 rightFront = new SRSHub.APDS9151();
-    static SRSHub.APDS9151 rightBack = new SRSHub.APDS9151();
-    static SRSHub.APDS9151 backBottom = new SRSHub.APDS9151();
-    static SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
-    static SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
-    static SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
 
     /* ================= INIT ================= */
 
-    public Indexer(OpMode opMode) {
-        srsHubLeft = opMode.hardwareMap.get(SRSHub.class, "srshubLeft");
-        srsHubRight = opMode.hardwareMap.get(SRSHub.class, "srshubRight");
-
-        if (!srsInit) {
-            SRSHub.Config leftConfig = new SRSHub.Config();
-            leftConfig.addI2CDevice(1, rightFront);
-            leftConfig.addI2CDevice(2, rightBack);
-            leftConfig.addI2CDevice(3, backBottom);
-
-            SRSHub.Config rightConfig = new SRSHub.Config();
-            rightConfig.addI2CDevice(1, leftFront);
-            rightConfig.addI2CDevice(2, leftBack);
-            rightConfig.addI2CDevice(3, backRight);
-            srsHubLeft.init(leftConfig);
-            srsHubRight.init(rightConfig);
-            srsInit = true;
-        }
-
+    public Indexer(OpMode opMode, SRSHubs srsHubs) {
         rightHolder = new Holder(
                 opMode,
                 "rightKicker",
-                rightFront,
-                rightBack,
+                srsHubs.rightFront,
+                srsHubs.rightBack,
                 kickerRightUp, kickerRightDown,
                 proximityThreshold
         );
@@ -111,8 +83,8 @@ public class Indexer {
         leftHolder = new Holder(
                 opMode,
                 "leftKicker",
-                leftFront,
-                leftBack,
+                srsHubs.leftFront,
+                srsHubs.leftBack,
                 kickerLeftUp, kickerLeftDown,
                 proximityThreshold
         );
@@ -120,8 +92,8 @@ public class Indexer {
         backHolder = new Holder(
                 opMode,
                 "backKicker",
-                backRight,
-                backBottom,
+                srsHubs.backRight,
+                srsHubs.backBottom,
                 kickerBackUp, kickerBackDown,
                 proximityThreshold
         );
@@ -161,8 +133,6 @@ public class Indexer {
 
     public void updateSensorCache() {
         if (!staggerSensorUpdates) {
-            srsHubLeft.update();
-            srsHubRight.update();
             for (Holder h : holders) {
                 h.updateSensorCache();
             }
@@ -170,11 +140,9 @@ public class Indexer {
         }
 
         if (updateLeftNext) {
-            srsHubLeft.update();
             rightHolder.updateSensorCache(true, true);
             backHolder.updateSensorCache(false, true);
         } else {
-            srsHubRight.update();
             leftHolder.updateSensorCache(true, true);
             backHolder.updateSensorCache(true, false);
         }
