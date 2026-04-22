@@ -37,10 +37,10 @@ public class SRSHubs {
         rightHub = hardwareMap.get(SRSHub.class, "srshubRight");
 
         SRSHub.Config leftConfig = new SRSHub.Config();
+        leftConfig.addI2CDevice(1, pinpoint);
         leftConfig.addI2CDevice(1, rightFront);
         leftConfig.addI2CDevice(2, rightBack);
         leftConfig.addI2CDevice(3, backBottom);
-        leftConfig.addI2CDevice(1, pinpoint);
 
         SRSHub.Config rightConfig = new SRSHub.Config();
         rightConfig.addI2CDevice(1, leftFront);

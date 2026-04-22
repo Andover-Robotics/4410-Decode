@@ -406,6 +406,218 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
         }
     }
 
+    public static class Config {
+
+        private boolean locked = false;
+        protected final AnalogDigitalDevice[] analogDigitalDevices =
+                new AnalogDigitalDevice[12];
+
+        protected final Encoder[] encoders = new Encoder[6];
+
+        protected final ArrayList<I2CDevice>[] i2cBuses = new ArrayList[]{
+                new ArrayList<I2CDevice>(),
+                new ArrayList<I2CDevice>(),
+                new ArrayList<I2CDevice>()
+        };
+
+        public Config() {
+            Arrays.fill(
+                    analogDigitalDevices,
+                    AnalogDigitalDevice.NONE
+            );
+
+            Arrays.fill(
+                    encoders,
+                    Encoder.NONE
+            );
+        }
+
+        /**
+         * configures an analog-digital pin to be analog, digital, or none
+         *
+         * @param pin the pin being configured, from 1 to 12
+         * @param device the type of device on the pin
+         *
+         * @throws IndexOutOfBoundsException if the pin is not between 1 and 12, inclusive
+         * @throws IllegalStateException if init has already been called
+         */
+        public void setAnalogDigitalDevice(
+                int pin,
+                AnalogDigitalDevice device
+        ) {
+            if (pin < 1 || pin > 12) {
+                throwException(
+                        IndexOutOfBoundsException.class,
+                        "AnalogDigitalDevice pin " +
+                                "must be from 1 to 12"
+                );
+            }
+
+            if (locked) {
+                throwException(
+                        IllegalStateException.class,
+                        "Config has already been " +
+                                "passed to the SRSHub; changes cannot be made"
+                );
+            }
+
+            analogDigitalDevices[pin - 1] = device;
+        }
+
+        /**
+         * configures an encoder port to be quadrature, pwm, or none
+         *
+         * @param port the port being configured, from 1 to 6
+         * @param device the type of device on the port
+         *
+         * @throws IndexOutOfBoundsException if the port is not between 1 and 6, inclusive
+         * @throws IllegalStateException if init has already been called
+         */
+        public void setEncoder(int port, Encoder device) {
+            if (port < 1 || port > 6) {
+                throwException(
+                        IndexOutOfBoundsException.class,
+                        "Encoder port must " +
+                                "be from 1 to 6"
+                );
+            }
+
+            if (locked) {
+                throwException(
+                        IllegalStateException.class,
+                        "Config has already been " +
+                                "passed to the SRSHub; changes cannot be made"
+                );
+            }
+
+            encoders[port - 1] = device;
+        }
+
+        /**
+         * adds a device to an I2C bus
+         *
+         * @param bus the bus to which the device is being added, from 1 to 3
+         * @param device the (unique) type of the device on the bus
+         *
+         * @throws IndexOutOfBoundsException if the bus is not between 1 and 3, inclusive
+         * @throws IllegalStateException if init has already been called or if a device of the same I2C address has been configured on the bus
+         */
+        public void addI2CDevice(int bus, I2CDevice device) {
+            if (bus < 1 || bus > 3) {
+                throwException(
+                        IndexOutOfBoundsException.class,
+                        "I2C bus must be from 1 to" +
+                                " 3"
+                );
+            }
+
+            if (locked) {
+                throwException(
+                        IllegalStateException.class,
+                        "Config has already been " +
+                                "passed to the SRSHub; changes cannot be made"
+                );
+            }
+
+            for (I2CDevice i2cDevice : i2cBuses[bus - 1]) {
+                if (i2cDevice.getClass() == device.getClass()) {
+                    throwException(
+                            IllegalStateException.class,
+                            "I2C Bus #" + bus + " " +
+                                    "already has a device of type " + device
+                                    .getClass()
+                                    .getName()
+                    );
+                }
+
+                if (i2cDevice.getAddress() == device.getAddress()) {
+                    throwException(
+                            IllegalStateException.class,
+                            "I2C Bus #" + bus + " " +
+                                    "already has a bus of type " + i2cDevice
+                                    .getClass()
+                                    .getName() + " which has an I2C address conflicting " +
+                                    "with the " + device
+                                    .getClass()
+                                    .getName()
+                    );
+                }
+            }
+
+            i2cBuses[bus - 1].add(device);
+        }
+
+        protected void lock() {
+            locked = true;
+        }
+
+    }
+    public SRSHub(
+            I2cDeviceSynchSimple deviceClient,
+            boolean deviceClientIsOwned
+    ) {
+        super(
+                deviceClient,
+                deviceClientIsOwned
+        );
+
+        this.deviceClient.setI2cAddress(I2cAddr.create7bit(I2C_ADDRESS));
+        super.registerArmingStateCallback(false);
+    }
+
+    protected boolean doInitialize() {
+        ((LynxI2cDeviceSynch) this.deviceClient).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+
+        isInitialized = false;
+
+        verifyInitialization();
+
+        return true;
+    }
+
+    public Manufacturer getManufacturer() {
+        return Manufacturer.Other;
+    }
+
+    public String getDeviceName() {
+        return "SRSHub";
+    }
+
+    enum Register {
+        DEVICE_INFO(
+                0x00,
+                4
+        ),
+
+        RESTART(
+                0x01,
+                1
+        ),
+
+        INIT(
+                0x02,
+                -1
+        ),
+
+        READ(
+                0x03,
+                -1
+        ),
+
+        COMMAND(
+                0x04,
+                -1
+        );
+
+        public final byte address;
+
+        public final int length;
+        Register(int address, int length) {
+            this.address = (byte) address;
+            this.length = length;
+        }
+
+    }
     public static class VL53L0X extends I2CDevice {
         private final BitSet config = new BitSet(getInitLength());
 
@@ -816,218 +1028,6 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     .wrap(paddedHVelocityChunk)
                     .order(BYTE_ORDER)
                     .getFloat();
-        }
-    }
-
-    public static class Config {
-        private boolean locked = false;
-
-        protected final AnalogDigitalDevice[] analogDigitalDevices =
-                new AnalogDigitalDevice[12];
-
-        protected final Encoder[] encoders = new Encoder[6];
-
-        protected final ArrayList<I2CDevice>[] i2cBuses = new ArrayList[]{
-                new ArrayList<I2CDevice>(),
-                new ArrayList<I2CDevice>(),
-                new ArrayList<I2CDevice>()
-        };
-
-        public Config() {
-            Arrays.fill(
-                    analogDigitalDevices,
-                    AnalogDigitalDevice.NONE
-            );
-
-            Arrays.fill(
-                    encoders,
-                    Encoder.NONE
-            );
-        }
-
-        /**
-         * configures an analog-digital pin to be analog, digital, or none
-         *
-         * @param pin the pin being configured, from 1 to 12
-         * @param device the type of device on the pin
-         *
-         * @throws IndexOutOfBoundsException if the pin is not between 1 and 12, inclusive
-         * @throws IllegalStateException if init has already been called
-         */
-        public void setAnalogDigitalDevice(
-                int pin,
-                AnalogDigitalDevice device
-        ) {
-            if (pin < 1 || pin > 12) {
-                throwException(
-                        IndexOutOfBoundsException.class,
-                        "AnalogDigitalDevice pin " +
-                                "must be from 1 to 12"
-                );
-            }
-
-            if (locked) {
-                throwException(
-                        IllegalStateException.class,
-                        "Config has already been " +
-                                "passed to the SRSHub; changes cannot be made"
-                );
-            }
-
-            analogDigitalDevices[pin - 1] = device;
-        }
-
-        /**
-         * configures an encoder port to be quadrature, pwm, or none
-         *
-         * @param port the port being configured, from 1 to 6
-         * @param device the type of device on the port
-         *
-         * @throws IndexOutOfBoundsException if the port is not between 1 and 6, inclusive
-         * @throws IllegalStateException if init has already been called
-         */
-        public void setEncoder(int port, Encoder device) {
-            if (port < 1 || port > 6) {
-                throwException(
-                        IndexOutOfBoundsException.class,
-                        "Encoder port must " +
-                                "be from 1 to 6"
-                );
-            }
-
-            if (locked) {
-                throwException(
-                        IllegalStateException.class,
-                        "Config has already been " +
-                                "passed to the SRSHub; changes cannot be made"
-                );
-            }
-
-            encoders[port - 1] = device;
-        }
-
-        /**
-         * adds a device to an I2C bus
-         *
-         * @param bus the bus to which the device is being added, from 1 to 3
-         * @param device the (unique) type of the device on the bus
-         *
-         * @throws IndexOutOfBoundsException if the bus is not between 1 and 3, inclusive
-         * @throws IllegalStateException if init has already been called or if a device of the same I2C address has been configured on the bus
-         */
-        public void addI2CDevice(int bus, I2CDevice device) {
-            if (bus < 1 || bus > 3) {
-                throwException(
-                        IndexOutOfBoundsException.class,
-                        "I2C bus must be from 1 to" +
-                                " 3"
-                );
-            }
-
-            if (locked) {
-                throwException(
-                        IllegalStateException.class,
-                        "Config has already been " +
-                                "passed to the SRSHub; changes cannot be made"
-                );
-            }
-
-            for (I2CDevice i2cDevice : i2cBuses[bus - 1]) {
-                if (i2cDevice.getClass() == device.getClass()) {
-                    throwException(
-                            IllegalStateException.class,
-                            "I2C Bus #" + bus + " " +
-                                    "already has a device of type " + device
-                                    .getClass()
-                                    .getName()
-                    );
-                }
-
-                if (i2cDevice.getAddress() == device.getAddress()) {
-                    throwException(
-                            IllegalStateException.class,
-                            "I2C Bus #" + bus + " " +
-                                    "already has a bus of type " + i2cDevice
-                                    .getClass()
-                                    .getName() + " which has an I2C address conflicting " +
-                                    "with the " + device
-                                    .getClass()
-                                    .getName()
-                    );
-                }
-            }
-
-            i2cBuses[bus - 1].add(device);
-        }
-
-        protected void lock() {
-            locked = true;
-        }
-    }
-
-    public SRSHub(
-            I2cDeviceSynchSimple deviceClient,
-            boolean deviceClientIsOwned
-    ) {
-        super(
-                deviceClient,
-                deviceClientIsOwned
-        );
-
-        this.deviceClient.setI2cAddress(I2cAddr.create7bit(I2C_ADDRESS));
-        super.registerArmingStateCallback(false);
-    }
-
-    protected boolean doInitialize() {
-        ((LynxI2cDeviceSynch) this.deviceClient).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
-
-        isInitialized = false;
-
-        verifyInitialization();
-
-        return true;
-    }
-
-    public Manufacturer getManufacturer() {
-        return Manufacturer.Other;
-    }
-
-    public String getDeviceName() {
-        return "SRSHub";
-    }
-
-    enum Register {
-        DEVICE_INFO(
-                0x00,
-                4
-        ),
-
-        RESTART(
-                0x01,
-                1
-        ),
-
-        INIT(
-                0x02,
-                -1
-        ),
-
-        READ(
-                0x03,
-                -1
-        ),
-
-        COMMAND(
-                0x04,
-                -1
-        );
-
-        public final byte address;
-        public final int length;
-
-        Register(int address, int length) {
-            this.address = (byte) address;
-            this.length = length;
         }
     }
 
