@@ -13,7 +13,6 @@ public class SRSHubs {
 
     public static double shooterLeftEncoderScale = 1.0;
     public static double shooterRightEncoderScale = -1.0;
-    public static float xOffset = (float) (-3.03 * 25.4), yOffset = (float) (-5.9 * 25.4);
 
     public final SRSHub leftHub;
     public final SRSHub rightHub;
@@ -24,7 +23,6 @@ public class SRSHubs {
     public final SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
     public final SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
     public final SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
-    public final SRSHub.GoBildaPinpoint pinpoint = new SRSHub.GoBildaPinpoint(xOffset, yOffset, 19.89436789f, SRSHub.GoBildaPinpoint.EncoderDirection.FORWARD, SRSHub.GoBildaPinpoint.EncoderDirection.FORWARD);
 
     public SRSHubs(OpMode opMode) {
         this(opMode.hardwareMap);
@@ -35,7 +33,6 @@ public class SRSHubs {
         rightHub = hardwareMap.get(SRSHub.class, "srshubRight");
 
         SRSHub.Config leftConfig = new SRSHub.Config();
-        leftConfig.addI2CDevice(1, pinpoint);
         leftConfig.addI2CDevice(1, rightFront);
         leftConfig.addI2CDevice(2, rightBack);
         leftConfig.addI2CDevice(3, backBottom);
@@ -54,17 +51,6 @@ public class SRSHubs {
     public void update() {
         leftHub.update();
         rightHub.update();
-    }
-
-    public SRSHub.GoBildaPinpoint getPinpoint() {
-        return getPinpointHub().getI2CDevice(
-                1,
-                SRSHub.GoBildaPinpoint.class
-        );
-    }
-
-    public SRSHub getPinpointHub() {
-        return leftHub;
     }
 
     public double getShooterLeftVelocityTicksPerSecond() {
