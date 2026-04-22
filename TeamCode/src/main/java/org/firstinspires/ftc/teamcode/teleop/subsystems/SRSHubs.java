@@ -60,7 +60,14 @@ public class SRSHubs {
     }
 
     public SRSHub.GoBildaPinpoint getPinpoint() {
-        return pinpoint;
+        return getPinpointHub().getI2CDevice(
+                1,
+                SRSHub.GoBildaPinpoint.class
+        );
+    }
+
+    public SRSHub getPinpointHub() {
+        return leftHub;
     }
 
     public int getTurretPositionTicks() {
