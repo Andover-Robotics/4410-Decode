@@ -14,50 +14,67 @@ public class SRSHubs {
     public static double shooterLeftEncoderScale = 1.0;
     public static double shooterRightEncoderScale = -1.0;
 
-    public final SRSHub leftHub;
-    public final SRSHub rightHub;
+    public static SRSHub leftHub;
+    public static SRSHub rightHub;
 
-    public final SRSHub.APDS9151 rightFront = new SRSHub.APDS9151();
-    public final SRSHub.APDS9151 rightBack = new SRSHub.APDS9151();
-    public final SRSHub.APDS9151 backBottom = new SRSHub.APDS9151();
-    public final SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
-    public final SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
-    public final SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
+    public static final SRSHub.APDS9151 rightFront = new SRSHub.APDS9151();
+    public static final SRSHub.APDS9151 rightBack = new SRSHub.APDS9151();
+    public static final SRSHub.APDS9151 backBottom = new SRSHub.APDS9151();
+    public static final SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
+    public static final SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
+    public static final SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
+    private static boolean initialized;
 
     public SRSHubs(OpMode opMode) {
         this(opMode.hardwareMap);
     }
 
     public SRSHubs(HardwareMap hardwareMap) {
-        leftHub = hardwareMap.get(SRSHub.class, "srshubLeft");
-        rightHub = hardwareMap.get(SRSHub.class, "srshubRight");
+        synchronized (SRSHubs.class) {
+            if (initialized) {
+                return;
+            }
 
-        SRSHub.Config leftConfig = new SRSHub.Config();
-        leftConfig.addI2CDevice(1, rightFront);
-        leftConfig.addI2CDevice(2, rightBack);
-        leftConfig.addI2CDevice(3, backBottom);
+            leftHub = hardwareMap.get(SRSHub.class, "srshubLeft");
+            rightHub = hardwareMap.get(SRSHub.class, "srshubRight");
 
-        SRSHub.Config rightConfig = new SRSHub.Config();
-        rightConfig.addI2CDevice(1, leftFront);
-        rightConfig.addI2CDevice(2, leftBack);
-        rightConfig.addI2CDevice(3, backRight);
-        rightConfig.setEncoder(shooterLeftEncoderPort, SRSHub.Encoder.QUADRATURE);
-        rightConfig.setEncoder(shooterRightEncoderPort, SRSHub.Encoder.QUADRATURE);
+            SRSHub.Config leftConfig = new SRSHub.Config();
+            leftConfig.addI2CDevice(1, rightFront);
+            leftConfig.addI2CDevice(2, rightBack);
+            leftConfig.addI2CDevice(3, backBottom);
 
-        leftHub.init(leftConfig);
-        rightHub.init(rightConfig);
+            SRSHub.Config rightConfig = new SRSHub.Config();
+            rightConfig.addI2CDevice(1, leftFront);
+            rightConfig.addI2CDevice(2, leftBack);
+            rightConfig.addI2CDevice(3, backRight);
+            rightConfig.setEncoder(shooterLeftEncoderPort, SRSHub.Encoder.QUADRATURE);
+            rightConfig.setEncoder(shooterRightEncoderPort, SRSHub.Encoder.QUADRATURE);
+
+            leftHub.init(leftConfig);
+            rightHub.init(rightConfig);
+            initialized = true;
+        }
     }
 
     public void update() {
+        if (!initialized) {
+            throw new IllegalStateException("SRSHubs must be initialized before update()");
+        }
         leftHub.update();
         rightHub.update();
     }
 
     public double getShooterLeftVelocityTicksPerSecond() {
+        if (!initialized) {
+            throw new IllegalStateException("SRSHubs must be initialized before reading encoders");
+        }
         return rightHub.readEncoder(shooterLeftEncoderPort).velocity * shooterLeftEncoderScale;
     }
 
     public double getShooterRightVelocityTicksPerSecond() {
+        if (!initialized) {
+            throw new IllegalStateException("SRSHubs must be initialized before reading encoders");
+        }
         return rightHub.readEncoder(shooterRightEncoderPort).velocity * shooterRightEncoderScale;
     }
 }
