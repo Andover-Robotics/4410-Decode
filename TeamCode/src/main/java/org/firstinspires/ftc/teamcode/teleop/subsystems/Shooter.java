@@ -38,6 +38,7 @@ public class Shooter {
     private double requestedHoodPos = 1.0;
     public static boolean leftEncoder = true;
     public double ff;
+    public static double bangBangVelocityThresholdInPerSec = 5.0;
 
     public static boolean voltageComp = true, angleCaching = false, powerCaching = false;
 
@@ -45,6 +46,7 @@ public class Shooter {
     private double targetRPM = 0.0;
     private double filteredRPM = 0.0;
     private double power = 0.0;
+    private double robotVelocityInPerSec = 0.0;
     private boolean closedLoopEnabled = true;
 
 
@@ -86,6 +88,10 @@ public class Shooter {
         closedLoopEnabled = false;
     }
 
+    public void setRobotVelocityInPerSec(double velocityInPerSec) {
+        robotVelocityInPerSec = Math.abs(velocityInPerSec);
+    }
+
     public void periodic() {
         if (leftEncoder) {
             filteredRPM = srsHubs.getShooterLeftVelocityTicksPerSecond() * 60 / 28;
@@ -96,18 +102,18 @@ public class Shooter {
         controller.setPID(p, i, d);
 
         if (closedLoopEnabled) {
-            ff = f * targetRPM;                                    // feedforward
-            double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
-            power = ff + pid;
-
-//             optional floor power when target is nonzero
             if (Math.abs(targetRPM) < 1e-3) {
                 power = 0.0;
+            } else if (robotVelocityInPerSec < bangBangVelocityThresholdInPerSec) {
+                power = filteredRPM < targetRPM ? 1.0 : 0.0;
+                ff = 0.0;
             } else {
+                ff = f * targetRPM;                                    // feedforward
+                double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
+                power = ff + pid;
                 double s = Math.signum(power);
                 power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
             }
-
         }
         power = clamp(power, -maxPower, maxPower);//
         motor1.set(power);
