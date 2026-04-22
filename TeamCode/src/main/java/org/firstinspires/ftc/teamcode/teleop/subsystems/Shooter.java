@@ -113,7 +113,7 @@ public class Shooter {
         motor1.set(power);
         motor2.set(-power);
         if (Math.abs(requestedHoodPos - currentServoPos) > 0.0015 || !angleCaching) {
-            hood.setPosition(requestedHoodPos);
+//            hood.setPosition(requestedHoodPos);
             currentHoodAngle = posToAngle(requestedHoodPos);
             currentServoPos = requestedHoodPos;
         }
