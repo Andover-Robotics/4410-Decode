@@ -46,6 +46,7 @@ import org.firstinspires.ftc.teamcode.auto.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.auto.messages.PoseMessage;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.SRSHubs;
 
 import java.lang.Math;
 import java.util.Arrays;
@@ -113,6 +114,7 @@ public final class MecanumDrive {
     public final DcMotorEx leftFront, leftBack, rightBack, rightFront;
 
     public final VoltageSensor voltageSensor;
+    public final SRSHubs srsHubs;
 
     public final LazyImu lazyImu;
 
@@ -255,6 +257,7 @@ public final class MecanumDrive {
                 PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
+        srsHubs = new SRSHubs(hardwareMap);
 
         localizer = new PinpointLocalizer(hardwareMap, pose);
 
