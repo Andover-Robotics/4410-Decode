@@ -22,15 +22,15 @@ public final class PinpointLocalizer implements Localizer {
 
     public static Params PARAMS = new Params();
 
-    private SRSHubs srshubs;
+    private final SRSHubs srshubs;
     public SRSHub.GoBildaPinpoint pinpoint;
-    public static double xOffset = -3.03, yOffset = -5.9;
     public static PoseVelocity2d robotPosVel;
 
     private Pose2d txWorldPinpoint;
     private Pose2d txPinpointRobot = new Pose2d(0, 0, 0);
 
     public PinpointLocalizer(SRSHubs srshubs, Pose2d initialPose) {
+        this.srshubs = srshubs;
         pinpoint = srshubs.getPinpoint();
 
         srshubs.getPinpointHub().runCommand(new SRSHub.GoBildaPinpoint.ResetIMUCommand(1));
