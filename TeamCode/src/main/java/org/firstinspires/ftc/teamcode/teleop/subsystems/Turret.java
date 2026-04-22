@@ -127,8 +127,6 @@ public class Turret {
     }
 
     private void runTo(int t) { //takes in ticks
-        motor.setRunMode(Motor.RunMode.RawPower);
-        motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         setPoint = t;
     }
 
@@ -254,38 +252,32 @@ public class Turret {
 
     public void periodic() {
         power = 0;
-        cachedPositionTicks = motor.getCurrentPosition();
+        cachedPositionTicks = motor.getCurrentPosition(); //todo put this in srshub
         pos = cachedPositionTicks;
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);
         currentPosDegs = getPositionDegs();
 
-        // position tracking mode
+//        // position tracking mode
         if (positionTracking) {
             trackingTarget = aimAtGlobalPoint(Bot.targetPose.x, Bot.targetPose.y);
             runToAngle(trackingTarget);
-//            runToAngle(aimAtGlobalPoint(goalX, goalY));
+////            runToAngle(aimAtGlobalPoint(goalX, goalY));
             double errorDeg = Math.abs((setPoint - pos) * degsPerTick);
-            activeController = errorDeg > errorThresholdDeg ? largeErrorController : smallErrorController;
-            if (activeController == largeErrorController) {
-                activeController.setPID(largeP, largeI, largeD);
-            } else {
-                activeController.setPID(smallP, smallI, smallD);
-            }
+            activeController = smallErrorController;
+            activeController.setPID(smallP, smallI, smallD);
             activeController.setSetPoint(setPoint);
-
+//
             double targetVelDegPerSec = ((setPoint - previousTargetTicks) * degsPerTick) / deltaTime;
-            double targetAccelDegPerSec2 = (targetVelDegPerSec - previousTargetVelDegPerSec) / deltaTime;
-
+//
             velFFPower = targetVelK * targetVelDegPerSec;
-            accelFFPower = targetAccelK * targetAccelDegPerSec2;
 
             staticFFPower = 0;
             if (Math.abs(activeController.getPositionError() * degsPerTick) > staticFErrorDeg) {
                 staticFFPower = staticF * Math.signum(activeController.getPositionError());
             }
 
-            feedforwardPower = velFFPower + accelFFPower + staticFFPower;
+            feedforwardPower = velFFPower + staticFFPower;
             power = (activeController.calculate(pos) + feedforwardPower);
 
             previousTargetTicks = setPoint;
@@ -314,11 +306,13 @@ public class Turret {
             shooter.setVelocity(shooterRpm);
             shooter.setHoodAngleDeg(hoodAngleDeg);
         } else if (!shooterActive) {
-            shooter.setPower(0);
+            if (shooter.getPower() != 0) {
+                shooter.setPower(0);
+            }
         }
         shooter.periodic();
 
-        motor.set(power);
+        motor.set(power);//todo power);
         lastTime = now;
     }
 

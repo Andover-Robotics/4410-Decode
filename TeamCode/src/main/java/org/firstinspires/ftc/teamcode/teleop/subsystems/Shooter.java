@@ -86,7 +86,7 @@ public class Shooter {
     }
 
     public void periodic() {
-        if (leftEncoder) {
+        if (leftEncoder) { //todo make this srshub
             filteredRPM = motor1.getVelocity() * 60 / 28;
         } else {
             filteredRPM = motor2.getVelocity() * 60 / 28 * -1;
@@ -99,29 +99,28 @@ public class Shooter {
             double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
             power = ff + pid;
 
-            // optional floor power when target is nonzero
+//             optional floor power when target is nonzero
             if (Math.abs(targetRPM) < 1e-3) {
                 power = 0.0;
             } else {
                 double s = Math.signum(power);
                 power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
             }
+
         }
-        power = clamp(power, -maxPower, maxPower);
-        if (power != motor1.getRawPower() || !powerCaching) {
-            motor1.set(power);
-            motor2.set(-power);
-        }
-        if (requestedHoodPos != getHoodAngle() ||!angleCaching) {
+        power = clamp(power, -maxPower, maxPower);//
+        motor1.set(power);
+        motor2.set(-power);
+        if (Math.abs(requestedHoodPos - currentServoPos) > 0.0015 || !angleCaching) {
             hood.setPosition(requestedHoodPos);
+            currentHoodAngle = posToAngle(requestedHoodPos);
+            currentServoPos = requestedHoodPos;
         }
     }
 
     public void setHoodAngle(double angle) {
         angle = clamp(angle, lowAngleLimit, lowAngleLimit + angleRange);
-        currentHoodAngle = angle;   // stores the angle for telemetry
-        currentServoPos = angleToPos(angle);
-        requestedHoodPos = currentServoPos;
+        requestedHoodPos = angleToPos(angle);
     }
     public double getHoodAngle() {
         return currentHoodAngle;
@@ -158,5 +157,10 @@ public class Shooter {
     private static double angleToPos(double angle) {
 //        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
         return servoPosPerAngle * (angle - lowAngleLimit) + lowServoLimit;
+    }
+
+    private static double posToAngle(double pos) {
+//        return highServoLimit + ((lowServoLimit-highServoLimit) * ((angle - lowAngleLimit) / angleRange));
+        return ((pos - lowServoLimit) / servoPosPerAngle) + lowAngleLimit;
     }
 }
