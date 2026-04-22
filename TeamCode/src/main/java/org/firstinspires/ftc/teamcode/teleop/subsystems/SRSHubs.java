@@ -24,7 +24,7 @@ public class SRSHubs {
     public final SRSHub.APDS9151 leftFront = new SRSHub.APDS9151();
     public final SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
     public final SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
-    public final SRSHub.GoBildaPinpoint pinpoint = new SRSHub.GoBildaPinpoint(xOffset, yOffset, 19.89436789f, SRSHub.GoBildaPinpoint.EncoderDirection.FORWARD, SRSHub.GoBildaPinpoint.EncoderDirection.REVERSED);
+    public final SRSHub.GoBildaPinpoint pinpoint = new SRSHub.GoBildaPinpoint(xOffset, yOffset, 19.89436789f, SRSHub.GoBildaPinpoint.EncoderDirection.FORWARD, SRSHub.GoBildaPinpoint.EncoderDirection.FORWARD);
 
     public SRSHubs(OpMode opMode) {
         this(opMode.hardwareMap);

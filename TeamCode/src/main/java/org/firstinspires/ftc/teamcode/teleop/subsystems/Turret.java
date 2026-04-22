@@ -311,9 +311,9 @@ public class Turret {
                 shooter.setPower(0);
             }
         }
-        shooter.periodic();
+        shooter.periodic(); //todo small spikes
 
-        motor.set(power);//todo power);
+        motor.set(power);
         lastTime = now;
     }
 
