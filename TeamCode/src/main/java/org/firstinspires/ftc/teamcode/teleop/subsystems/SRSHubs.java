@@ -8,11 +8,9 @@ import org.firstinspires.ftc.teamcode.util.SRSHub;
 
 @Config
 public class SRSHubs {
-    public static int turretEncoderPort = 1;
     public static int shooterLeftEncoderPort = 2;
     public static int shooterRightEncoderPort = 3;
 
-    public static double turretEncoderScale = 1.0;
     public static double shooterLeftEncoderScale = 1.0;
     public static double shooterRightEncoderScale = -1.0;
     public static float xOffset = (float) (-3.03 * 25.4), yOffset = (float) (-5.9 * 25.4);
@@ -46,7 +44,6 @@ public class SRSHubs {
         rightConfig.addI2CDevice(1, leftFront);
         rightConfig.addI2CDevice(2, leftBack);
         rightConfig.addI2CDevice(3, backRight);
-        rightConfig.setEncoder(turretEncoderPort, SRSHub.Encoder.QUADRATURE);
         rightConfig.setEncoder(shooterLeftEncoderPort, SRSHub.Encoder.QUADRATURE);
         rightConfig.setEncoder(shooterRightEncoderPort, SRSHub.Encoder.QUADRATURE);
 
@@ -68,10 +65,6 @@ public class SRSHubs {
 
     public SRSHub getPinpointHub() {
         return leftHub;
-    }
-
-    public int getTurretPositionTicks() {
-        return (int) Math.round(rightHub.readEncoder(turretEncoderPort).position * turretEncoderScale);
     }
 
     public double getShooterLeftVelocityTicksPerSecond() {
