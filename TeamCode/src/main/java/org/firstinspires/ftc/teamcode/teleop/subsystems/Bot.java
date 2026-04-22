@@ -10,13 +10,11 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -97,11 +95,6 @@ public class Bot {
 //        voltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
         updatePoses();
         setMidShooting();
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        PhotonCore.experimental.setMaximumParallelCommands(8);
-        PhotonCore.enable();
-        PhotonCore.PARALLELIZE_SERVOS = false;
     }
 
     public void switchAlliance() {

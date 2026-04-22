@@ -38,7 +38,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.seattlesolvers.solverslib.photon.PhotonCore;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -476,8 +475,6 @@ public final class MecanumDrive {
     }
 
     public void clearBulkCache() {
-        PhotonCore.CONTROL_HUB.clearBulkCache();
-        PhotonCore.EXPANSION_HUB.clearBulkCache();
     }
 
     private void drawPoseHistory(Canvas c) {
