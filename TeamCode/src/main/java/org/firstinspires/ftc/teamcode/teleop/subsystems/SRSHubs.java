@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.SRSHub;
 
@@ -28,8 +29,12 @@ public class SRSHubs {
     public final SRSHub.GoBildaPinpoint pinpoint = new SRSHub.GoBildaPinpoint(xOffset, yOffset, 19.89436789f, SRSHub.GoBildaPinpoint.EncoderDirection.FORWARD, SRSHub.GoBildaPinpoint.EncoderDirection.REVERSED);
 
     public SRSHubs(OpMode opMode) {
-        leftHub = opMode.hardwareMap.get(SRSHub.class, "srshubLeft");
-        rightHub = opMode.hardwareMap.get(SRSHub.class, "srshubRight");
+        this(opMode.hardwareMap);
+    }
+
+    public SRSHubs(HardwareMap hardwareMap) {
+        leftHub = hardwareMap.get(SRSHub.class, "srshubLeft");
+        rightHub = hardwareMap.get(SRSHub.class, "srshubRight");
 
         SRSHub.Config leftConfig = new SRSHub.Config();
         leftConfig.addI2CDevice(1, rightFront);
