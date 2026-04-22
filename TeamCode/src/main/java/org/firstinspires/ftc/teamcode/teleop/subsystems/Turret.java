@@ -253,7 +253,7 @@ public class Turret {
 
     public void periodic() {
         power = 0;
-        cachedPositionTicks = srsHubs.getTurretPositionTicks();
+        cachedPositionTicks = motor.getCurrentPosition();
         pos = cachedPositionTicks;
         double now = timer.seconds();
         double deltaTime = Math.max(1e-3, now - lastTime);
