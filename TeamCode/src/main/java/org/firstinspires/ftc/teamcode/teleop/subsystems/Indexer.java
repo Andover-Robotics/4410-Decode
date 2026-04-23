@@ -501,7 +501,7 @@ public class Indexer {
         private boolean sensorADisabled = false;
         private boolean sensorBDisabled = false;
         private static final int SENSOR_DISABLE_KICK_COUNT = 3;
-        private static final long SENSOR_DISABLE_MIN_STREAK_NS = 8_000_000_000L;
+        private static final long SENSOR_DISABLE_MIN_STREAK_NS = 5_000_000_000L;
 
         public Holder(
                 OpMode opMode,
@@ -589,25 +589,46 @@ public class Indexer {
         }
 
         public void updateSensorCache(boolean updateSensorA, boolean updateSensorB) {
-            if (updateSensorA && !sensorADisabled) {
+            if (updateSensorA) {
                 distanceA = sensorA.distanceMm();
+                if (sensorADisabled) {
+                    boolean stillCovered = distanceA > 0 && distanceA < distanceThreshold;
+                    if (!stillCovered) {
+                        sensorADisabled = false;
+                        consecutiveCoveredAfterKickA = 0;
+                        coveredStreakStartNsA = -1;
+                    }
+                }
 
+                if (!sensorADisabled) {
 //                int r = Math.max(0, sensorA.red);
 //                int g = Math.max(0, sensorA.green);
 //                int b = Math.max(0, sensorA.blue);
 //                android.graphics.Color.RGBToHSV(r, g, b, hsv);
 //                hueA = hsv[0];
-                hueA = sensorA.hue();
+                    hueA = sensorA.hue();
+                }
             }
 
-            if (updateSensorB && !sensorBDisabled) {
+            if (updateSensorB) {
                 distanceB = sensorB.distanceMm();
+                if (sensorBDisabled) {
+                    boolean stillCovered = distanceB > 0 && distanceB < distanceThreshold;
+                    if (!stillCovered) {
+                        sensorBDisabled = false;
+                        consecutiveCoveredAfterKickB = 0;
+                        coveredStreakStartNsB = -1;
+                    }
+                }
+
+                if (!sensorBDisabled) {
 //                int r = Math.max(0, sensorB.red);
 //                int g = Math.max(0, sensorB.green);
 //                int b = Math.max(0, sensorB.blue);
 //                android.graphics.Color.RGBToHSV(r, g, b, hsv);
 //                hueB = hsv[0];
-                hueB = sensorB.hue();
+                    hueB = sensorB.hue();
+                }
             }
 
             boolean presentA = !sensorADisabled && distanceA > 0 && distanceA < distanceThreshold;
