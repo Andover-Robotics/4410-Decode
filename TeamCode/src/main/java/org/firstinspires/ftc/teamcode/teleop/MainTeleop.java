@@ -131,7 +131,7 @@ public class MainTeleop extends LinearOpMode {
 
         loopTimer.reset();
         bot.indexer.resetIndexer();
-        runningActions.add(bot.indexer.leftHolder.resetFastAction());
+        runningActions.add(bot.indexer.shootRapidFire());
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();

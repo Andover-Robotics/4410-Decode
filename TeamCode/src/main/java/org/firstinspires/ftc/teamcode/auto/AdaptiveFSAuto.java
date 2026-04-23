@@ -324,53 +324,6 @@ public class AdaptiveFSAuto extends LinearOpMode {
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackAlliance());
 
-        if (cfg.delayGate > 0 && gateCycles > 0) {
-            builder = builder.stopAndAdd(new SleepAction(cfg.delayGate));
-            addedAction = true;
-        }
-        for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) { //TODO - Make sure this doesn't hit far balls, if it does, then add another .splineTo above line 302 that goes to a position that is just 10 inches lower y than the gate position
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.gate.component1(), Math.toRadians(90))
-                    .waitSeconds(0.5)
-                    .strafeToLinearHeading(Pos.gateIntaking.position, Math.toRadians(45))
-                    .waitSeconds(0.35)
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.2, bot.indexer.jiggleKickers())
-                    .afterTime(0.9, (() -> bot.reverseIntake()))
-                    .setTangent(Math.toRadians(-85));
-            builder = (gateIndex == gateCycles - 1) ?
-                    builder
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(45)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire()) :
-                    builder
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180)) // TODO tune this move to not hit the far balls - we need to do far after gate because otherwise overflow will become an issue
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire());
-            addedAction = true;
-        }
-
-        if (cfg.runClose) {
-            if (cfg.delayClose > 0) {
-                builder = builder.stopAndAdd(new SleepAction(cfg.delayClose));
-                addedAction = true;
-            }
-            builder = builder
-                    .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
-                    .strafeToConstantHeading(new Vector2d(Pos.blueCloseIntake.position.x,
-                            Pos.blueCloseIntake.position.y + Pos.closeIntake))
-                    .stopAndAdd(bot.enableShooter())
-                    .afterTime(0.4, bot.indexer.jiggleKickers())
-                    .afterTime(1.1, (() -> bot.reverseIntake()))
-                    .setReversed(true)
-                    .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(5)), Math.toRadians(-180))
-                    .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                    .stopAndAdd(bot.indexer.shootRapidFire());
-            addedAction = true;
-        }
-
         if (cfg.runFar) {
             if (cfg.delayFar > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
@@ -425,7 +378,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex % 2 == 1) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-70, 70))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                             .afterTime(1.3, (() -> bot.reverseIntake()))
                             .setReversed(true)
                             .splineTo(Pos.farShoot, Math.toRadians(-100))
@@ -434,7 +387,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 } else {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-70, 70))
+                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                             .afterTime(1.5, (() -> bot.reverseIntake()))
                             .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100))
 //                            .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-40, 70))
