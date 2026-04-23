@@ -187,8 +187,8 @@ public class SoloTeleop extends LinearOpMode {
                 bot.turret.enableShooter(false);
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.A)  && !gp1.isDown(GamepadKeys.Button.START)) {
-                runningActions.add(bot.indexer.shootMotif());
+            if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
+                bot.indexer.resetDisabledSensors();
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
