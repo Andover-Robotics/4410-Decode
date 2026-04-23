@@ -344,6 +344,7 @@ import team.techtigers.core.display.sprites.XSprite;
 
 public class BallRegion extends DisplayRegion {
     private final CircleSprite circle1, circle2, circle3;
+    private final CircleSprite fault1, fault2, fault3;
     private final RectangleOutlineSprite outline1;
     private final Sprite[] sprites;
     public boolean teleop = false;
@@ -361,11 +362,20 @@ public class BallRegion extends DisplayRegion {
         circle3 = new CircleSprite(16, 0, 8);
         circle3.setColor(Color.GREEN);
         circle3.enable();
+        fault1 = new CircleSprite(1, 1, 6);
+        fault1.setColor(Color.RED);
+        fault1.disable();
+        fault2 = new CircleSprite(9, 1, 6);
+        fault2.setColor(Color.RED);
+        fault2.disable();
+        fault3 = new CircleSprite(17, 1, 6);
+        fault3.setColor(Color.RED);
+        fault3.disable();
         outline1 = new RectangleOutlineSprite(0, 0, 24, 8);
         outline1.setColor(Color.RED);
         outline1.disable();
 
-        sprites = new Sprite[]{circle1, circle2, circle3, outline1};
+        sprites = new Sprite[]{circle1, circle2, circle3, fault1, fault2, fault3, outline1};
     }
 
     @Override
@@ -380,6 +390,19 @@ public class BallRegion extends DisplayRegion {
         if (teleop) {
             for (int i = 0; i < 3; i++) {
                 Sprite circle = sprites[i];
+                CircleSprite fault = i == 0 ? fault1 : (i == 1 ? fault2 : fault3);
+
+                int disabledSensorCount = bot.indexer.holders[i].disabledSensorCount();
+                if (disabledSensorCount >= 2) {
+                    circle.setColor(Color.RED);
+                    fault.disable();
+                    continue;
+                } else if (disabledSensorCount == 1) {
+                    fault.enable();
+                } else {
+                    fault.disable();
+                }
+
                 if (bot.indexer.holders[i].getColor().equals("GREEN")) {
                     circle.setColor(Color.GREEN);
                 } else if (bot.indexer.holders[i].getColor().equals("PURPLE")) {
@@ -391,6 +414,9 @@ public class BallRegion extends DisplayRegion {
                 }
             }
         } else {
+            fault1.disable();
+            fault2.disable();
+            fault3.disable();
             for (Sprite sprite : sprites) {
                 sprite.setColor(sprite.getColor());
             }
@@ -408,4 +434,3 @@ public class BallRegion extends DisplayRegion {
     }
 
 }
-
