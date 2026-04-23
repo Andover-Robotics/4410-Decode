@@ -14,16 +14,14 @@ public class Shooter {
     private final MotorEx motor1;
     private final MotorEx motor2;
     public final Servo hood;
-    private final SRSHubs srsHubs;
 
     // basic control objects
     private final PIDController controller;
 
     // PIDF coefficients (PID runs on RPM error to accel/decel; F is power-per-RPM feedforward)
-    public static double p = 0.004, i = 0.0, d = 0.0, f = 0.00018, bangBangTolerance = 20;
+    public static double p = 0.0021, i = 0.0, d = 0.0, f = 0.00018, bangBangTolerance = 20;
     public static boolean inverted = false;
 
-    // note for interpolation - distance >55, max angle = 44, distance <35, min angle = 32.5, add 1.4375
     // targeting and behavior
     public static double toleranceRPM = 75.0;   // speed window for "at speed"
     public static double minPower = 0.0;        // floor power to overcome friction
@@ -38,7 +36,7 @@ public class Shooter {
     private double requestedHoodPos = 1.0;
     public static boolean leftEncoder = true;
     public double ff;
-    public static double bangBangVelocityThresholdInPerSec = 5;
+    public static double bangBangVelocityThresholdInPerSec = -1;
 
     public static boolean voltageComp = true, angleCaching = false, fullPower = false;
 
@@ -51,7 +49,6 @@ public class Shooter {
 
 
     public Shooter(OpMode opMode, SRSHubs srsHubs) {
-        this.srsHubs = srsHubs;
         motor1 = new MotorEx(opMode.hardwareMap, "shooterL", Motor.GoBILDA.BARE);
         motor1.setInverted(inverted);
         motor1.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
@@ -116,8 +113,8 @@ public class Shooter {
                     ff = f * targetRPM;                                    // feedforward
                     double pid = controller.calculate(filteredRPM, targetRPM);    // error on RPM
                     power = ff + pid;
-                    double s = Math.signum(power);
-                    power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
+//                    double s = Math.signum(power);
+//                    power = s * Math.max(Math.abs(power), minPower) * (voltageComp? 13.5 / clamp(Bot.getBatteryVoltage(), 11, 15) : 1);
                 }
             }
         }

@@ -353,7 +353,7 @@ public class Playoff24BallAuto extends LinearOpMode {
                             .afterTime(0.2, bot.indexer.jiggleKickers())
                             .afterTime(0.9, (() -> bot.reverseIntake()))
                             .setReversed(true)
-                            .afterTime(1.3, bot.indexer.shootRapidFire())
+                            .afterTime(1.4, bot.indexer.shootRapidFire())
                             .strafeToSplineHeading(Pos.closeGateCycleShoot, Math.toRadians(110), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80))
                     :
                     builder
@@ -361,7 +361,7 @@ public class Playoff24BallAuto extends LinearOpMode {
                             .afterTime(0.9, (() -> bot.reverseIntake()))
                             .setReversed(true)
                             .afterTime(1.45, bot.indexer.shootRapidFire())
-                            .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x - 4, Pos.closeGateCycleShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80));
+                            .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x - 5.5, Pos.closeGateCycleShoot.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80));
 
             addedAction = true;
         }

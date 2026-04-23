@@ -124,6 +124,7 @@ public class SoloTeleop extends LinearOpMode {
         }
         bot.indexer.resetIndexer();
         loopTimer.reset();
+        runningActions.add(bot.indexer.shootRapidFire());
 
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket packet = new TelemetryPacket();
