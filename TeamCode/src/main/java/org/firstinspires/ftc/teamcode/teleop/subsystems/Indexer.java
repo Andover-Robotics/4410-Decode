@@ -458,6 +458,11 @@ public class Indexer {
         return autoMotifPattern;
     }
 
+    public void offsetAutoMotifBy(int offset) {
+        autoMotifPattern = rotateMotifPattern(getAutoMotifPattern(), offset);
+        autoMotifInitialized = true;
+    }
+
 
     public String getMotifPattern() {
         if (Bot.motif == null) {

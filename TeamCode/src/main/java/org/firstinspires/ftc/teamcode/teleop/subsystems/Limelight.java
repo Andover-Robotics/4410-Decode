@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleop.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -11,6 +12,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
 
 @Config
 public class Limelight {
@@ -27,6 +34,11 @@ public class Limelight {
     public static boolean obelisk = false;
     public double headingInput;
     public static double llxoffset=0,llyoffset=0;
+    public static int lastDetectedArtifacts = 0;
+    private static final int RAMP_PIPELINE_INDEX = 7;
+    private static final int MIN_ARTIFACT_SIDE_PIXELS = 30;
+    private static final int ROLLING_WINDOW_SIZE = 5;
+    private final Deque<Integer> artifactHistory = new ArrayDeque<>();
 
 
     public Limelight(OpMode opMode) {
@@ -65,6 +77,79 @@ public class Limelight {
     public void trackObelisk() {
         setPipeline(2);
         obelisk = true;
+    }
+
+    public void trackRamp() {
+        setPipeline(RAMP_PIPELINE_INDEX);
+        obelisk = false;
+    }
+
+    public int getRollingAverageArtifactCount() {
+        LLResult latestResult = limelight.getLatestResult();
+        int validArtifacts = 0;
+
+        if (latestResult != null && latestResult.isValid()) {
+            List<LLResultTypes.DetectorResult> detectorResults = latestResult.getDetectorResults();
+            if (detectorResults != null) {
+                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
+                    if (isDetectorAtLeast30x30(detectorResult)) {
+                        validArtifacts++;
+                    }
+                }
+            }
+        }
+
+        artifactHistory.addLast(validArtifacts);
+        if (artifactHistory.size() > ROLLING_WINDOW_SIZE) {
+            artifactHistory.removeFirst();
+        }
+
+        if (artifactHistory.isEmpty()) {
+            return 0;
+        }
+
+        int sum = 0;
+        for (int sample : artifactHistory) {
+            sum += sample;
+        }
+        lastDetectedArtifacts = (int) Math.round((double) sum / artifactHistory.size());
+        return lastDetectedArtifacts;
+    }
+
+    private boolean isDetectorAtLeast30x30(LLResultTypes.DetectorResult detectorResult) {
+        double widthPx = readDouble(detectorResult, "getTargetWidthPixels", "getWidthPixels", "getWidth");
+        double heightPx = readDouble(detectorResult, "getTargetHeightPixels", "getHeightPixels", "getHeight");
+
+        if (widthPx > 0 && heightPx > 0) {
+            return widthPx >= MIN_ARTIFACT_SIDE_PIXELS && heightPx >= MIN_ARTIFACT_SIDE_PIXELS;
+        }
+
+        return false;
+    }
+
+    private double readDouble(Object target, String... methodNames) {
+        for (String methodName : methodNames) {
+            try {
+                Method method = target.getClass().getMethod(methodName);
+                Object value = method.invoke(target);
+                if (value instanceof Number) {
+                    return ((Number) value).doubleValue();
+                }
+            } catch (Exception ignored) {
+                // try the next method name
+            }
+
+            try {
+                Field field = target.getClass().getField(methodName);
+                Object value = field.get(target);
+                if (value instanceof Number) {
+                    return ((Number) value).doubleValue();
+                }
+            } catch (Exception ignored) {
+                // try the next field name
+            }
+        }
+        return -1;
     }
 
     public void setObelisk(boolean enable) {
