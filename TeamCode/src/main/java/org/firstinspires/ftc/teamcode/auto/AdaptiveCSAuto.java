@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
 @Config
 @Autonomous(name = "Adaptive Close Shot Auto", group = "Competition")
 public class AdaptiveCSAuto extends LinearOpMode {
+    public static boolean ENABLE_RAMP_DETECTION_FEATURES = true;
     Bot bot;
     private GamepadEx gp1;
 
@@ -41,6 +42,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
         public boolean runFar     = true;
         public boolean runPushPark = false;
         public boolean runHp      = true;
+        public boolean rampDetection = false;
 
         public int delayPreload = 0;
         public int delayGate    = 0;
@@ -53,7 +55,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = open gate, 6 = far, 7 = push park, 8 = hp
+    // 0 = starting position, 1 = preload, 2 = mid, 3 = gate, 4 = close, 5 = open gate, 6 = far, 7 = push park, 8 = hp, 9 = ramp detection
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -106,6 +108,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
             addSegmentLine(7, "Push Park: run (X)", "%b", cfg.runPushPark);
             addSegmentLine(8, "HP:      run (X) / delay (L/R)", "%b / %ds",
                     cfg.runHp, cfg.delayHp);
+            addSegmentLine(9, "Ramp Detection (X)", "%b", cfg.rampDetection);
+            telemetry.addData("Ramp Features Enabled", ENABLE_RAMP_DETECTION_FEATURES);
             if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
             } else {
@@ -181,10 +185,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 9 - 1) % 9;
+            selectedSegment = (selectedSegment + 10 - 1) % 10;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 9;
+            selectedSegment = (selectedSegment + 1) % 10;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
@@ -217,6 +221,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     break;
                 case 8:
                     cfg.runHp = !cfg.runHp;
+                    break;
+                case 9:
+                    cfg.rampDetection = !cfg.rampDetection;
                     break;
             }
         }
@@ -264,6 +271,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 case 8:
                     cfg.delayHp =
                             clampDelay(cfg.delayHp + delta);
+                    break;
+                case 9:
                     break;
             }
         }
@@ -320,6 +329,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 addedAction = true;
                 bot.sensorIntake(true);
             }
+            if (isRampDetectionEnabled()) {
+                builder = builder.stopAndAdd(() -> bot.limelight.trackRamp());
+            }
             builder = builder
                     .afterTime(0.01, (() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(new Pose2d(Pos.blueMidIntake.position.x,
@@ -374,6 +386,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayClose));
                 addedAction = true;
             }
+
+            if (isRampDetectionEnabled()) {
+                builder = builder.stopAndAdd(bot.trackRampPose());
+            }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)));
 
@@ -419,6 +435,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
 //                                .splineTo(Pos.closeShootPark, Math.toRadians(-45));
 //                                .setReversed(true)
                                     .splineToSplineHeading(new Pose2d(Pos.closeShootPark.component1(), Pos.closeShootPark.component2(), Math.toRadians(135)), Math.toRadians(-20));
+            if (isRampDetectionEnabled()) {
+                builder = builder.afterTime(2.0, bot.offsetMotifByRampArtifacts());
+            }
 
             builder = (cfg.gateCycles < 2) ?
                     builder
@@ -432,6 +451,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
             if (cfg.delayFar > 0) {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayFar));
                 addedAction = true;
+            }
+            if (isRampDetectionEnabled()) {
+                builder = builder.stopAndAdd(bot.trackRampPose());
             }
             if (cfg.runPushPark) {
                 builder = builder
@@ -456,13 +478,21 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
             if (cfg.gateCycles > 1) {
                 builder = builder
-                        .setReversed(true)
+                        .setReversed(true);
+                if (isRampDetectionEnabled()) {
+                    builder = builder.afterTime(2.0, bot.offsetMotifByRampArtifacts());
+                }
+                builder = builder
                         .splineTo(Pos.closeShootPark, Math.toRadians(-25))
                         .stopAndAdd(bot.indexer.shootRapidFire());
                 //.stopAndAdd((() -> bot.disableShooter()));
             } else {
                 builder = builder
-                        .setReversed(true)
+                        .setReversed(true);
+                if (isRampDetectionEnabled()) {
+                    builder = builder.afterTime(2.0, bot.offsetMotifByRampArtifacts());
+                }
+                builder = builder
                         .splineTo(Pos.closeShoot, Math.toRadians(-25))
                         .stopAndAdd(bot.indexer.shootMotifAuto());
                 //.stopAndAdd((() -> bot.disableShooter()));
@@ -475,6 +505,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder.stopAndAdd(new SleepAction(cfg.delayHp));
                 addedAction = true;
             }
+            if (isRampDetectionEnabled()) {
+                builder = builder.stopAndAdd(bot.trackRampPose());
+            }
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2())
@@ -482,7 +515,11 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
             builder = builder
                     .waitSeconds(0.1)
-                    .setReversed(true)
+                    .setReversed(true);
+            if (isRampDetectionEnabled()) {
+                builder = builder.afterTime(2.0, bot.offsetMotifByRampArtifacts());
+            }
+            builder = builder
                     .afterTime(0.01, new SequentialAction(
                             bot.enableShooter(),
                             new SleepAction(0.5),
@@ -502,5 +539,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
         addedAction = false;
         return builder.build();
+    }
+
+    private boolean isRampDetectionEnabled() {
+        return ENABLE_RAMP_DETECTION_FEATURES && cfg.rampDetection;
     }
 }

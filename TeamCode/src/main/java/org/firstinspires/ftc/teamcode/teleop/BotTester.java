@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.tuning.Drawing;
 import org.firstinspires.ftc.teamcode.auto.Pos;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Bot;
+import org.firstinspires.ftc.teamcode.teleop.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.teleop.subsystems.Turret;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class BotTester extends LinearOpMode {
     private List<Action> runningActions = new ArrayList<>();
     private boolean useStoredPose = true;
     private boolean headingLockEnabled = false;
+    private boolean rampPipelineEnabled = false;
     private final ElapsedTime loopTimer = new ElapsedTime();
     private int n = 0, rpmTotalError = 0;
 
@@ -137,6 +139,15 @@ public class BotTester extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
                 bot.limelight.setObelisk(!bot.limelight.isObelisk());
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.START)) {
+                rampPipelineEnabled = !rampPipelineEnabled;
+                if (rampPipelineEnabled) {
+                    bot.limelight.trackRamp();
+                } else {
+                    bot.limelight.trackAlliance();
+                }
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
@@ -266,6 +277,10 @@ public class BotTester extends LinearOpMode {
                 bot.turret.resetEncoder();
             }
 
+            if (rampPipelineEnabled) {
+                bot.limelight.getRollingAverageArtifactCount();
+            }
+
             bot.periodic();
             drive();
 
@@ -318,6 +333,8 @@ public class BotTester extends LinearOpMode {
                     backColor != null
                             ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
                             : back);
+            telemetry.addData("Ramp Pipeline (START)", rampPipelineEnabled);
+            telemetry.addData("Artifacts (avg)", Limelight.lastDetectedArtifacts);
 
 //            String color = lastLoopTime < 20? "green" : lastLoopTime < 40? "yellow" : lastLoopTime < 60? "#FFA500" : "#FF3333";
 //

@@ -102,6 +102,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
             telemetry.addData("HEADING LOCK (TOUCHPAD)", headingLockEnabled);
+            telemetry.addData("Last Auto Artifacts", Limelight.lastDetectedArtifacts);
 
             telemetry.addData("Motif:", bot.indexer.getMotifPattern());
             telemetry.addLine("DPAD Down: PPG");
@@ -371,6 +372,11 @@ public class MainTeleop extends LinearOpMode {
 //            telemetry.addData("Tracking Target", bot.turret.trackingTarget);
 //
 //
+
+            telemetry.addData("Tracking Target", bot.turret.trackingTarget);
+            telemetry.addData("Last Auto Artifacts", Limelight.lastDetectedArtifacts);
+
+
             telemetry.addData("\nGoal Distance", Turret.trackingDistance);
 ////            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getHoodAngle());
 ////            telemetry.addData("Hood Angle Setpoint:", bot.turret.shooter.getServoPosition());
