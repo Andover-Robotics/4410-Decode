@@ -45,11 +45,12 @@ public class AdaptiveFSAuto extends LinearOpMode {
         public int delayFar     = 0;
         public int delayTunnel  = 0;
         public int intervalTunnel = 0;
+        public int secretTunnelConfig = 0;
     }
 
     private AutoConfig cfg = new AutoConfig();
 
-    // 0 = preload, 1 = mid, 2 = gate, 3 = close, 4 = hp, 5 = far, 6 = tunnel
+    // 0 = preload, 1 = mid, 2 = gate, 3 = close, 4 = hp, 5 = far, 6 = tunnel, 7 = secret tunnel config
     private int selectedSegment = 0;
 
     private Action builtAuto = null;
@@ -101,6 +102,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     cfg.runHp, cfg.delayHp);
             addSegmentLine(6, "Tunnel:  cycles (X) / delay (L/R) / interval (LB/RB)", "%d / %ds / %ds",
                     cfg.tunnelCycles, cfg.delayTunnel, cfg.intervalTunnel);
+            addSegmentLine(7, "Secret Tunnel X Offset: (X/L/R)", "%d in", cfg.secretTunnelConfig);
             if (builtAuto == null || addedAction) {
                 telemetry.addData("", "<big><b><font color='red'>AUTO NOT BUILT (Y to build)</font></b></big>");
             } else {
@@ -123,6 +125,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
         telemetry.addData("Auto", "Built for %s", Bot.getAlliance());
         telemetry.addData("Segments", "preload:%b mid:%b gate:%d close:%b far:%b hp:%b tunnel:%d",
                 cfg.runPreload, cfg.runMid, cfg.gateCycles, cfg.runClose, cfg.runFar, cfg.runHp, cfg.tunnelCycles);
+        telemetry.addData("Secret Tunnel X Offset", "%d in", cfg.secretTunnelConfig);
         telemetry.update();
 
         applyStartingPosition(drive);
@@ -165,10 +168,10 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            selectedSegment = (selectedSegment + 7 - 1) % 7;
+            selectedSegment = (selectedSegment + 8 - 1) % 8;
         }
         if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            selectedSegment = (selectedSegment + 1) % 7;
+            selectedSegment = (selectedSegment + 1) % 8;
         }
 
         if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
@@ -194,6 +197,9 @@ public class AdaptiveFSAuto extends LinearOpMode {
                     break;
                 case 6:
                     cfg.tunnelCycles = (cfg.tunnelCycles + 1) % 6;
+                    break;
+                case 7:
+                    cfg.secretTunnelConfig = clampSecretTunnelConfig(cfg.secretTunnelConfig + 1);
                     break;
             }
         }
@@ -237,6 +243,10 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 case 6:
                     cfg.delayTunnel =
                             clampDelay(cfg.delayTunnel + delta);
+                    break;
+                case 7:
+                    cfg.secretTunnelConfig =
+                            clampSecretTunnelConfig(cfg.secretTunnelConfig + delta);
                     break;
             }
         }
@@ -285,6 +295,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
 
         int gateCycles = Math.max(0, Math.min(3, cfg.gateCycles));
         int tunnelCycles = Math.max(0, Math.min(5, cfg.tunnelCycles));
+        int secretTunnelOffset = clampSecretTunnelConfig(cfg.secretTunnelConfig);
 
         builder = builder.stopAndAdd(() -> bot.limelight.trackObelisk());
 
@@ -378,7 +389,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex % 2 == 1) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
+                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x - secretTunnelOffset, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                             .afterTime(1.3, (() -> bot.reverseIntake()))
                             .setReversed(true)
                             .splineTo(Pos.farShoot, Math.toRadians(-100))
@@ -417,5 +428,11 @@ public class AdaptiveFSAuto extends LinearOpMode {
 
         addedAction = false;
         return builder.build();
+    }
+
+    private int clampSecretTunnelConfig(int config) {
+        if (config < 0) return 0;
+        if (config > 12) return 12;
+        return config;
     }
 }
