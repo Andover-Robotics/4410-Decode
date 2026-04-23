@@ -38,7 +38,7 @@ public class Limelight {
     private static final int RAMP_PIPELINE_INDEX = 7;
     private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
     private static final int ROLLING_WINDOW_SIZE = 5;
-    public static double taThreshold = 0.8;
+    public static double taThreshold = 0.25;
     private final Deque<Integer> artifactHistory = new ArrayDeque<>();
 
 
