@@ -74,7 +74,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
         applyStartingPosition(drive);
         bot.setTargetGoalPose();
         bot.indexer.resetIndexer();
-        Actions.runBlocking(bot.indexer.leftHolder.resetFastAction());
+        Actions.runBlocking(bot.indexer.shootRapidFire());
         Bot.drive.localizer.recalibrateIMU();
 
 

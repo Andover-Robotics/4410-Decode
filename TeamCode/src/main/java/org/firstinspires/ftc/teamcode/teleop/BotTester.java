@@ -141,14 +141,6 @@ public class BotTester extends LinearOpMode {
                 bot.limelight.setObelisk(!bot.limelight.isObelisk());
             }
 
-            if (gp1.wasJustPressed(GamepadKeys.Button.START)) {
-                rampPipelineEnabled = !rampPipelineEnabled;
-                if (rampPipelineEnabled) {
-                    bot.limelight.trackRamp();
-                } else {
-                    bot.limelight.trackAlliance();
-                }
-            }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
                 shooting = !shooting;
@@ -222,7 +214,12 @@ public class BotTester extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
-                runningActions.add(bot.indexer.shootMotif());
+                rampPipelineEnabled = !rampPipelineEnabled;
+                if (rampPipelineEnabled) {
+                    bot.limelight.trackRamp();
+                } else {
+                    bot.limelight.trackAlliance();
+                }
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
@@ -245,13 +242,6 @@ public class BotTester extends LinearOpMode {
                 runningActions.add(bot.indexer.shootGreen());
             }
             if (gp2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-//                if (bot.hoodPosition == Bot.HoodPosition.FAR) {
-//                    bot.turret.shooter.setHoodPosition(1);
-//                    bot.hoodPosition = Bot.HoodPosition.MID;
-//                } else {
-//                    bot.turret.shooter.setHoodPosition(0.74);
-//                    bot.hoodPosition = Bot.HoodPosition.FAR;
-//                }
                 bot.turret.shooter.setHoodAngle(angle);
             }
 
@@ -333,14 +323,13 @@ public class BotTester extends LinearOpMode {
                     backColor != null
                             ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
                             : back);
-            telemetry.addData("Ramp Pipeline (START)", rampPipelineEnabled);
-            telemetry.addData("Artifacts (avg)", Limelight.lastDetectedArtifacts);
+            telemetry.addData("Ramp Pipeline (A)", rampPipelineEnabled);
+            telemetry.addData("<big>Artifacts (avg)</big>", "<big>" + Limelight.lastDetectedArtifacts + "</big/>");
 
 //            String color = lastLoopTime < 20? "green" : lastLoopTime < 40? "yellow" : lastLoopTime < 60? "#FFA500" : "#FF3333";
 //
 //            telemetry.addData("<big><b><u>Total loop time</big></b></u>", "<font color=\""+ color + "\"><b>%.1f ms</b></font>", lastLoopTime);
 
-            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ bot.indexer.getMotifPattern() + "</big></b></u>");
             telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 //            telemetry.addData("Obelisk Detection", bot.limelight.isObelisk());
 //            if (bot.limelight.llResult != null && bot.limelight.llResult.isValid())

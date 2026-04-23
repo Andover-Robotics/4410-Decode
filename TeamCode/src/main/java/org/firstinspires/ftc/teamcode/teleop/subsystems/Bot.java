@@ -35,7 +35,7 @@ public class Bot {
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
     public static Vector2d obeliskPose = new Vector2d(66, 0);
-    public static Vector2d rampPose = new Vector2d(24, 76);
+    public static Vector2d rampPose = new Vector2d(16, 76);
     public static Vector2d goalPose = new Vector2d(62, 60); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
@@ -304,6 +304,7 @@ public class Bot {
         limelight.periodic();
         turret.periodic();
         drive.updatePoseEstimate();
+        screen.periodic();
         if (sensorIntaking) {
             if (indexer.countBalls()==3) {
                 intake.reverse();

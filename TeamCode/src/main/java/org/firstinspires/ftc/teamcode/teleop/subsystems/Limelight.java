@@ -36,7 +36,7 @@ public class Limelight {
     public static double llxoffset=0,llyoffset=0;
     public static int lastDetectedArtifacts = 0;
     private static final int RAMP_PIPELINE_INDEX = 7;
-    private static final int MIN_ARTIFACT_SIDE_PIXELS = 30;
+    private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
     private static final int ROLLING_WINDOW_SIZE = 5;
     private final Deque<Integer> artifactHistory = new ArrayDeque<>();
 
@@ -91,11 +91,12 @@ public class Limelight {
         if (latestResult != null && latestResult.isValid()) {
             List<LLResultTypes.DetectorResult> detectorResults = latestResult.getDetectorResults();
             if (detectorResults != null) {
-                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
-                    if (isDetectorAtLeast30x30(detectorResult)) {
-                        validArtifacts++;
-                    }
-                }
+                validArtifacts = detectorResults.size();
+//                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
+//                    if (isDetectorAtLeast30x30(detectorResult)) {
+//                        validArtifacts++;
+//                    }
+//                }
             }
         }
 
@@ -114,42 +115,6 @@ public class Limelight {
         }
         lastDetectedArtifacts = (int) Math.round((double) sum / artifactHistory.size());
         return lastDetectedArtifacts;
-    }
-
-    private boolean isDetectorAtLeast30x30(LLResultTypes.DetectorResult detectorResult) {
-        double widthPx = readDouble(detectorResult, "getTargetWidthPixels", "getWidthPixels", "getWidth");
-        double heightPx = readDouble(detectorResult, "getTargetHeightPixels", "getHeightPixels", "getHeight");
-
-        if (widthPx > 0 && heightPx > 0) {
-            return widthPx >= MIN_ARTIFACT_SIDE_PIXELS && heightPx >= MIN_ARTIFACT_SIDE_PIXELS;
-        }
-
-        return false;
-    }
-
-    private double readDouble(Object target, String... methodNames) {
-        for (String methodName : methodNames) {
-            try {
-                Method method = target.getClass().getMethod(methodName);
-                Object value = method.invoke(target);
-                if (value instanceof Number) {
-                    return ((Number) value).doubleValue();
-                }
-            } catch (Exception ignored) {
-                // try the next method name
-            }
-
-            try {
-                Field field = target.getClass().getField(methodName);
-                Object value = field.get(target);
-                if (value instanceof Number) {
-                    return ((Number) value).doubleValue();
-                }
-            } catch (Exception ignored) {
-                // try the next field name
-            }
-        }
-        return -1;
     }
 
     public void setObelisk(boolean enable) {
