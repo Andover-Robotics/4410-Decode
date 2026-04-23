@@ -304,8 +304,8 @@ public class Playoff24BallAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(() -> bot.stopIntake())
                     .stopAndAdd(bot.enableShooter())
-                    .stopAndAdd(new SleepAction(0.3))
-                    .afterTime(0.45, bot.indexer.shootRapidFire())
+                    .stopAndAdd(new SleepAction(0.35))
+                    .afterTime(0.55, bot.indexer.shootRapidFire())
                     .strafeToSplineHeading(Pos.firstShoot, Math.toRadians(175));
 
             addedAction = true;
