@@ -298,7 +298,6 @@ public class Bot {
     }
 
     public void autoPeriodic() {
-//        clearBulkCache(); //drive.updatePoseEstimate does this
         drive.srsHubs.update();
         indexer.updateSensorCache();
         limelight.periodic();

@@ -120,7 +120,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             }
             telemetry.update();
 
-            bot.periodic();
+            bot.autoPeriodic();
         }
 
         waitForStart();

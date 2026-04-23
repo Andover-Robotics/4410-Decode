@@ -22,7 +22,7 @@ public final class PinpointLocalizer implements Localizer {
 
     public final GoBildaPinpointDriver driver;
     public final GoBildaPinpointDriver.EncoderDirection initialParDirection, initialPerpDirection;
-    public static double xOffset = -3.03, yOffset = -5.9;
+    public static double xOffset = -3.03, yOffset = -6.4;
     public static PoseVelocity2d robotPosVel;
 
     private Pose2d txWorldPinpoint;
