@@ -40,16 +40,16 @@ public class Pos {
     public static Pose2d blueHpAngledIntake = new Pose2d(-60, 58, Math.toRadians(120));
     public static Pose2d blueHpSideIntake = new Pose2d(-61, 60, Math.toRadians(90));
 
-    public static Pose2d blueSecretTunnel = new Pose2d(-30, 62, Math.toRadians(35));
-    public static Pose2d blueHpCycle = new Pose2d(-56, 55, Math.toRadians(90));
+    public static Pose2d blueSecretTunnel = new Pose2d(-36, 62, Math.toRadians(35));
+    public static Pose2d blueHpCycle = new Pose2d(-59, 55, Math.toRadians(90));
 
     // SHOOTING (Vectors, as we do not care about robot orientation here)
     public static Vector2d firstShoot = new Vector2d(18, 20);
     public static Vector2d closeShoot = new Vector2d(4, 17);
     public static Vector2d closeShootPark = new Vector2d(30, 18);
-    public static Vector2d closeGateCycleShoot = new Vector2d(4, 22);
+    public static Vector2d closeGateCycleShoot = new Vector2d(4, 17);
     public static Vector2d closePark = new Vector2d(-1, 21);
-    public static Vector2d farShoot = new Vector2d(-55, 15);
+    public static Vector2d farShoot = new Vector2d(-53, 19);
     public static Vector2d farPark = new Vector2d(-44, 24);
 
     public static Pose2d transformRed(Pose2d pose) {

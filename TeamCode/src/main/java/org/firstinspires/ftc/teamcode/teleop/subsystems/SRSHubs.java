@@ -8,11 +8,6 @@ import org.firstinspires.ftc.teamcode.util.SRSHub;
 
 @Config
 public class SRSHubs {
-    public static int shooterLeftEncoderPort = 2;
-    public static int shooterRightEncoderPort = 3;
-
-    public static double shooterLeftEncoderScale = 1.0;
-    public static double shooterRightEncoderScale = -1.0;
 
     public static SRSHub leftHub;
     public static SRSHub rightHub;
@@ -24,6 +19,7 @@ public class SRSHubs {
     public static final SRSHub.APDS9151 leftBack = new SRSHub.APDS9151();
     public static final SRSHub.APDS9151 backRight = new SRSHub.APDS9151();
     private static boolean initialized;
+    public static boolean leftUpdate = true;
 
     public SRSHubs(OpMode opMode) {
         this(opMode.hardwareMap);
@@ -47,8 +43,6 @@ public class SRSHubs {
             rightConfig.addI2CDevice(1, leftFront);
             rightConfig.addI2CDevice(2, leftBack);
             rightConfig.addI2CDevice(3, backRight);
-            rightConfig.setEncoder(shooterLeftEncoderPort, SRSHub.Encoder.QUADRATURE);
-            rightConfig.setEncoder(shooterRightEncoderPort, SRSHub.Encoder.QUADRATURE);
 
             leftHub.init(leftConfig);
             rightHub.init(rightConfig);
@@ -60,21 +54,14 @@ public class SRSHubs {
         if (!initialized) {
             throw new IllegalStateException("SRSHubs must be initialized before update()");
         }
-        leftHub.update();
-        rightHub.update();
-    }
-
-    public double getShooterLeftVelocityTicksPerSecond() {
-        if (!initialized) {
-            throw new IllegalStateException("SRSHubs must be initialized before reading encoders");
+        if (leftUpdate) {
+            leftHub.update();
+            leftUpdate = false;
+        } else {
+            rightHub.update();
+            leftUpdate = true;
         }
-        return rightHub.readEncoder(shooterLeftEncoderPort).velocity * shooterLeftEncoderScale;
-    }
-
-    public double getShooterRightVelocityTicksPerSecond() {
-        if (!initialized) {
-            throw new IllegalStateException("SRSHubs must be initialized before reading encoders");
-        }
-        return rightHub.readEncoder(shooterRightEncoderPort).velocity * shooterRightEncoderScale;
+//        leftHub.update();
+//        rightHub.update();
     }
 }
