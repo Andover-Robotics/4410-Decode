@@ -262,6 +262,10 @@ public class MainTeleop extends LinearOpMode {
                 runningActions.add(bot.clearKickerJam());
             }
 
+            if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
+                bot.indexer.resetDisabledSensors();
+            }
+
             if (manualTurret) {
                 bot.turret.runManual(gp2.getLeftX());
             }
@@ -339,6 +343,18 @@ public class MainTeleop extends LinearOpMode {
                     backColor != null
                             ? "<big><font color=\"" + backColor + "\"><b>" + back + "</b></font></big>"
                             : back);
+            telemetry.addLine();
+            telemetry.addLine("=== SENSOR DISABLE STATUS ===");
+            telemetry.addData("GP1 A", "Reset/re-enable all holder sensors");
+            telemetry.addData("Right Sensors", "A:%s  B:%s",
+                    bot.indexer.rightHolder.isSensorADisabled() ? "DISABLED" : "ON",
+                    bot.indexer.rightHolder.isSensorBDisabled() ? "DISABLED" : "ON");
+            telemetry.addData("Back Sensors", "A:%s  B:%s",
+                    bot.indexer.backHolder.isSensorADisabled() ? "DISABLED" : "ON",
+                    bot.indexer.backHolder.isSensorBDisabled() ? "DISABLED" : "ON");
+            telemetry.addData("Left Sensors", "A:%s  B:%s",
+                    bot.indexer.leftHolder.isSensorADisabled() ? "DISABLED" : "ON",
+                    bot.indexer.leftHolder.isSensorBDisabled() ? "DISABLED" : "ON");
 //
 //            telemetry.addData("<big><b><u>Motif</big></b></u>", "<big><b> "+ Bot.motif + "</big></b></u>");
 //

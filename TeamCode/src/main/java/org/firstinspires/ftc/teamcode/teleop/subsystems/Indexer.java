@@ -126,6 +126,12 @@ public class Indexer {
         rightHolder.reset();
     }
 
+    public void resetDisabledSensors() {
+        for (Holder h : holders) {
+            h.resetDisabledSensors();
+        }
+    }
+
     public int countBalls() {
         int balls = 0;
         for (Holder h : holders) if (h.ballPresent()) balls++;
@@ -488,6 +494,14 @@ public class Indexer {
         private float hueB = Float.NaN;
         private boolean cachedBallPresent = false;
         private String cachedColor = "EMPTY";
+        private int consecutiveCoveredAfterKickA = 0;
+        private int consecutiveCoveredAfterKickB = 0;
+        private long coveredStreakStartNsA = -1;
+        private long coveredStreakStartNsB = -1;
+        private boolean sensorADisabled = false;
+        private boolean sensorBDisabled = false;
+        private static final int SENSOR_DISABLE_KICK_COUNT = 3;
+        private static final long SENSOR_DISABLE_MIN_STREAK_NS = 8_000_000_000L;
 
         public Holder(
                 OpMode opMode,
@@ -510,6 +524,7 @@ public class Indexer {
         public void down() { kicker.setPosition(downPos); }
 
         private void kick()  {
+            updateSensorDisableStateAfterKick();
             up();
         }
 
@@ -574,7 +589,7 @@ public class Indexer {
         }
 
         public void updateSensorCache(boolean updateSensorA, boolean updateSensorB) {
-            if (updateSensorA) {
+            if (updateSensorA && !sensorADisabled) {
                 distanceA = sensorA.distanceMm();
 
 //                int r = Math.max(0, sensorA.red);
@@ -585,7 +600,7 @@ public class Indexer {
                 hueA = sensorA.hue();
             }
 
-            if (updateSensorB) {
+            if (updateSensorB && !sensorBDisabled) {
                 distanceB = sensorB.distanceMm();
 //                int r = Math.max(0, sensorB.red);
 //                int g = Math.max(0, sensorB.green);
@@ -595,8 +610,8 @@ public class Indexer {
                 hueB = sensorB.hue();
             }
 
-            boolean presentA = distanceA > 0 && distanceA < distanceThreshold;
-            boolean presentB = distanceB > 0 && distanceB < distanceThreshold;
+            boolean presentA = !sensorADisabled && distanceA > 0 && distanceA < distanceThreshold;
+            boolean presentB = !sensorBDisabled && distanceB > 0 && distanceB < distanceThreshold;
 
             cachedBallPresent = presentA || presentB;
 
@@ -616,6 +631,48 @@ public class Indexer {
 
         public boolean ballPresent() {
             return cachedBallPresent;
+        }
+
+        private void updateSensorDisableStateAfterKick() {
+            if (!sensorADisabled) {
+                boolean presentA = distanceA > 0 && distanceA < distanceThreshold;
+                long nowNs = System.nanoTime();
+                if (presentA) {
+                    if (consecutiveCoveredAfterKickA == 0) {
+                        coveredStreakStartNsA = nowNs;
+                    }
+                    consecutiveCoveredAfterKickA++;
+                } else {
+                    consecutiveCoveredAfterKickA = 0;
+                    coveredStreakStartNsA = -1;
+                }
+
+                if (consecutiveCoveredAfterKickA >= SENSOR_DISABLE_KICK_COUNT
+                        && coveredStreakStartNsA > 0
+                        && nowNs - coveredStreakStartNsA >= SENSOR_DISABLE_MIN_STREAK_NS) {
+                    sensorADisabled = true;
+                }
+            }
+
+            if (!sensorBDisabled) {
+                boolean presentB = distanceB > 0 && distanceB < distanceThreshold;
+                long nowNs = System.nanoTime();
+                if (presentB) {
+                    if (consecutiveCoveredAfterKickB == 0) {
+                        coveredStreakStartNsB = nowNs;
+                    }
+                    consecutiveCoveredAfterKickB++;
+                } else {
+                    consecutiveCoveredAfterKickB = 0;
+                    coveredStreakStartNsB = -1;
+                }
+
+                if (consecutiveCoveredAfterKickB >= SENSOR_DISABLE_KICK_COUNT
+                        && coveredStreakStartNsB > 0
+                        && nowNs - coveredStreakStartNsB >= SENSOR_DISABLE_MIN_STREAK_NS) {
+                    sensorBDisabled = true;
+                }
+            }
         }
 
         private boolean isGreenHue(float h)  { return h > greenHueLow && h < greenHueHigh; }
@@ -639,6 +696,30 @@ public class Indexer {
 
         public float getHueB() {
             return hueB;
+        }
+
+        public boolean isSensorADisabled() {
+            return sensorADisabled;
+        }
+
+        public boolean isSensorBDisabled() {
+            return sensorBDisabled;
+        }
+
+        public int disabledSensorCount() {
+            int count = 0;
+            if (sensorADisabled) count++;
+            if (sensorBDisabled) count++;
+            return count;
+        }
+
+        public void resetDisabledSensors() {
+            sensorADisabled = false;
+            sensorBDisabled = false;
+            consecutiveCoveredAfterKickA = 0;
+            consecutiveCoveredAfterKickB = 0;
+            coveredStreakStartNsA = -1;
+            coveredStreakStartNsB = -1;
         }
 
         public float hueFromSensor(RevColorSensorV3 sensor) {
