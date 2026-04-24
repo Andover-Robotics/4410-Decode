@@ -39,7 +39,6 @@ public class Indexer {
 
     // Rapid fire between shots (normal)
     public static double rapidShootSleep = 0.035;
-    public static double autoFarSleep = 0.15;
 
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.40;
@@ -53,7 +52,7 @@ public class Indexer {
     public static boolean shooting = false;
 
     public static double
-            greenHueLow = 153,
+            greenHueLow = 147,
             greenHueHigh = 185,
             purpleHueLow = 185,
             purpleHueHigh = 235;
@@ -423,11 +422,7 @@ public class Indexer {
         }
 
         if (updateAutoMotif) {
-            autoMotifPattern = rotateMotifPattern(motifPattern, shotsPlanned);
-        }
-
-        if (updateAutoMotif) {
-            autoMotifPattern = rotateMotifPattern(motifPattern, shotsPlanned);
+            autoMotifPattern = rotateMotifPattern(getAutoMotifPattern(), shotsPlanned);
             autoMotifInitialized = true;
         }
 
@@ -439,7 +434,7 @@ public class Indexer {
             return motifPattern;
         }
         int length = motifPattern.length();
-        int shift = ((offset % length) + length) % length;
+        int shift = offset % length;
         if (shift == 0) {
             return motifPattern;
         }
@@ -455,7 +450,7 @@ public class Indexer {
     }
 
     public void offsetAutoMotifBy(int offset) {
-        autoMotifPattern = rotateMotifPattern(getAutoMotifPattern(), offset);
+        autoMotifPattern = rotateMotifPattern(getMotifPattern(), offset); //get pure motif for this
         autoMotifInitialized = true;
     }
 

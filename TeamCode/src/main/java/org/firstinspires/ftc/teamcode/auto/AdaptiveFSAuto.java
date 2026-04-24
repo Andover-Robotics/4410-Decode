@@ -386,7 +386,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex > 0 && cfg.intervalTunnel > 0) {
                     builder = builder.stopAndAdd(new SleepAction(cfg.intervalTunnel));
                 }
-                if (tunnelIndex % 2 == 1) {
+                if (tunnelIndex % 2 == 0) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
                             .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x - secretTunnelOffset, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
