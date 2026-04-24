@@ -38,6 +38,7 @@ public class Limelight {
     private static final int RAMP_PIPELINE_INDEX = 7;
     private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
     private static final int ROLLING_WINDOW_SIZE = 5;
+    public static double taThreshold = 0.25;
     private final Deque<Integer> artifactHistory = new ArrayDeque<>();
 
 
@@ -91,12 +92,12 @@ public class Limelight {
         if (latestResult != null && latestResult.isValid()) {
             List<LLResultTypes.DetectorResult> detectorResults = latestResult.getDetectorResults();
             if (detectorResults != null) {
-                validArtifacts = detectorResults.size();
-//                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
-//                    if (isDetectorAtLeast30x30(detectorResult)) {
-//                        validArtifacts++;
-//                    }
-//                }
+                // validArtifacts = detectorResults.size();
+                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
+                    if (detectorResult.getTargetArea() > taThreshold) {
+                        validArtifacts++;
+                    }
+                }
             }
         }
 
