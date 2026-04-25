@@ -268,7 +268,7 @@ public class BotTester extends LinearOpMode {
             }
 
             if (rampPipelineEnabled) {
-                bot.limelight.getRollingAverageArtifactCount();
+                bot.limelight.periodic();
             }
 
             bot.periodic();

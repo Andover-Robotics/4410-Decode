@@ -102,7 +102,7 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("STARTING POSITION (B)", Bot.getStartingPos());
             telemetry.addData("STORED POSITION", useStoredPose);
             telemetry.addData("HEADING LOCK (TOUCHPAD)", headingLockEnabled);
-            telemetry.addData("Last Auto Artifacts", Limelight.lastDetectedArtifacts);
+            telemetry.addData("Last Auto Artifacts", Limelight.artifactHistory.toString());
             telemetry.addData("Far Artifacts", Limelight.farArtifacts);
             telemetry.addData("HP Artifacts", Limelight.hpArtifacts);
 
@@ -240,6 +240,10 @@ public class MainTeleop extends LinearOpMode {
             // FAILSAFES
 
             if (gp1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+                bot.resetXY();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.resetPose();
             }
 
