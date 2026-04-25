@@ -437,7 +437,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
 
             builder = (cfg.gateCycles < 2) ?
                     builder
-                            .stopAndAdd(bot.indexer.shootMotifAuto()) :
+                            .stopAndAdd(isRampDetectionEnabled()
+                                    ? bot.indexer.shootMotifAutoClearArtifacts()
+                                    : bot.indexer.shootMotifAuto()) :
                     builder
                             .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
@@ -499,7 +501,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 }
                 builder = builder
                         .splineTo(Pos.closeShoot, Math.toRadians(-25))
-                        .stopAndAdd(bot.indexer.shootMotifAuto());
+                        .stopAndAdd(isRampDetectionEnabled()
+                                ? bot.indexer.shootMotifAutoClearArtifacts()
+                                : bot.indexer.shootMotifAuto());
             }
             addedAction = true;
         }
@@ -539,7 +543,9 @@ public class AdaptiveCSAuto extends LinearOpMode {
 //                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
                     .setTangent(Math.toRadians(-35))
                     .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(15))
-                    .stopAndAdd(bot.indexer.shootMotifAuto());
+                    .stopAndAdd(isRampDetectionEnabled()
+                            ? bot.indexer.shootMotifAutoClearArtifacts()
+                            : bot.indexer.shootMotifAuto());
             addedAction = true;
         }
         if (!cfg.runHp && cfg.gateCycles == 0) {

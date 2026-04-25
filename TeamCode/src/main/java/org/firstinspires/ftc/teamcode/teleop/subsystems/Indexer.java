@@ -348,14 +348,27 @@ public class Indexer {
         return buildMotifActionSupplier(this::getAutoMotifPattern, true);
     }
 
+    /**
+     * Auto motif shot variant that always kicks all three holders.
+     * Pattern-matched shots happen first, then any leftover holders are kicked
+     * to clear possible ramp-detection artifacts.
+     */
+    public Action shootMotifAutoClearArtifacts() {
+        return buildMotifActionSupplier(this::getAutoMotifPattern, true, true);
+    }
+
     private Action buildMotifActionSupplier(Supplier<String> motifSupplier, boolean updateAutoMotif) {
+        return buildMotifActionSupplier(motifSupplier, updateAutoMotif, false);
+    }
+
+    private Action buildMotifActionSupplier(Supplier<String> motifSupplier, boolean updateAutoMotif, boolean kickAllSlots) {
         return new Action() {
             private Action builtAction;
 
             @Override
             public boolean run(@NonNull TelemetryPacket t) {
                 if (builtAction == null) {
-                    builtAction = buildMotifAction(motifSupplier.get(), updateAutoMotif);
+                    builtAction = buildMotifAction(motifSupplier.get(), updateAutoMotif, kickAllSlots);
                 }
                 return builtAction.run(t);
             }
@@ -369,13 +382,15 @@ public class Indexer {
         };
     }
 
-    private Action buildMotifAction(String motifPattern, boolean updateAutoMotif) {
+    private Action buildMotifAction(String motifPattern, boolean updateAutoMotif, boolean kickAllSlots) {
 
         List<Integer> purple = new ArrayList<>();
         List<Integer> green = new ArrayList<>();
+        List<Integer> remaining = new ArrayList<>();
 
         for (int i = 0; i < holders.length; i++) {
             String color = holders[i].getColor();
+            remaining.add(i);
             if ("PURPLE".equals(color)) {
                 purple.add(i);
             } else if ("GREEN".equals(color)) {
@@ -391,33 +406,50 @@ public class Indexer {
             char target = motifPattern.charAt(i);
 
             Holder h = null;
+            int holderIndex = -1;
 
             if (target == 'P') {
                 if (!purple.isEmpty()) {
-                    h = holders[purple.remove(0)];
+                    holderIndex = purple.remove(0);
+                    h = holders[holderIndex];
                 } else if (!green.isEmpty()) {
-                    h = holders[green.remove(0)];
+                    holderIndex = green.remove(0);
+                    h = holders[holderIndex];
                 }
             } else if (target == 'G') {
                 if (!green.isEmpty()) {
-                    h = holders[green.remove(0)];
+                    holderIndex = green.remove(0);
+                    h = holders[holderIndex];
                 } else if (!purple.isEmpty()) {
-                    h = holders[purple.remove(0)];
+                    holderIndex = purple.remove(0);
+                    h = holders[holderIndex];
                 }
             } else {
                 if (!purple.isEmpty()) {
-                    h = holders[purple.remove(0)];
+                    holderIndex = purple.remove(0);
+                    h = holders[holderIndex];
                 } else if (!green.isEmpty()) {
-                    h = holders[green.remove(0)];
+                    holderIndex = green.remove(0);
+                    h = holders[holderIndex];
                 }
             }
 
             if (h != null) {
                 shotsPlanned++;
+                remaining.remove((Integer) holderIndex);
             }
             actions.add(h == null ? new InstantAction(() -> {}) : h.kickResetAction());
             if (i < 2) {
                 actions.add(new SleepAction(motifShootSleep));
+            }
+        }
+
+        if (kickAllSlots) {
+            for (int i = 0; i < remaining.size(); i++) {
+                actions.add(holders[remaining.get(i)].kickResetAction());
+                if (i < remaining.size() - 1) {
+                    actions.add(new SleepAction(motifShootSleep));
+                }
             }
         }
 
