@@ -35,7 +35,8 @@ public class Limelight {
     public double headingInput;
     public static double llxoffset=0,llyoffset=0;
     public static int lastDetectedArtifacts = 0, farArtifacts = 0, hpArtifacts = 0;
-    private static final int RAMP_PIPELINE_INDEX = 7;
+    private static final int BLUE_RAMP_PIPELINE_INDEX = 7;
+    private static final int RED_RAMP_PIPELINE_INDEX = 8;
     private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
     private static final int ROLLING_WINDOW_SIZE = 4;
     public static double taThreshold = 0.0025;
@@ -80,10 +81,24 @@ public class Limelight {
         obelisk = true;
     }
 
-    public void trackRamp() {
-        setPipeline(RAMP_PIPELINE_INDEX);
+    public void trackBlueRamp() {
+        setPipeline(BLUE_RAMP_PIPELINE_INDEX);
         obelisk = false;
     }
+
+    public void trackRedRamp() {
+        setPipeline(RED_RAMP_PIPELINE_INDEX);
+        obelisk = false;
+    }
+
+    public void trackRampAlliance() {
+        if (Bot.getAlliance() == Bot.allianceOptions.BLUE_ALLIANCE) {
+            trackBlueRamp();
+        } else {
+            trackRedRamp();
+        }
+    }
+
 
     public int calculateRollingAverageRamp(LLResult latestResult) {
         int validArtifacts = 0;

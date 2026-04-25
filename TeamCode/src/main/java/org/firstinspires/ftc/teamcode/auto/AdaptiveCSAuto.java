@@ -326,7 +326,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             addedAction = true;
         }
         if (isRampDetectionEnabled()) {
-            builder = builder.stopAndAdd(() -> bot.limelight.trackRamp());
+            builder = builder.stopAndAdd(() -> bot.limelight.trackRampAlliance());
         }
 
         if (cfg.runMid) {
