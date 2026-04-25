@@ -341,7 +341,7 @@ public class Indexer {
         return buildMotifActionSupplier(this::getMotifPattern, false);
     }
 
-    public Action shootMotifAuto(boolean motifAdjust) {
+    public Action shootMotifAuto() {
         return buildMotifActionSupplier(this::getAutoMotifPattern, true);
     }
 
@@ -351,7 +351,7 @@ public class Indexer {
      * to clear possible ramp-detection artifacts.
      */
     public Action shootMotifAutoClearArtifacts() {
-        return buildMotifActionSupplier(this::getAutoMotifPattern, true, true);
+        return buildMotifActionSupplier(this::getAutoMotifPattern, false, true);
     }
 
     private Action buildMotifActionSupplier(Supplier<String> motifSupplier, boolean updateAutoMotif) {
