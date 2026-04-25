@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 
@@ -15,9 +14,7 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.auto.tuning.ActionHelper;
 import org.firstinspires.ftc.teamcode.util.SRSHub;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -344,7 +341,7 @@ public class Indexer {
         return buildMotifActionSupplier(this::getMotifPattern, false);
     }
 
-    public Action shootMotifAuto() {
+    public Action shootMotifAuto(boolean motifAdjust) {
         return buildMotifActionSupplier(this::getAutoMotifPattern, true);
     }
 
@@ -481,7 +478,7 @@ public class Indexer {
         return autoMotifPattern;
     }
 
-    public void offsetAutoMotifBy(int offset) {
+    public void rampDetectionOffsetAutoMotifBy(int offset) {
         autoMotifPattern = rotateMotifPattern(getMotifPattern(), offset); //get pure motif for this
         autoMotifInitialized = true;
     }

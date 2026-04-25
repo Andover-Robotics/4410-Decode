@@ -367,12 +367,12 @@ public class Playoff24BallAuto extends LinearOpMode {
                     .stopAndAdd((() -> bot.sensorIntake(true)))
 //                    .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
 //                            Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80))
-                    .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
+                    .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.blueCloseIntake.position.y + Pos.closeIntake + 4), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                     .afterTime(0.01, bot.enableShooter());
 
             builder = builder
-                    .afterTime(0.85, bot.indexer.shootRapidFire())
-                    .afterTime(1.1, new InstantAction(() -> bot.stopIntake()))
+                    .afterTime(1.15, bot.indexer.shootRapidFire())
+                    .afterTime(1.05, new InstantAction(() -> bot.reverseIntake()))
                     .splineToLinearHeading(new Pose2d(Pos.closeShootPark.component1() + 2, Pos.closeShootPark.component2() + 1, Math.toRadians(130)), Math.toRadians(-20), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 85))
                     .strafeTo(Pos.closeShootPark);
 //                    .setReversed(true)
