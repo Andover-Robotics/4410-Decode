@@ -363,7 +363,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
                     .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 72))
-                    .waitSeconds(1);
+                    .waitSeconds(0.6);
             builder = (gateIndex != gateCycles - 1) ?
                     builder
                             .afterTime(0.2, bot.indexer.jiggleKickers())
@@ -399,13 +399,15 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 }
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
-                        .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
-                                Pos.blueCloseIntake.position.y + Pos.closeIntake + 4), Math.toRadians(90))
-                        .setReversed(true)
-                        .splineToConstantHeading(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)) //TODO: switch to head on for time savings
+                        .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.blueCloseIntake.position.y + Pos.closeIntake + 6), Math.toRadians(90))// drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
+//                        .splineTo(Pos.blueCloseIntake.position, Math.toRadians(90))
+//                        .splineTo(new Vector2d(Pos.blueCloseIntake.position.x,
+//                                Pos.blueCloseIntake.position.y + Pos.closeIntake + 4), Math.toRadians(90))
+
+                        .splineToLinearHeading(new Pose2d(Pos.gateSideOpenHeadOnBack.position, Math.toRadians(90)), Math.toRadians(90))
+                        .splineToLinearHeading(new Pose2d(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)), Math.toRadians(90))
                         .stopAndAdd(bot.indexer.jiggleKickers())
-                        .waitSeconds(0.3)
+                        .waitSeconds(1)
                         .stopAndAdd((() -> bot.reverseIntake()))
                         .stopAndAdd((bot.enableShooter()));
 
@@ -430,9 +432,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                                     .setReversed(true)
                                     .splineTo(Pos.closeShoot, Math.toRadians(-90)) :
                             builder
-////                                .setReversed(true)
-//                                .splineTo(Pos.closeShootPark, Math.toRadians(-45));
-//                                .setReversed(true)
                                     .splineToSplineHeading(new Pose2d(Pos.closeShootPark.component1(), Pos.closeShootPark.component2(), Math.toRadians(135)), Math.toRadians(-20));
 
 
@@ -492,7 +491,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 if (isRampDetectionEnabled()) {
                     builder = builder.afterTime(1.3, new SequentialAction(
                             bot.offsetMotifByRampArtifacts(),
-                            new SleepAction(0.1),
+                            new InstantAction(() -> bot.limelight.saveFarArtifacts()),
+                            new SleepAction(0.03),
                             new InstantAction(() -> bot.setTargetGoalPose()),
                             new InstantAction(Bot::updatePoses)
                     ));
@@ -500,7 +500,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
                         .splineTo(Pos.closeShoot, Math.toRadians(-25))
                         .stopAndAdd(bot.indexer.shootMotifAuto());
-                //.stopAndAdd((() -> bot.disableShooter()));
             }
             addedAction = true;
         }
@@ -519,12 +518,13 @@ public class AdaptiveCSAuto extends LinearOpMode {
                     .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 15.5, Pos.blueHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
 
             builder = builder
-                    .waitSeconds(0.2)
+                    .waitSeconds(0.05)
                     .setReversed(true);
             if (isRampDetectionEnabled()) {
-                builder = builder.afterTime(1.7, new SequentialAction(
+                builder = builder.afterTime(2.35, new SequentialAction(
                         bot.offsetMotifByRampArtifacts(),
-                        new SleepAction(0.1),
+                        new InstantAction(() -> bot.limelight.saveHpArtifacts()),
+                        new SleepAction(0.03),
                         new InstantAction(() -> bot.setTargetGoalPose()),
                         new InstantAction(Bot::updatePoses),
                         new InstantAction(() -> bot.limelight.trackAlliance())
@@ -537,8 +537,8 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
 //                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
-                    .setTangent(Math.toRadians(-25))
-                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(-10))
+                    .setTangent(Math.toRadians(-35))
+                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(15))
                     .stopAndAdd(bot.indexer.shootMotifAuto());
             addedAction = true;
         }

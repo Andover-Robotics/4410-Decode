@@ -22,22 +22,19 @@ public class Pos {
     public static double intakeDisp = 23;
 
     public static Pose2d gate = new Pose2d(-11, 67, GATE_INTAKE_ANGLE);
-    public static Pose2d gateIntaking = new Pose2d(-14, 61, Math.toRadians(45));
 
-    public static Pose2d gateSideOpen = new Pose2d(3, 62, Math.toRadians(-10));
     public static Pose2d gateSideOpenHeadOn = new Pose2d(1, 61, Math.toRadians(90));
+    public static Pose2d gateSideOpenHeadOnBack = new Pose2d(1, gateSideOpenHeadOn.position.y - 20, Math.toRadians(90));
 
     public static Pose2d blueCloseIntake = new Pose2d(11, 32, Math.toRadians(90));
     public static double closeIntake = 15;
 
     public static Pose2d blueFarIntakeFarAuto = new Pose2d(-44, 63, Math.toRadians(90));
     public static Pose2d blueFarIntakeCloseAuto = new Pose2d(-35, 35, Math.toRadians(90));
-    public static double farIntakeFarAuto = 19;
 
     public static Pose2d pushPark = new Pose2d(-58,  20, Math.toRadians(90));
 
-    public static Pose2d blueHpIntake = new Pose2d(-48, 69, Math.toRadians(179));
-    public static Pose2d blueHpAngledIntake = new Pose2d(-60, 58, Math.toRadians(120));
+    public static Pose2d blueHpIntake = new Pose2d(-48, 68, Math.toRadians(179));
     public static Pose2d blueHpSideIntake = new Pose2d(-61, 60, Math.toRadians(90));
 
     public static Pose2d blueSecretTunnel = new Pose2d(-36, 62, Math.toRadians(35));

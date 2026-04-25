@@ -103,6 +103,8 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("STORED POSITION", useStoredPose);
             telemetry.addData("HEADING LOCK (TOUCHPAD)", headingLockEnabled);
             telemetry.addData("Last Auto Artifacts", Limelight.lastDetectedArtifacts);
+            telemetry.addData("Far Artifacts", Limelight.farArtifacts);
+            telemetry.addData("HP Artifacts", Limelight.hpArtifacts);
 
             telemetry.addData("Motif:", bot.indexer.getMotifPattern());
             telemetry.addLine("DPAD Down: PPG");

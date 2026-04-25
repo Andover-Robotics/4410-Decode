@@ -34,11 +34,11 @@ public class Limelight {
     public static boolean obelisk = false;
     public double headingInput;
     public static double llxoffset=0,llyoffset=0;
-    public static int lastDetectedArtifacts = 0;
+    public static int lastDetectedArtifacts = 0, farArtifacts = 0, hpArtifacts = 0;
     private static final int RAMP_PIPELINE_INDEX = 7;
     private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
     private static final int ROLLING_WINDOW_SIZE = 5;
-    public static double taThreshold = 0.25;
+    public static double taThreshold = 0.0025;
     private final Deque<Integer> artifactHistory = new ArrayDeque<>();
 
 
@@ -92,12 +92,12 @@ public class Limelight {
         if (latestResult != null && latestResult.isValid()) {
             List<LLResultTypes.DetectorResult> detectorResults = latestResult.getDetectorResults();
             if (detectorResults != null) {
-                // validArtifacts = detectorResults.size();
-                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
-                    if (detectorResult.getTargetArea() > taThreshold) {
-                        validArtifacts++;
-                    }
-                }
+                validArtifacts = detectorResults.size();
+//                for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
+//                    if (detectorResult.getTargetArea() > taThreshold) {
+//                        validArtifacts++;
+//                    }
+//                }
             }
         }
 
@@ -116,6 +116,14 @@ public class Limelight {
         }
         lastDetectedArtifacts = (int) Math.round((double) sum / artifactHistory.size());
         return lastDetectedArtifacts;
+    }
+
+    public void saveFarArtifacts() {
+        farArtifacts = getRollingAverageArtifactCount();
+    }
+
+    public void saveHpArtifacts() {
+        hpArtifacts = getRollingAverageArtifactCount();
     }
 
     public void setObelisk(boolean enable) {

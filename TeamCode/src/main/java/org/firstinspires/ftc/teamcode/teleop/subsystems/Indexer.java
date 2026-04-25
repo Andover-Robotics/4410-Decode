@@ -43,7 +43,7 @@ public class Indexer {
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.40;
 
-    public static double proximityThreshold = 28;
+    public static double proximityThreshold = 26;
     public static boolean staggerSensorUpdates = true;
 
     public static double jiggleKickerDelta = 0.015;
@@ -53,8 +53,8 @@ public class Indexer {
 
     public static double
             greenHueLow = 147,
-            greenHueHigh = 185,
-            purpleHueLow = 185,
+            greenHueHigh = 178,
+            purpleHueLow = 178,
             purpleHueHigh = 235;
 
     /* ================= HOLDERS ================= */
