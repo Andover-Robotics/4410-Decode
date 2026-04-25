@@ -12,8 +12,6 @@ import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -35,7 +33,8 @@ public class Bot {
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
     public static Vector2d obeliskPose = new Vector2d(66, 0);
-    public static Vector2d rampPose = new Vector2d(38, 82);
+    public static Vector2d farRampPose = new Vector2d(33, 80);
+    public static Vector2d hpRampPose = new Vector2d(38, 82);
     public static Vector2d goalPose = new Vector2d(61, 62); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
@@ -131,13 +130,15 @@ public class Bot {
             goalPose = new Vector2d(goalPose.x, -1 * Math.abs(goalPose.y));
             obeliskPose = new Vector2d(obeliskPose.x, -1 * Math.abs(obeliskPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
-            rampPose = new Vector2d(rampPose.x, -1 * Math.abs(rampPose.y));
+            farRampPose = new Vector2d(farRampPose.x, -1 * Math.abs(farRampPose.y));
+            hpRampPose = new Vector2d(hpRampPose.x, -1 * Math.abs(hpRampPose.y));
 
         } else {
             goalPose = new Vector2d(goalPose.x, Math.abs(goalPose.y));
             obeliskPose = new Vector2d(obeliskPose.x, Math.abs(obeliskPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
-            rampPose = new Vector2d(rampPose.x, Math.abs(rampPose.y));
+            farRampPose = new Vector2d(farRampPose.x, Math.abs(farRampPose.y));
+            hpRampPose = new Vector2d(hpRampPose.x, Math.abs(hpRampPose.y));
         }
         targetPose = goalPose;
     }
@@ -155,23 +156,35 @@ public class Bot {
         limelight.trackObelisk();
     }
 
-    public void setTargetRampPose() {
-        targetPose = rampPose;
+    public void setTargetHpRampPose() {
+        targetPose = hpRampPose;
     }
 
-    public Action trackRampPose() {
-        return new InstantAction(this::setTargetRampPose);
+    public void setTargetFarRampPose() {
+        targetPose = farRampPose;
+    }
+
+    public Action trackFarRampPose() {
+        return new InstantAction(this::setTargetFarRampPose);
+    }
+
+    public Action trackHpRampPose() {
+        return new InstantAction(this::setTargetHpRampPose);
     }
 
     public Action offsetMotifByRampArtifacts() {
         return new InstantAction(() -> {
-            int artifacts = limelight.getRollingAverageArtifactCount();
-            indexer.offsetAutoMotifBy(artifacts);
+            int artifacts = limelight.getLastDetectedArtifacts();
+            indexer.rampDetectionOffsetAutoMotifBy(artifacts);
         });
     }
 
     public void resetPose() {
         drive.localizer.setPose(resetPose);
+    }
+
+    public void resetXY() {
+        drive.localizer.setPose(new Pose2d(resetPose.position, drive.localizer.getPose().heading));
     }
 
     public static void useStoredPose() {

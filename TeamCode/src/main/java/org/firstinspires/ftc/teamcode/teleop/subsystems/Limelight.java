@@ -37,9 +37,9 @@ public class Limelight {
     public static int lastDetectedArtifacts = 0, farArtifacts = 0, hpArtifacts = 0;
     private static final int RAMP_PIPELINE_INDEX = 7;
     private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
-    private static final int ROLLING_WINDOW_SIZE = 5;
+    private static final int ROLLING_WINDOW_SIZE = 4;
     public static double taThreshold = 0.0025;
-    private final Deque<Integer> artifactHistory = new ArrayDeque<>();
+    public static final Deque<Integer> artifactHistory = new ArrayDeque<>();
 
 
     public Limelight(OpMode opMode) {
@@ -85,8 +85,7 @@ public class Limelight {
         obelisk = false;
     }
 
-    public int getRollingAverageArtifactCount() {
-        LLResult latestResult = limelight.getLatestResult();
+    public int calculateRollingAverageRamp(LLResult latestResult) {
         int validArtifacts = 0;
 
         if (latestResult != null && latestResult.isValid()) {
@@ -118,12 +117,20 @@ public class Limelight {
         return lastDetectedArtifacts;
     }
 
+    public int getLastDetectedArtifacts() {
+        return lastDetectedArtifacts;
+    }
+
     public void saveFarArtifacts() {
-        farArtifacts = getRollingAverageArtifactCount();
+        farArtifacts = lastDetectedArtifacts;
     }
 
     public void saveHpArtifacts() {
-        hpArtifacts = getRollingAverageArtifactCount();
+        hpArtifacts = lastDetectedArtifacts;
+    }
+
+    public void takeSnapshot(String name) {
+        limelight.captureSnapshot(name);
     }
 
     public void setObelisk(boolean enable) {
@@ -137,7 +144,8 @@ public class Limelight {
     public void periodic() {
 
         llResult = limelight.getLatestResult();
-         headingInput = Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) - Turret.currentPosDegs + 180;
+        calculateRollingAverageRamp(llResult);
+        headingInput = Math.toDegrees(Bot.drive.localizer.getPose().heading.log()) - Turret.currentPosDegs + 180;
 
         if (!obelisk) {
             if(Bot.getAlliance() == Bot.allianceOptions.RED_ALLIANCE){
@@ -169,6 +177,7 @@ public class Limelight {
                 }
             }
         }
+
     }
 
     public void relocalizeBotPose() {
