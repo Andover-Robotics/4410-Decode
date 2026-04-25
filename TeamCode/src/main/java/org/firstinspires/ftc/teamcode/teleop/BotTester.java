@@ -216,7 +216,7 @@ public class BotTester extends LinearOpMode {
             if (gp1.wasJustPressed(GamepadKeys.Button.A) && !gp1.isDown(GamepadKeys.Button.START)) {
                 rampPipelineEnabled = !rampPipelineEnabled;
                 if (rampPipelineEnabled) {
-                    bot.limelight.trackRamp();
+                    bot.limelight.trackRampAlliance();
                 } else {
                     bot.limelight.trackAlliance();
                 }
