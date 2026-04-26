@@ -387,21 +387,21 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex % 2 == 1) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(new Vector2d(Pos.blueSecretTunnel.position.x - secretTunnelOffset, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
+                            .strafeToSplineHeading(new Vector2d(Pos.blueSecretTunnel.position.x - secretTunnelOffset, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
 //                            .afterTime(1.3, (() -> bot.reverseIntake()))
 //                            .setReversed(true)
 //                            .splineTo(Pos.farShoot, Math.toRadians(-100))
                             .afterTime(1.4, (() -> bot.reverseIntake()))
-                            .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(90)), Math.toRadians(-100))
+                            .splineToLinearHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(90)), Math.toRadians(-90))
 //
                             .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                             .stopAndAdd(bot.indexer.shootRapidFire());
                 } else {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .splineTo(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
+                            .strafeToSplineHeading(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                             .afterTime(1.4, (() -> bot.reverseIntake()))
-                            .splineToSplineHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100))
+                            .splineToLinearHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100))
 //                            .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-40, 70))
 //
 //                            .afterTime(0.01, new SequentialAction(
