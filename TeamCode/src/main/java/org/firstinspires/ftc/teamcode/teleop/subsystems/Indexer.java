@@ -189,7 +189,7 @@ public class Indexer {
                 Holder holder = holders[rapidFireOrder[i]];
                 if (i != 2) {
                     actions.add(holder.kickResetAction());
-                    actions.add(new SleepAction(notRapidSleep));
+                    actions.add(new SleepAction(sleepSeconds));
                 } else {
                     actions.add(holder.longKickResetAction());
                 }
