@@ -214,7 +214,7 @@ public class MainTeleop extends LinearOpMode {
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                runningActions.add(bot.indexer.shootRapidFireSensor());
+                runningActions.add(bot.indexer.shootNotRapidFire());
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.B) && !bot.shooting) {
@@ -245,6 +245,10 @@ public class MainTeleop extends LinearOpMode {
 
             if (gp1.wasJustPressed(GamepadKeys.Button.Y)) {
                 bot.resetPose();
+            }
+
+            if (gp1.wasJustPressed(GamepadKeys.Button.X)) {
+                bot.resetGateXY();
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {

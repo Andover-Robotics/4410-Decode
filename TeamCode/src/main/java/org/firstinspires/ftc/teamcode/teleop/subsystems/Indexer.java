@@ -39,6 +39,7 @@ public class Indexer {
 
     // Motif between shots (slow, to register motifs)
     public static double motifShootSleep = 0.40;
+    public static double notRapidSleep = 0.15;
 
     public static double proximityThreshold = 26;
     public static boolean staggerSensorUpdates = true;
@@ -180,8 +181,6 @@ public class Indexer {
     public Action shootRapidFire() {
         List<Action> actions = new ArrayList<>();
         double sleepSeconds = Turret.getRapidShootSleep(rapidShootSleep);
-
-        Bot bot = Bot.getInstance();
         shooting = true;
 
         if (!Turret.deadzone) {
@@ -190,10 +189,32 @@ public class Indexer {
                 Holder holder = holders[rapidFireOrder[i]];
                 if (i != 2) {
                     actions.add(holder.kickResetAction());
-                    actions.add(new SleepAction(sleepSeconds));
+                    actions.add(new SleepAction(notRapidSleep));
                 } else {
                     actions.add(holder.longKickResetAction());
-                    actions.add(new InstantAction(() -> Shooter.setFullPower(false)));
+                }
+            }
+        } else {
+            actions.add(new SleepAction(0.01));
+        }
+
+        shooting = false;
+        return new SequentialAction(actions.toArray(new Action[0]));
+    }
+
+    public Action shootNotRapidFire() {
+        List<Action> actions = new ArrayList<>();
+        shooting = true;
+
+        if (!Turret.deadzone) {
+            int[] rapidFireOrder = buildRapidFireMotifOrder(getMotifPattern());
+            for (int i = 0; i < 3; i++) {
+                Holder holder = holders[rapidFireOrder[i]];
+                if (i != 2) {
+                    actions.add(holder.kickResetAction());
+                    actions.add(new SleepAction(notRapidSleep));
+                } else {
+                    actions.add(holder.longKickResetAction());
                 }
             }
         } else {
@@ -454,7 +475,6 @@ public class Indexer {
             autoMotifPattern = rotateMotifPattern(getAutoMotifPattern(), shotsPlanned);
             autoMotifInitialized = true;
         }
-
         return new SequentialAction(actions.toArray(new Action[0]));
     }
 

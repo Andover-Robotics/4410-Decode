@@ -47,7 +47,7 @@ public class Turret {
     public static final double[] SHOOTER_DISTANCE_IN = {
             30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 77.5, 80, 82.5, 85, 87.5, 90, 92.5, 95, 97.5, 100, 102.5, 105, 107.5, 110, 112.5, 115, 117.5, 120, 122.5, 125, 127.5, 130, 132.5, 135, 137.5, 140, 142.5, 145, 147.5, 150.0, 152.5, 155};
     public static final double[] SHOOTER_RPM = {
-            2650, 2655, 2656, 2660, 2665, 2670, 2690, 2700, 2750, 2800, 2890, 2970, 3040, 3100, 3130, 3180, 3220, 3250, 3310, 3350, 3375, 3400, 3420, 3510, 3550, 3585, 3620, 3655, 3710, 3755, 3810, 3890, 3950, 4010, 4070, 4110, 4135, 4155, 4180, 4240, 4280, 4320, 4350, 4380, 4410, 4440, 4470, 4500, 4530, 4560, 4600};
+            2650, 2655, 2656, 2660, 2665, 2670, 2690, 2700, 2750, 2800, 2890, 2970, 3040, 3100, 3130, 3180, 3220, 3250, 3310, 3350, 3375, 3400, 3420, 3510, 3550, 3585, 3620, 3655, 3710, 3755, 3810, 3890, 3950, 4010, 4070, 4110, 4135, 4120, 4170, 4210, 4280, 4320, 4350, 4380, 4410, 4440, 4470, 4500, 4530, 4560, 4600};
     public static final double[] SHOOTER_HOOD_ANGLE_DEG = {
             35.000, 35.000, 35.000, 35.469, 35.938, 36.406, 36.875, 37.344, 37.813, 38.281, 38.750, 39.219, 39.688, 40.156, 40.625, 41.094, 41.563, 42.031, 42.500, 42.969, 43.438, 43.906, 44.375, 44.844, 45.313, 45.781, 46.250, 46.719, 47.188, 47.656, 48.125, 48.594, 49.063, 49.531, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000, 50.000
     };
@@ -230,10 +230,10 @@ public class Turret {
 
     public double calculateTime(double dx, double dy) {
         // Constants
-        final double G = 386.09;                 // in/s^2 (gravity in inches)
-        final double heightDisplacement = 26.0;  // inches (Δz)
-        final double launchAngleAboveHorizDeg = 90 - shooter.getHoodAngle();  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
-        final double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
+        double G = 386.09;                 // in/s^2 (gravity in inches)
+        double heightDisplacement = 26.0;  // inches (Δz)
+        double launchAngleAboveHorizDeg = 90 - shooter.getHoodAngle();  // (90 degrees - actual shooter angle) -> makes the angle relative to horizontal plane
+        double launchAngleRad = Math.toRadians(launchAngleAboveHorizDeg);
 
         // Horizontal distance (XY plane)
         double R = Math.sqrt(dx * dx + dy * dy);

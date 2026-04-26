@@ -32,6 +32,7 @@ public class Bot {
 
     public static Pose2d storedPose = new Pose2d(0, 0, 0);
     public static Pose2d resetPose = new Pose2d(-63, -61, Math.toRadians(-90));
+    public static Vector2d gateResetPose = new Vector2d(9, 54);
     public static Vector2d obeliskPose = new Vector2d(66, 0);
     public static Vector2d farRampPose = new Vector2d(33, 80);
     public static Vector2d hpRampPose = new Vector2d(38, 82);
@@ -131,6 +132,7 @@ public class Bot {
             obeliskPose = new Vector2d(obeliskPose.x, -1 * Math.abs(obeliskPose.y));
             resetPose = new Pose2d(resetPose.position.x, Math.abs(resetPose.position.y), Math.abs(resetPose.heading.log()));
             farRampPose = new Vector2d(farRampPose.x, -1 * Math.abs(farRampPose.y));
+            gateResetPose = new Vector2d(gateResetPose.x, -1 * Math.abs(gateResetPose.y));
             hpRampPose = new Vector2d(hpRampPose.x, -1 * Math.abs(hpRampPose.y));
 
         } else {
@@ -138,6 +140,7 @@ public class Bot {
             obeliskPose = new Vector2d(obeliskPose.x, Math.abs(obeliskPose.y));
             resetPose = new Pose2d(resetPose.position.x, -1 * Math.abs(resetPose.position.y), -1 * Math.abs(resetPose.heading.log()));
             farRampPose = new Vector2d(farRampPose.x, Math.abs(farRampPose.y));
+            gateResetPose = new Vector2d(gateResetPose.x, Math.abs(gateResetPose.y));
             hpRampPose = new Vector2d(hpRampPose.x, Math.abs(hpRampPose.y));
         }
         targetPose = goalPose;
@@ -185,6 +188,10 @@ public class Bot {
 
     public void resetXY() {
         drive.localizer.setPose(new Pose2d(resetPose.position, drive.localizer.getPose().heading));
+    }
+
+    public void resetGateXY() {
+        drive.localizer.setPose(new Pose2d(gateResetPose, drive.localizer.getPose().heading));
     }
 
     public static void useStoredPose() {
