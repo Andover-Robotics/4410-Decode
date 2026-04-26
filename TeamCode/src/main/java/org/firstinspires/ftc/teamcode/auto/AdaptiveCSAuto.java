@@ -518,17 +518,17 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
                         .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2(), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 75))
-                        .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 15.5, Pos.blueHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
+                        .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 19.5, Pos.blueHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
             } else {
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
                         .splineTo(Pos.redHpIntake.component1(), Pos.redHpIntake.component2(), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 75))
-                        .splineTo(new Vector2d(Pos.redHpIntake.position.x - 15.5, Pos.redHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
+                        .splineTo(new Vector2d(Pos.redHpIntake.position.x - 19.5, Pos.redHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
             }
 
-            builder = builder
-                    .waitSeconds(0.05)
-                    .setReversed(true);
+//            builder = builder
+//                    .waitSeconds(0.05)
+//                    .setReversed(true);
             if (isRampDetectionEnabled()) {
                 builder = builder
 //                        .afterTime(2.65, new InstantAction(() -> bot.limelight.takeSnapshot("hp 2.65")))
@@ -548,9 +548,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             new SleepAction(0.8),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-//                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
-                    .setTangent(Math.toRadians(-22))
-                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(7))
+                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
+//                    .setTangent(Math.toRadians(-22))
+//                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(7))
+
                     .stopAndAdd(isRampDetectionEnabled()
                             ? bot.indexer.shootMotifAutoClearArtifacts()
                             : bot.indexer.shootMotifAuto());
