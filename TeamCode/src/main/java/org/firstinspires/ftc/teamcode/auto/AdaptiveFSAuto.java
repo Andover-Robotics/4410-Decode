@@ -117,6 +117,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
         }
 
         waitForStart();
+        bot.enableShooter(true);
         if (isStopRequested()) return;
         if (builtAuto == null || addedAction) {
             builtAuto = buildAuto(Bot.drive, Bot.isBlue(), cfg);
@@ -305,7 +306,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
             builder = builder
                     .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
                     .stopAndAdd(bot.enableShooter())
-                    .waitSeconds(1.15)
+                    .waitSeconds(1.45)
                     .stopAndAdd(bot.indexer.shootRapidFire());
             addedAction = true;
         }
