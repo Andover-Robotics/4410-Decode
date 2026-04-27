@@ -332,8 +332,8 @@ public class Playoff24BallAuto extends LinearOpMode {
         for (int gateIndex = 0; gateIndex < gateCycles; gateIndex++) {
             builder = builder
                     .stopAndAdd((() -> bot.sensorIntake(true)))
-                    .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-50, 78))
-                    .waitSeconds(0.5);
+                    .splineToSplineHeading(Pos.gate, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 78))
+                    .waitSeconds(0.550);
             builder = (gateIndex != gateCycles - 1) ?
                     builder
                             .afterTime(0.2, bot.indexer.jiggleKickers())
@@ -348,7 +348,7 @@ public class Playoff24BallAuto extends LinearOpMode {
                             .setReversed(true)
                             .afterTime(1.55, bot.indexer.shootRapidFire())
                             .setTangent(Math.toRadians(-90))
-                            .splineToSplineHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-25), drive.defaultVelConstraint, new ProfileAccelConstraint(-64, 84));
+                            .splineToSplineHeading(new Pose2d(Pos.blueCloseIntake.position.x, Pos.closeGateCycleShoot.y, Math.toRadians(90)), Math.toRadians(-25), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 84));
 
             addedAction = true;
         }
@@ -360,10 +360,10 @@ public class Playoff24BallAuto extends LinearOpMode {
 //                            Pos.blueCloseIntake.position.y + Pos.closeIntake), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-67, 80))
                     .strafeToSplineHeading(new Vector2d(Pos.blueCloseIntake.position.x, Pos.blueCloseIntake.position.y + Pos.closeIntake + 4), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                     .afterTime(0.01, bot.enableShooter())
-                    .afterTime(1.15, bot.indexer.shootRapidFire())
-                    .afterTime(1.05, new InstantAction(() -> bot.reverseIntake()))
+                    .afterTime(1.35, bot.indexer.shootRapidFire())
+                    .afterTime(1.25, new InstantAction(() -> bot.reverseIntake()))
                     .splineToLinearHeading(new Pose2d(Pos.closeShootPark.component1() + 4, Pos.closeShootPark.component2() + 1, Math.toRadians(130)), Math.toRadians(-20), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 85))
-                    .strafeTo(new Vector2d(Pos.closeShootPark.component1() + 6, Pos.closeShootPark.component2() + 1));
+                    .strafeTo(new Vector2d(Pos.closeShootPark.component1() + 8, Pos.closeShootPark.component2() + 1));
 //                    .setReversed(true)
 //                    .splineTo(Pos.closeShootPark, Math.toRadians(-130), drive.defaultVelConstraint, new ProfileAccelConstraint(-64, 84));
 //                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark.component1(), Pos.closeShootPark.component2(), Math.toRadians(135)), Math.toRadians(-20), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 80));

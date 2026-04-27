@@ -349,7 +349,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .stopAndAdd(bot.indexer.shootRapidFire());
             } else {
                 builder = builder
-                        .afterTime(1.0, bot.indexer.shootRapidFire())
+                        .afterTime(1.15, bot.indexer.shootRapidFire())
                         .strafeToSplineHeading(Pos.closeShoot, Math.toRadians((cfg.gateCycles == 0 ? 135 : 110)));
             }
             addedAction = true;
@@ -407,9 +407,14 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .splineToLinearHeading(new Pose2d(Pos.gateSideOpenHeadOnBack.position, Math.toRadians(90)), Math.toRadians(90))
                         .splineToLinearHeading(new Pose2d(Pos.gateSideOpenHeadOn.position, Math.toRadians(90)), Math.toRadians(90))
                         .stopAndAdd(bot.indexer.jiggleKickers())
+                        .stopAndAdd(() -> bot.stopIntake())
                         .waitSeconds(0.95)
                         .stopAndAdd((() -> bot.reverseIntake()))
                         .stopAndAdd((bot.enableShooter()));
+
+                if (gateCycles == 0) {
+                    builder = builder.waitSeconds(1);
+                }
 
                 addedAction = true;
             } else {
@@ -466,7 +471,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                         .stopAndAdd((() -> bot.sensorIntake(true)))
                         .splineTo(Pos.blueFarIntakeCloseAuto.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-60, 75))
                         .strafeToConstantHeading(new Vector2d(Pos.blueFarIntakeCloseAuto.position.x,
-                                Pos.blueFarIntakeCloseAuto.position.y + Pos.intakeDisp), drive.defaultVelConstraint, new ProfileAccelConstraint(-60, 75));
+                                Pos.blueFarIntakeCloseAuto.position.y + Pos.intakeDisp + 4), drive.defaultVelConstraint, new ProfileAccelConstraint(-60, 75));
             }
 
             builder = builder
@@ -492,7 +497,6 @@ public class AdaptiveCSAuto extends LinearOpMode {
                 builder = builder
                         .splineTo(Pos.closeShootPark, Math.toRadians(-25))
                         .stopAndAdd(bot.indexer.shootRapidFire());
-                //.stopAndAdd((() -> bot.disableShooter()));
             } else {
                 builder = builder
                         .setReversed(true);
@@ -517,25 +521,26 @@ public class AdaptiveCSAuto extends LinearOpMode {
             if (Bot.getAlliance() == Bot.allianceOptions.BLUE_ALLIANCE) {
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2(), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 75))
-                        .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 19.5, Pos.blueHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
+                        .splineTo(new Vector2d(-52.5, 59), Math.toRadians(150))
+                        .strafeToSplineHeading(new Vector2d(-67, 63), Math.toRadians(90));
+//                        .splineTo(Pos.blueHpIntake.component1(), Pos.blueHpIntake.component2(), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 75))
+//                        .splineTo(new Vector2d(Pos.blueHpIntake.position.x - 19.5, Pos.blueHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
             } else {
                 builder = builder
                         .stopAndAdd((() -> bot.sensorIntake(true)))
-                        .splineTo(Pos.redHpIntake.component1(), Pos.redHpIntake.component2(), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 75))
-                        .splineTo(new Vector2d(Pos.redHpIntake.position.x - 19.5, Pos.redHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
+                        .splineTo(new Vector2d(-52.5, 59), Math.toRadians(150))
+                        .strafeToSplineHeading(new Vector2d(-67, 63), Math.toRadians(90));
+//                        .splineTo(Pos.redHpIntake.component1(), Pos.redHpIntake.component2(), drive.defaultVelConstraint, new ProfileAccelConstraint(-57, 75))
+//                        .splineTo(new Vector2d(Pos.redHpIntake.position.x - 19.5, Pos.redHpIntake.position.y), Math.toRadians(180), drive.defaultVelConstraint, new ProfileAccelConstraint(-45, 70));
             }
 
-//            builder = builder
-//                    .waitSeconds(0.05)
-//                    .setReversed(true);
             if (isRampDetectionEnabled()) {
                 builder = builder
 //                        .afterTime(2.65, new InstantAction(() -> bot.limelight.takeSnapshot("hp 2.65")))
-                        .afterTime(2.6, new SequentialAction(
+                        .afterTime(2.1, new SequentialAction(
                         bot.offsetMotifByRampArtifacts(),
                         new InstantAction(() -> bot.limelight.saveHpArtifacts()),
-                        new InstantAction(() -> bot.limelight.takeSnapshot("hp 2.6")),
+                        new InstantAction(() -> bot.limelight.takeSnapshot("hp 2.1")),
                         new SleepAction(0.03),
                         new InstantAction(() -> bot.setTargetGoalPose()),
                         new InstantAction(Bot::updatePoses),

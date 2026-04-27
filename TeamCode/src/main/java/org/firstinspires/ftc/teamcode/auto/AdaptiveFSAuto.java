@@ -388,7 +388,7 @@ public class AdaptiveFSAuto extends LinearOpMode {
                 if (tunnelIndex % 2 == 1) {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
-                            .strafeToSplineHeading(new Vector2d(Pos.blueSecretTunnel.position.x - secretTunnelOffset, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
+                            .strafeToSplineHeading(new Vector2d(Pos.blueSecretTunnel.position.x + secretTunnelOffset, Pos.blueSecretTunnel.position.y), Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
 //                            .afterTime(1.3, (() -> bot.reverseIntake()))
 //                            .setReversed(true)
 //                            .splineTo(Pos.farShoot, Math.toRadians(-100))
@@ -433,8 +433,8 @@ public class AdaptiveFSAuto extends LinearOpMode {
     }
 
     private int clampSecretTunnelConfig(int config) {
-        if (config < 0) return 0;
-        if (config > 12) return 12;
+        if (config < -20) return -20;
+        if (config > 20) return 20;
         return config;
     }
 }

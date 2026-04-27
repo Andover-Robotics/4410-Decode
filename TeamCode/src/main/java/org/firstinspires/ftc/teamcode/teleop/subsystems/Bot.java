@@ -36,7 +36,7 @@ public class Bot {
     public static Vector2d obeliskPose = new Vector2d(66, 0);
     public static Vector2d farRampPose = new Vector2d(33, 80);
     public static Vector2d hpRampPose = new Vector2d(38, 82);
-    public static Vector2d goalPose = new Vector2d(61, 62); //initializes with blue, switches based on alliance
+    public static Vector2d goalPose = new Vector2d(62, 61); //initializes with blue, switches based on alliance
     public static Vector2d targetPose = goalPose;
     public Pose2d positionLockPose;
     public boolean shooting = false, sensorIntaking = true;
