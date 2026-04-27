@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import android.annotation.SuppressLint;
+
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -12,6 +14,7 @@ public class SnapshotTaker extends LinearOpMode {
 
     public static int snapshotCounter = 1;
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
         Bot.instance = null;
@@ -46,7 +49,7 @@ public class SnapshotTaker extends LinearOpMode {
             }
 
             if (gp1.wasJustPressed(GamepadKeys.Button.A)) {
-                String fileName = String.format("%03d", snapshotCounter);
+                @SuppressLint("DefaultLocale") String fileName = String.format("%03d", snapshotCounter);
                 bot.limelight.takeSnapshot(fileName);
                 snapshotCounter++;
             }
