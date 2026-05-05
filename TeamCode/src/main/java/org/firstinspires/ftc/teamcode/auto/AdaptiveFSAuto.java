@@ -393,16 +393,13 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                            .setReversed(true)
 //                            .splineTo(Pos.farShoot, Math.toRadians(-100))
                             .afterTime(1.4, (() -> bot.reverseIntake()))
-                            .splineToLinearHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(90)), Math.toRadians(-90))
-//
-                            .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                            .stopAndAdd(bot.indexer.shootRapidFire());
+                            .splineToLinearHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(90)), Math.toRadians(-90));
                 } else {
                     builder = builder
                             .stopAndAdd((() -> bot.sensorIntake(true)))
                             .strafeToSplineHeading(Pos.blueHpCycle.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-80, 80))
                             .afterTime(1.4, (() -> bot.reverseIntake()))
-                            .splineToLinearHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100))
+                            .splineToLinearHeading(new Pose2d(Pos.farShoot.component1(), Pos.farShoot.component2(), Math.toRadians(75)), Math.toRadians(-100));
 //                            .splineTo(Pos.blueHpSideIntake.position, Math.toRadians(90), drive.defaultVelConstraint, new ProfileAccelConstraint(-40, 70))
 //
 //                            .afterTime(0.01, new SequentialAction(
@@ -414,9 +411,11 @@ public class AdaptiveFSAuto extends LinearOpMode {
 //                            .setReversed(true)
 //                            .splineToSplineHeading(new Pose2d(Pos.farShoot, Math.toRadians(75)), Math.toRadians(-90), drive.defaultVelConstraint, new ProfileAccelConstraint(-65, 50))
 
-                            .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
-                            .stopAndAdd(bot.indexer.shootRapidFire());
                 }
+                builder = builder
+                        .waitSeconds(0.23)
+                        .stopAndAdd(new InstantAction((() -> bot.stopIntake())))
+                        .stopAndAdd(bot.indexer.shootRapidFire());
 
                 addedAction = true;
             }

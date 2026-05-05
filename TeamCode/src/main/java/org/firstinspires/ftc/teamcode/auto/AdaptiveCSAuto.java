@@ -482,10 +482,10 @@ public class AdaptiveCSAuto extends LinearOpMode {
             if (isRampDetectionEnabled()) {
                 builder = builder
 //                        .afterTime(1.5, new InstantAction(() -> bot.limelight.takeSnapshot("far 1.5")))
-                        .afterTime(1.6, new SequentialAction(
+                        .afterTime(1.7, new SequentialAction(
                                 bot.offsetMotifByRampArtifacts(),
                                 new InstantAction(() -> bot.limelight.saveFarArtifacts()),
-                                new InstantAction(() -> bot.limelight.takeSnapshot("far 1.6")),
+                                new InstantAction(() -> bot.limelight.takeSnapshot("far 1.7")),
                                 new SleepAction(0.03),
                                 new InstantAction(() -> bot.setTargetGoalPose()),
                                 new InstantAction(Bot::updatePoses)
@@ -553,7 +553,7 @@ public class AdaptiveCSAuto extends LinearOpMode {
                             new SleepAction(0.8),
                             new InstantAction((() -> bot.reverseIntake()))
                     ))
-                    .strafeToLinearHeading(Pos.closeShootPark, Math.toRadians(135))
+                    .strafeToLinearHeading(new Vector2d(Pos.closeShootPark.x + 2, Pos.closeShootPark.y - 1) , Math.toRadians(135))
 //                    .setTangent(Math.toRadians(-22))
 //                    .splineToSplineHeading(new Pose2d(Pos.closeShootPark, Math.toRadians(135)), Math.toRadians(7))
 

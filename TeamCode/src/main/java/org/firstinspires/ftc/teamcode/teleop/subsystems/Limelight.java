@@ -35,8 +35,8 @@ public class Limelight {
     public double headingInput;
     public static double llxoffset=0,llyoffset=0;
     public static int lastDetectedArtifacts = 0, farArtifacts = 0, hpArtifacts = 0;
-    private static final int BLUE_RAMP_PIPELINE_INDEX = 7;
-    private static final int RED_RAMP_PIPELINE_INDEX = 8;
+    private static final int BLUE_RAMP_PIPELINE_INDEX = 5;
+    private static final int RED_RAMP_PIPELINE_INDEX = 6;
     private static final int MIN_ARTIFACT_SIDE_PIXELS = 5;
     private static final int ROLLING_WINDOW_SIZE = 1;
     public static double taThreshold = 0.0025;
