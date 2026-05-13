@@ -762,7 +762,9 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                     );
                 }
 
-                ByteBuffer buffer = ByteBuffer.allocate(12);
+                ByteBuffer buffer = ByteBuffer
+                        .allocate(12)
+                        .order(BYTE_ORDER);
 
                 buffer.putFloat(xPosition);
                 buffer.putFloat(yPosition);
@@ -817,7 +819,9 @@ public class SRSHub extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
                 EncoderDirection xEncoderDirection,
                 EncoderDirection yEncoderDirection
         ) {
-            ByteBuffer buffer = ByteBuffer.allocate(13);
+            ByteBuffer buffer = ByteBuffer
+                    .allocate(13)
+                    .order(BYTE_ORDER);
 
             buffer.putFloat(xPodOffset);
             buffer.putFloat(yPodOffset);
