@@ -11,6 +11,8 @@ repositories {
     maven {
         url = "https://repo.dairy.foundation/snapshots"
     }
+
+    maven { url = "https://mymaven.bylazar.com/releases" }
 }
 
 dependencies {
@@ -25,5 +27,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.github.techtigers-ftc:ftc-core:2.0.0'
     implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+
+    implementation 'com.pedropathing:ftc:2.1.2'
+    implementation 'com.pedropathing:telemetry:1.0.0'
+    implementation 'com.bylazar:fullpanels:1.0.12'
 }
 
